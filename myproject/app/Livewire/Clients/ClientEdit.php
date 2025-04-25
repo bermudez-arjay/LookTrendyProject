@@ -4,12 +4,12 @@ namespace App\Livewire\User;
 use Livewire\Component;
 use App\Models\User;
 
-class UserEdit extends Component
+class ClientEdit extends Component
 {
     public $open = false;
 
     public $userId;
-    public $User_FirstName, $User_LastName, $User_Address, $User_Phone, $User_Email, $Password, $User_Role;
+    public $User_FirstName, $User_LastName, $User_Address, $User_Phone, $User_Email, $User_Password, $User_Rol;
     public $roles = ['Administrador', 'Empleado'];
     protected $listeners = ['editUserByEmail' => 'loadUserByEmail'];
 
@@ -22,8 +22,8 @@ class UserEdit extends Component
             'User_Email' => 'required|email|max:100|unique:users,User_Email,' . ($this->userId ?? 'null') . ',User_ID',
             'User_Address' => 'required|string|max:255',
             'User_Phone' => 'required|string|max:20',
-            'User_Role' => 'required|string',
-            'Password' => 'nullable|string|min:6'
+            'User_Rol' => 'required|string',
+            'User_Password' => 'nullable|string|min:6'
         ];
     }
 
@@ -41,10 +41,10 @@ class UserEdit extends Component
         $this->User_Email = $user->User_Email;
         $this->User_Address = $user->User_Address;
         $this->User_Phone = $user->User_Phone;
-        $this->User_Role = $user->User_Role;
+        $this->User_Rol = $user->User_Rol;
 
         // No cargamos la contraseña por seguridad
-        $this->Password = '';
+        $this->User_Password = '';
 
     }
 
@@ -64,8 +64,8 @@ class UserEdit extends Component
         $this->User_Email = '';
         $this->User_Address = '';
         $this->User_Phone = '';
-        $this->User_Role = '';
-        $this->Password = '';
+        $this->User_Rol = '';
+        $this->User_Password = '';
     }
 
     public function update()
@@ -81,10 +81,10 @@ class UserEdit extends Component
             'User_Email' => $this->User_Email,
             'User_Address' => $this->User_Address,
             'User_Phone' => $this->User_Phone,
-            'User_Role' => $this->User_Role,
-            'Password' => $this->Password
-                ? bcrypt($this->Password)
-                : $user->Password, 
+            'User_Rol' => $this->User_Rol,
+            'User_Password' => $this->User_Password
+                ? bcrypt($this->User_Password)
+                : $user->User_Password, 
         ]);
 
         $this->resetForm();

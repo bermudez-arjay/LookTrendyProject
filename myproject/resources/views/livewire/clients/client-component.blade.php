@@ -23,11 +23,11 @@
                 <p class="text-sm text-gray-500 mb-6 mt-[-3px]">En la siguiente tabla puede observar la lista de clientes</p>
                 <div class="flex space-x-2 items-center">
                     <input 
-                        id="searchName"
+                        id="searchEmail"
                         type="text" 
-                        placeholder="Buscar por Nombre..." 
+                        placeholder="Buscar por Email..." 
                         class="border border-gray-300 rounded-lg px-4 py-2 w-full max-w-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        wire:model="searchName"
+                        wire:model="searchEmail"
                     >
                     
                     <button 

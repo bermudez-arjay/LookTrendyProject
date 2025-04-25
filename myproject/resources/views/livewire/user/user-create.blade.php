@@ -8,14 +8,14 @@
             <div class="grid grid-cols-4 md:grid-cols-4 gap-6">
                 <input type="text" wire:model.defer="User_FirstName" placeholder="Nombre" class="w-full border px-4 py-2 rounded" />
                 <input type="text" wire:model.defer="User_LastName" placeholder="Apellido" class="w-full border px-4 py-2 rounded" />
-                <select wire:model.defer="User_Rol" class="w-full border px-4 py-2 rounded col-span-2">
+                <select wire:model.defer="User_Role" class="w-full border px-4 py-2 rounded col-span-2">
                     <option value="">Seleccione un Rol</option>
                     @foreach($roles as $rol)
                         <option value="{{ $rol }}">{{ $rol }}</option>
                     @endforeach
                 </select>
                 <input type="email" wire:model.defer="User_Email" placeholder="Email" class="w-full border px-4 py-2 rounded col-span-2" />
-                <input type="password" wire:model.defer="User_Password" placeholder="Contraseña" class="w-full border px-4 py-2 rounded col-span-2" />
+                <input type="password" wire:model.defer="Password" placeholder="Contraseña" class="w-full border px-4 py-2 rounded col-span-2" />
                 <input type="text" wire:model.defer="User_Phone" placeholder="Teléfono" class="w-full border px-4 py-2 rounded col-span-2" />
 
                 <input type="text" wire:model.defer="User_Address" placeholder="Dirección" class="w-full border px-4 py-2 rounded col-span-2" />

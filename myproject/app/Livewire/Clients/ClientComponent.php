@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Livewire\User;
+namespace App\Livewire\Clients;
 
 use Livewire\Component;
 use Livewire\WithPagination;
-use App\Models\User;
-class UserComponent extends Component
+use App\Models\Client;
+class ClientComponent extends Component
 {
     use WithPagination;
 
     protected $paginationTheme = 'tailwind';
-    protected $listeners = ['userCreated','userUpdated','userDeleted','llamarFuncion'];
+    protected $listeners = ['clientCreated','clientUpdated','clientDeleted','llamarFuncion'];
 
     public function llamarFuncion()
     {
@@ -31,9 +31,9 @@ class UserComponent extends Component
 }
 public function someMethod()
 {
-    $this->dispatch('userCreated');
-    $this->dispatch('userUpdated');
-    $this->dispatch('userDeleted');
+    $this->dispatch('clientCreated');
+    $this->dispatch('clientUpdated');
+    $this->dispatch('clientDeleted');
 }
     public function filterByEmail()
     {
@@ -42,17 +42,17 @@ public function someMethod()
     
     public function render()
     {
-        $query = User::where('Removed', false);
+        $query = Client::where('Removed', false);
 
         if (!empty($this->searchEmail)) {
-            $query->where('User_Email', 'like', '%' . $this->searchEmail . '%');
+            $query->where('Client_Email', 'like', '%' . $this->searchEmail . '%');
             $this->searchEmail = '';
         }
 
-        $users = $query->paginate(6);
+        $clients = $query->paginate(6);
 
-        return view('livewire.user.user-component', [
-            'users' => $users
+        return view('livewire.clients.client-component', [
+            'clients' => $clients
         ])->layout('layouts.app');
     }
 }
