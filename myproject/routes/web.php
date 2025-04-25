@@ -1,8 +1,8 @@
 <?php
 
 use App\Livewire\Auth\Login;
-use App\Livewire\Clients\Clients;
 use App\Livewire\Inicio\Inicio;
+use App\Livewire\Clients\ClientComponent;
 use App\Livewire\User\UserComponent;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
@@ -21,7 +21,7 @@ Route::get("/", function () {
     return view('welcome'); //no tocar
 });
 Route::get('/usuarios',UserComponent::class)->name('usuarios');//no tocar
-Route::get('/clientes',Clients::class)->name('clientes');
+Route::get('/clientes',ClientComponent::class)->name('clientes');
 // Ruta de login
 Route::get('/login', Login::class)->name('login');//no tocar
 

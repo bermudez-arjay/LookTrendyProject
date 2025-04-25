@@ -14,9 +14,9 @@ use Laravel\Sanctum\HasApiTokens;
  * @property string $User_Address
  * @property string $User_Phone
  * @property string $User_Email
- * @property string $User_Password
- * @property string $User_Rol
- * @property boolean $Active
+ * @property string $Password
+ * @property string $User_Role
+ * @property boolean $Removed
  * @property Purchase[] $purchases
  * @property Transaction[] $transactions
  */
@@ -40,7 +40,7 @@ class User extends Authenticatable
 
     public function getAuthPassword()
     {
-        return $this->User_Password;
+        return $this->Password;
     }
     public function getAuthIdentifierName()
     {

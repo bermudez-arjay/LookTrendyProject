@@ -5,14 +5,14 @@
         <div class="flex items-center text-sm text-gray-500 mb-[-25px]">
             <span class="text-gray-500">dashboard</span>
             <span class="mx-2">→</span>
-            <span class="text-gray-500 font-medium">Gestión de usuarios</span>
+            <span class="text-gray-500 font-medium">Gestión de Clientes</span>
         </div>
     </div>
     <div class="overflow-x-auto bg-gray-50 rounded-2xl shadow-inner border border-gray-300 p-8 my-10 mx-auto w-full max-w-[90rem]">   
         <div class="mb-6">
             <div class="flex justify-between items-center mb-2">
                 <div>
-                    <h2 class="text-2xl font-bold text-gray-800">Lista de Usuarios</h2>
+                    <h2 class="text-2xl font-bold text-gray-800">Lista de Clientes</h2>
                 </div>
                 <button wire:click="$dispatch('openCreateUserModal')" class="px-4 py-2 bg-blue-600 text-white roundedhover:bg-blue-700">
                     Nuevo Usuario
@@ -20,9 +20,8 @@
             </div>
             
             {{-- llamadis a los subComponenetes--}}
-            <livewire:user.user-create />
-            <livewire:user.user-edit />
-            <livewire:user.user-delete />
+            <livewire:clients.client-create />
+       
             
             <p class="text-sm text-gray-500 mb-6 mt-[-3px]">En la siguiente tabla puede observar la lista de usuarios</p>
             <div class="flex space-x-2 items-center">
@@ -81,7 +80,7 @@
                         <td class="px-6 py-4 whitespace-nowrap">{{ $user->User_Email }}</td>
                         <td class="px-6 py-4 whitespace-nowrap">{{ $user->User_Phone }}</td>
                         <td class="px-6 py-4 whitespace-nowrap">{{ $user->User_Address }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">{{ $user->User_Role }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">{{ $user->User_Rol }}</td>
                         <td class="px-6 py-4 whitespace-nowrap flex space-x-4">
                             <button class="text-red-600 hover:text-red-900" wire:click="$dispatch('showDeleteModal', {User_ID: '{{ $user->User_ID }}'})">
                                 <i class="fa-solid fa-trash"></i>
