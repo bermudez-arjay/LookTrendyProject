@@ -89,7 +89,7 @@
                                 <i class="fas fa-user text-lg"></i>
                                 <span class="ml-3">Usuarios</span>
                             </a>
-                            <a href="{{ route('provedores') }}" class="flex items-center p-2 rounded-lg hover:bg-blue-700 text-sm" wire:navigate>
+                            <a href="" class="flex items-center p-2 rounded-lg hover:bg-blue-700 text-sm" wire:navigate>
                                 <i class="fas fa-truck text-lg"></i>
                                 <span class="ml-3">Proveedores</span>
                             </a>
