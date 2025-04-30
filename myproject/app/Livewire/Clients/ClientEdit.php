@@ -1,50 +1,47 @@
 <?php
-namespace App\Livewire\User;
+namespace App\Livewire\Clients;
 
 use Livewire\Component;
-use App\Models\User;
+use App\Models\Client;
 
 class ClientEdit extends Component
 {
     public $open = false;
 
-    public $userId;
-    public $User_FirstName, $User_LastName, $User_Address, $User_Phone, $User_Email, $User_Password, $User_Rol;
-    public $roles = ['Administrador', 'Empleado'];
-    protected $listeners = ['editUserByEmail' => 'loadUserByEmail'];
-
-    // Reglas de validación
-    protected function rules()
-    {
-        return [
-            'User_FirstName' => 'required|string|max:100',
-            'User_LastName' => 'required|string|max:100',
-            'User_Email' => 'required|email|max:100|unique:users,User_Email,' . ($this->userId ?? 'null') . ',User_ID',
-            'User_Address' => 'required|string|max:255',
-            'User_Phone' => 'required|string|max:20',
-            'User_Rol' => 'required|string',
-            'User_Password' => 'nullable|string|min:6'
+  public $Client_ID;
+    public  $Client_Identity, $Client_FirstName, $Client_LastName, $Client_Address, $Client_Phone, $Client_Email;
+    
+protected function rules(){
+    return  
+    [
+            'Client_Identity' => 'required|string|max:15',
+            'Client_FirstName' => 'required|string|max:100',
+            'Client_LastName' => 'required|string|max:100',
+            'Client_Email' => 'required|email|max:100|unique:clients,Client_Email,'.  ($this->Client_ID ?? 'null') . ',Client_ID',
+            'Client_Address' => 'required|string|max:255',
+            'Client_Phone' => 'required|string|max:20'
+            
         ];
-    }
+}
+    
+    protected $listeners = ['editClientById' => 'loadClientById'];
 
 
-    public function loadUserByEmail($email)
+    public function loadClientById($Client_ID)
     {
         $this->open = true; 
-        // Buscar usuario por email
-        $user = User::where('User_Email', $email)->firstOrFail();
+        // Buscar cliente por id
+        $client = Client::where('Client_ID', $Client_ID)->firstOrFail();
 
-        // Cargar los datos del usuario en el modal
-        $this->userId = $user->User_ID;
-        $this->User_FirstName = $user->User_FirstName;
-        $this->User_LastName = $user->User_LastName;
-        $this->User_Email = $user->User_Email;
-        $this->User_Address = $user->User_Address;
-        $this->User_Phone = $user->User_Phone;
-        $this->User_Rol = $user->User_Rol;
+        // Cargar los datos del cliente en el modal
+        $this->Client_ID = $client->Client_ID;
+        $this->Client_FirstName = $client->Client_FirstName;
+        $this->Client_LastName = $client->Client_LastName;
+        $this->Client_Email = $client->Client_Email;
+        $this->Client_Address = $client->Client_Address;
+        $this->Client_Phone = $client->Client_Phone;
+        $this->Client_Identity = $client->Client_Identity;
 
-        // No cargamos la contraseña por seguridad
-        $this->User_Password = '';
 
     }
 
@@ -57,48 +54,45 @@ class ClientEdit extends Component
 
     // Resetear los valores del formulario
     public function resetForm()
-    {
-        $this->userId = null;
-        $this->User_FirstName = '';
-        $this->User_LastName = '';
-        $this->User_Email = '';
-        $this->User_Address = '';
-        $this->User_Phone = '';
-        $this->User_Rol = '';
-        $this->User_Password = '';
+    {   
+        $this->Client_ID = null;
+        $this->Client_FirstName = '';
+        $this->Client_LastName = '';
+        $this->Client_Email = '';
+        $this->Client_Address = '';
+        $this->Client_Phone = '';
+        $this->Client_Identity = '';
+       
     }
 
     public function update()
     {
   
         $this->validate();
-        $user = User::findOrFail($this->userId);
+        $client = Client::findOrFail($this->Client_ID);
 
-        // Actualizar los datos del usuario
-        $user->update([
-            'User_FirstName' => $this->User_FirstName,
-            'User_LastName' => $this->User_LastName,
-            'User_Email' => $this->User_Email,
-            'User_Address' => $this->User_Address,
-            'User_Phone' => $this->User_Phone,
-            'User_Rol' => $this->User_Rol,
-            'User_Password' => $this->User_Password
-                ? bcrypt($this->User_Password)
-                : $user->User_Password, 
+        // Actualizar los datos del 
+        $client->update([
+            'Client_Identity' => $this->Client_Identity,
+            'Client_FirstName' => $this->Client_FirstName,
+            'Client_LastName' => $this->Client_LastName,
+            'Client_Address' => $this->Client_Address,
+            'Client_Phone' => $this->Client_Phone,
+            'Client_Email' => $this->Client_Email
         ]);
 
         $this->resetForm();
-        $this->dispatch('userUpdated');
+        $this->dispatch('clientUpdated');
         $this->closeModal();
     }
 
-    public function refreshUsers()
+    public function refreshClients()
 {
     $this->resetPage(); 
 }
     public function render()
     {
-        return view('livewire.user.user-edit');
+        return view('livewire.clients.client-edit');
     }
 }
 
