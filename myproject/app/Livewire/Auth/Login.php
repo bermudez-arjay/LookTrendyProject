@@ -12,17 +12,18 @@ use Laravel\Sanctum\PersonalAccessToken;
 class Login extends Component
 {
     public $User_Email = '';
-    public $User_Password = '';
+    public $Password = '';
     public $remember = false;
 
     public function login(Request $request)
       {
        
         $user = User::where('User_Email', $this->User_Email)->first();
+       
 
-        if ($user && Hash::check($this->User_Password, $user->User_Password)) {
+        if ($user && Hash::check($this->Password, $user->Password)) {
 
-            if (!$user->Active) {
+            if ($user->Removed == 1) {
                 session()->flash('error', 'Tu cuenta está inactiva. Contacta al administrador.');
                 return;
             }

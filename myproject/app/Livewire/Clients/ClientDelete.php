@@ -1,36 +1,51 @@
 <?php
 
-namespace App\Livewire\User;
+namespace App\Livewire\Clients;
 
 use Livewire\Component;
-use App\Models\User;
+use App\Models\Client;
 
 class ClientDelete extends Component
 {
-    public $confirmingUserDeletion = false;
-    public $userToDelete = null;
-
+   
+    public $confirmingClientDeletion = false;
+    public $clientToDelete = null;
     protected $listeners = [
-        'showDeleteModal' => 'confirmDelete'
+        'showDeleteModal' => 'confirmDelete',
+       
     ];
 
-    public function confirmDelete($User_ID)
+    /**
+     * Carga el cliente a eliminar y muestra el modal
+     *
+     * @param int $Client_ID
+     */
+    public function confirmDelete($Client_ID)
     {
-        $this->userToDelete = User::find($User_ID);
-        $this->confirmingUserDeletion = true;
-    }
-
-    // Método para eliminar al usuario
-    public function deleteUser()
-    {
-        if ($this->userToDelete) {
-            $this->userToDelete->delete();
-            $this->confirmingUserDeletion = false;
-            $this->dispatch('userDeleted'); 
+        $this->clientToDelete = Client::find($Client_ID);
+        if ($this->clientToDelete) {
+            $this->confirmingClientDeletion = true;
         }
     }
+
+   
+    public function deleteClient()
+    {
+        if ($this->clientToDelete) {
+            $this->clientToDelete->update(['Removed' => 1]);
+
+            session()->flash('success', 'Cliente eliminado correctamente.');
+
+            $this->confirmingClientDeletion = false;
+            $this->clientToDelete = null;
+            $this->dispatch('clientDeleted'); 
+           $this->reset();
+           
+        }
+    }
+
     public function render()
     {
-        return view('livewire.user.user-delete');
+        return view('livewire.clients.client-delete');
     }
 }
