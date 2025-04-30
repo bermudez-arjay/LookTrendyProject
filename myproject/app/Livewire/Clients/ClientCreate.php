@@ -1,29 +1,29 @@
 <?php
 
-namespace App\Livewire\User;
+namespace App\Livewire\Clients;
 
 use Livewire\Component;
-use App\Models\User;
+use App\Models\Client;
 
 class ClientCreate extends Component
 { public $open = false;
 
     // Propiedades alineadas con los nombres de las columnas
-    public $User_FirstName, $User_LastName, $User_Address, $User_Phone, $User_Email, $User_Password, $User_Rol;
-    public $roles = ['Administrador', 'Empleado'];
+    public $Client_Identity, $Client_FirstName, $Client_LastName, $Client_Address, $Client_Phone, $Client_Email;
+    
 
     protected $rules = [
-        'User_FirstName' => 'required|string|max:100',
-        'User_LastName' => 'required|string|max:100',
-        'User_Email' => 'required|email|max:100|unique:users,User_Email',
-        'User_Password' => 'required|string|min:6',
-        'User_Address' => 'required|string|max:255',
-        'User_Phone' => 'required|string|max:20',
-        'User_Rol' => 'required|string'
+        'Client_Identity' => 'required|string|max:15',
+        'Client_FirstName' => 'required|string|max:100',
+        'Client_LastName' => 'required|string|max:100',
+        'Client_Email' => 'required|email|max:100|unique:clients,Client_Email',
+        'Client_Address' => 'required|string|max:255',
+        'Client_Phone' => 'required|string|max:8'
+        
     ];
     
 
-    protected $listeners = ['openCreateUserModal' => 'openModal'];
+    protected $listeners = ['openCreateClientModal' => 'openModal'];
 
     public function openModal()
     {
@@ -39,13 +39,13 @@ class ClientCreate extends Component
     public function resetForm()
     {
         $this->reset([
-            'User_FirstName',
-            'User_LastName',
-            'User_Email',
-            'User_Password',
-            'User_Address',
-            'User_Phone',
-            'User_Rol'
+            'Client_Identity',
+            'Client_FirstName',
+            'Client_LastName',
+            'Client_Email',
+            'Client_Address',
+            'Client_Phone'
+           
         ]);
     }
 
@@ -53,25 +53,23 @@ class ClientCreate extends Component
     {
         $this->validate();
     
-        User::create([
-            'User_FirstName' => $this->User_FirstName,
-            'User_LastName' => $this->User_LastName,
-            'User_Email' => $this->User_Email,
-            'User_Password' => bcrypt($this->User_Password),
-            'User_Address' => $this->User_Address,
-            'User_Phone' => $this->User_Phone,
-            'User_Rol' => $this->User_Rol,
-            'Removed' => false
+        Client::create([
+            'Client_Identity' => $this->Client_Identity,
+				'Client_FirstName' => $this->Client_FirstName,
+				'Client_LastName' => $this->Client_LastName,
+				'Client_Address' => $this->Client_Address,
+				'Client_Phone' => $this->Client_Phone,
+				'Client_Email' => $this->Client_Email
         ]);
     
         $this->resetForm();
-        $this->dispatch('userCreated');
+        $this->dispatch('ClientCreated');
         $this->closeModal();
     }
     
 
     public function render()
     {
-        return view('livewire.user.user-create');
+        return view('livewire.clients.client-create');
     }
 }

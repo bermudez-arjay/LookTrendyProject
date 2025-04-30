@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $Client_Address
  * @property string $Client_Phone
  * @property string $Client_Email
- * @property boolean $Active
+ * @property boolean $Removed
  * @property Credit[] $credits
  */
 class Client extends Model
@@ -22,6 +22,7 @@ class Client extends Model
      * 
      * @var string
      */
+    public $timestamps = false;
     protected $primaryKey = 'Client_ID';
 
     /**

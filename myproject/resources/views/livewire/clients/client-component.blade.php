@@ -19,7 +19,10 @@
                         Nuevo Cliente
                     </button>
                 </div>
-                
+
+                <livewire:clients.client-create />
+                <livewire:clients.client-delete/>
+                <livewire:clients.client-edit />
                 <p class="text-sm text-gray-500 mb-6 mt-[-3px]">En la siguiente tabla puede observar la lista de clientes</p>
                 <div class="flex space-x-2 items-center">
                     <input 
@@ -83,7 +86,7 @@
                                     <i class="fa-solid fa-trash"></i>
                                 </button>
                                 <button class="text-blue-600 hover:text-blue-900" 
-                                    wire:click="$dispatch('editClientById', { id: '{{ $client->Client_ID }}' })">
+                                    wire:click="$dispatch('editClientById', { Client_ID: '{{ $client->Client_ID }}' })">
                                     <i class="fas fa-edit"></i>
                                 </button>
                             </td>
