@@ -1,6 +1,6 @@
-projectKey=LookAndTrendy
+projectKey=LookTrendyTesr
 serverUrl=http://localhost:9000
 serverVersion=25.4.0.105899
-dashboardUrl=http://localhost:9000/dashboard?id=LookAndTrendy
-ceTaskId=0ef9a524-9d4a-4d84-b69f-4284bd5eab02
-ceTaskUrl=http://localhost:9000/api/ce/task?id=0ef9a524-9d4a-4d84-b69f-4284bd5eab02
+dashboardUrl=http://localhost:9000/dashboard?id=LookTrendyTesr
+ceTaskId=b0671ad6-17c9-4aca-ab82-f10e98703756
+ceTaskUrl=http://localhost:9000/api/ce/task?id=b0671ad6-17c9-4aca-ab82-f10e98703756

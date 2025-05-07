@@ -14,7 +14,7 @@
                 <div>
                     <h2 class="text-2xl font-bold text-gray-800">Lista de Usuarios</h2>
                 </div>
-                <button wire:click="$dispatch('openCreateUserModal')" class="px-4 py-2 bg-blue-600 text-white roundedhover:bg-blue-700">
+                <button wire:click="$dispatch('openCreateUserModal')"  data-bs-toggle="modal" data-bs-target="#DataModal"class="bg-indigo-600 text-white px-6 py-3 rounded-lg transform transition duration-300 hover:-translate-y-1 hover:shadow-lg">
                     Nuevo Usuario
                 </button>
             </div>
@@ -31,15 +31,9 @@
                     type="text" 
                     placeholder="Buscar por Email..." 
                     class="border border-gray-300 rounded-lg px-4 py-2 w-full max-w-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    wire:model="searchEmail"
+                    wire:model.live='keyWord'
                 >
                 
-                <button 
-                    class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-                    wire:click="filterByEmail"
-                >
-                    Filtrar
-                </button>
                 <button 
                 class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600"
                 wire:click="clearFilter"
@@ -101,3 +95,17 @@
         </div>
     </div>    
 </div>
+<script>
+    window.addEventListener('user-notify', event => {
+     Swal.fire({
+         icon: 'success',
+         title: event.detail.title || '¡Operación exitosa!',
+         text: event.detail.message,
+         timer: 3000,
+         showConfirmButton: false,
+         toast: true,
+         position: 'top-end'
+     });
+ });
+</script>
+

@@ -49,10 +49,11 @@ class ClientCreate extends Component
         ]);
     }
 
-    public function save()
+    public function save2()
     {
+   
         $this->validate();
-    
+        
         Client::create([
             'Client_Identity' => $this->Client_Identity,
 				'Client_FirstName' => $this->Client_FirstName,
@@ -61,9 +62,11 @@ class ClientCreate extends Component
 				'Client_Phone' => $this->Client_Phone,
 				'Client_Email' => $this->Client_Email
         ]);
-    
+      dd($this->Client_Identity);
+        session()->flash('message', 'Cliente creado exitosamente.');
         $this->resetForm();
-        $this->dispatch('ClientCreated');
+        $this->dispatch('clientCreated');
+        $this->dispatch('client-notify', ['message' => 'Cliente creado exitosamente.']);
         $this->closeModal();
     }
     

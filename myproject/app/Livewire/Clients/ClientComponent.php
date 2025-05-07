@@ -5,6 +5,7 @@ namespace App\Livewire\Clients;
 use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\Client;
+
 class ClientComponent extends Component
 {
     use WithPagination;
@@ -12,47 +13,47 @@ class ClientComponent extends Component
     protected $paginationTheme = 'tailwind';
     protected $listeners = ['clientCreated','clientUpdated','clientDeleted','llamarFuncion'];
 
+    public $keyWord;
+
     public function llamarFuncion()
     {
-        // Código que quieres ejecutar
         info("¡Función llamada desde otro componente!");
-    }
-    public $searchEmail = '';
-    
-    public function updatingSearchEmail()
-    {
-        $this->resetPage();
     }
 
     public function clearFilter()
-{
-    $this->searchEmail = '';
-    $this->resetPage();
-}
-public function someMethod()
-{
-    $this->dispatch('clientCreated');
-    $this->dispatch('clientUpdated');
-    $this->dispatch('clientDeleted');
-}
-    public function filterByEmail()
     {
-        $this->resetPage(); 
+        $this->keyWord = '';
+        $this->resetPage();
     }
-    
+
+    public function someMethod()
+    {
+        $this->dispatch('clientCreated');
+        $this->dispatch('clientUpdated');
+        $this->dispatch('clientDeleted');
+    }
+
+    public function filteredClients()
+    {
+        $keyWord = '%' . $this->keyWord . '%';
+
+        return Client::where('Removed', 0)
+            ->where(function ($query) use ($keyWord) {
+                $query->orWhere('Client_ID', 'LIKE', $keyWord)
+                      ->orWhere('Client_Identity', 'LIKE', $keyWord)
+                      ->orWhere('Client_FirstName', 'LIKE', $keyWord)
+                      ->orWhere('Client_LastName', 'LIKE', $keyWord)
+                      ->orWhere('Client_Address', 'LIKE', $keyWord)
+                      ->orWhere('Client_Phone', 'LIKE', $keyWord)
+                      ->orWhere('Client_Email', 'LIKE', $keyWord);
+            })
+            ->paginate(10);
+    }
+
     public function render()
     {
-        $query = Client::where('Removed', false);
-
-        if (!empty($this->searchEmail)) {
-            $query->where('Client_Email', 'like', '%' . $this->searchEmail . '%');
-            $this->searchEmail = '';
-        }
-
-        $clients = $query->paginate(6);
-
         return view('livewire.clients.client-component', [
-            'clients' => $clients
+            'clients' => $this->filteredClients()
         ])->layout('layouts.app');
     }
 }
