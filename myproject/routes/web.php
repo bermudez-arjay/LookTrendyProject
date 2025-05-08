@@ -4,6 +4,7 @@ use App\Livewire\Auth\Login;
 use App\Livewire\Inicio\Inicio;
 use App\Livewire\Clients\ClientComponent;
 use App\Livewire\User\UserComponent;
+use App\Livewire\Supplier\SupplierComponent;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 /*
@@ -22,6 +23,7 @@ Route::get("/", function () {
 });
 Route::get('/usuarios',UserComponent::class)->name('usuarios');//no tocar
 Route::get('/clientes',ClientComponent::class)->name('clientes');
+Route::get('/proveedores', SupplierComponent::class)->name('proveedores');
 // Ruta de login
 Route::get('/login', Login::class)->name('login');//no tocar
 

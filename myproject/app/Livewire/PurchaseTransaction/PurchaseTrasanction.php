@@ -6,41 +6,59 @@ use App\Models\Purchase;
 use App\Models\PurchaseDetail;
 use App\Models\Product;
 use App\Models\Supplier;
-use App\Models\Time;
 use App\Models\User;
 use App\Models\Inventory;
 use App\Models\Transaction;
+use App\Models\Time;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
 class PurchaseTrasanction extends Component
 {
+    public $users, $suppliers, $products;
+    public $userId;
 
-    public $users;
-    public $suppliers;
-    public $products;
-
-    public $selectedUserId;
-    public $selectedSupplierId;
+    public $selectedUserId, $selectedSupplierId;
     public $transactionType = 'Compra';
 
     public $productList = [];
-    public $selectedProductId;
-    public $quantity;
-    public $unitPrice;
+    public $selectedProductId, $quantity, $unitPrice;
+
+    protected $rules = [
+        'selectedUserId' => 'required|exists:users,User_ID',
+        'selectedSupplierId' => 'required|exists:suppliers,Supplier_ID',
+    ];
 
     public function mount()
     {
-        $this->users = User::where('Active', 1)->get();
-        $this->suppliers = Supplier::where('Active', 1)->get();
-        $this->products = Product::where('Active', 1)->get();
+        $this->userId = Auth::id();
+        $this->users = User::where('Removed', 0)->get();
+        $this->suppliers = Supplier::where('Removed', 0)->get();
+        $this->products = Product::where('Removed', 0)->get();
+        $this->selectedUserId = $this->userId; // Usuario logueado por defecto
     }
 
     public function addProduct()
     {
+        $this->validate([
+            'selectedProductId' => 'required|exists:products,Product_ID',
+            'quantity' => 'required|numeric|min:1',
+            // 'unitPrice' => 'required|numeric|min:0',
+        ]);
+
         $product = Product::find($this->selectedProductId);
-        if (!$product || !$this->quantity || !$this->unitPrice) return;
+        if (!$product) return;
+
+        foreach ($this->productList as &$item) {
+            if ($item['product_id'] == $product->Product_ID) {
+                $item['quantity'] += $this->quantity;
+                $item['subtotal'] = $item['quantity'] * $item['unit_price'];
+                $this->resetInputs();
+                return;
+            }
+        }
 
         $this->productList[] = [
             'product_id' => $product->Product_ID,
@@ -50,23 +68,46 @@ class PurchaseTrasanction extends Component
             'subtotal' => $this->quantity * $this->unitPrice
         ];
 
+        $this->resetInputs();
+    }
+
+    private function resetInputs()
+    {
         $this->selectedProductId = null;
         $this->quantity = null;
         $this->unitPrice = null;
     }
 
+    public function updatedSelectedProductId($productId)
+    {
+        if ($productId) {
+            $product = Product::find($productId);
+            if ($product) {
+                $this->unitPrice = $product->Unit_Price;
+            }
+        } else {
+            $this->unitPrice = null;
+        }
+    }
+
     public function removeProduct($index)
     {
         unset($this->productList[$index]);
-        $this->productList = array_values($this->productList); // reindex
+        $this->productList = array_values($this->productList); // Reindexar
     }
 
     public function saveTransaction()
     {
-        DB::transaction(function () {
-            $total = array_sum(array_column($this->productList, 'subtotal'));
+       // $this->validate();
 
-            // Insert into times
+        if (empty($this->productList)) {
+            $this->addError('productList', 'Debe agregar al menos un producto.');
+            return;
+        }
+
+        DB::transaction(function () {
+            $total = collect($this->productList)->sum('subtotal');
+
             $now = Carbon::now();
             $time = Time::create([
                 'Date' => $now->toDateString(),
@@ -78,17 +119,15 @@ class PurchaseTrasanction extends Component
                 'Day_of_Week' => $now->dayOfWeekIso,
             ]);
 
-            // Insert purchase
             $purchase = Purchase::create([
                 'Supplier_ID' => $this->selectedSupplierId,
                 'User_ID' => $this->selectedUserId,
                 'Time_ID' => $time->Time_ID,
                 'Total_Amount' => $total,
-                'Purchase_Status' => 'Completed',
+                'Purchase_Status' => 'Completado',
             ]);
-
+            dd($purchase);
             foreach ($this->productList as $item) {
-                // Insert purchase_detail
                 PurchaseDetail::create([
                     'Purchase_ID' => $purchase->Purchase_ID,
                     'Product_ID' => $item['product_id'],
@@ -99,31 +138,31 @@ class PurchaseTrasanction extends Component
                     'Total_With_VAT' => $item['subtotal'],
                 ]);
 
-                // Insert into transactions
                 Transaction::create([
-                    'Product_ID' => $item['product_id'],
                     'Supplier_ID' => $this->selectedSupplierId,
                     'User_ID' => $this->selectedUserId,
                     'Time_ID' => $time->Time_ID,
-                    'Quantity' => $item['quantity'],
-                    'Unit_Price' => $item['unit_price'],
                     'Total' => $item['subtotal'],
                     'Transaction_Type' => $this->transactionType,
                     'Purchase_ID' => $purchase->Purchase_ID
                 ]);
 
-                // Update inventory
                 $inventory = Inventory::firstOrNew(['Product_ID' => $item['product_id']]);
                 $inventory->Current_Stock = ($inventory->Current_Stock ?? 0) + $item['quantity'];
                 $inventory->Last_Update = $now->toDateString();
                 $inventory->save();
             }
 
-            // Reset
-            $this->productList = [];
-            $this->selectedSupplierId = null;
-            $this->selectedUserId = null;
+            $this->resetAll();
+            session()->flash('success', 'Compra registrada exitosamente.');
         });
+    }
+
+    private function resetAll()
+    {
+        $this->selectedUserId = $this->userId; // Mantener el usuario logueado
+        $this->selectedSupplierId = null;
+        $this->productList = [];
     }
 
     public function render()

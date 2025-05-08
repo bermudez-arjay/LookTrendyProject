@@ -36,6 +36,7 @@ class Transaction extends Model
     /**
      * @var array
      */
+    public $timestamps = false;
     protected $fillable = ['Product_ID', 'Supplier_ID', 'User_ID', 'Time_ID', 'Credit_ID', 'Quantity', 'Unit_Price', 'Total', 'Transaction_Type', 'Purchase_ID', 'Payment_Type_ID'];
 
     /**

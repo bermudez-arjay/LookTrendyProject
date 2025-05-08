@@ -108,7 +108,7 @@
                                 <i class="fas fa-clipboard-list text-lg"></i>
                                 <span class="ml-3">Inventario</span>
                             </a>
-                            <a href="{{ route('productos') }}" class="flex items-center p-2 rounded-lg hover:bg-blue-700 text-sm" wire:navigate>
+                            <a href="" class="flex items-center p-2 rounded-lg hover:bg-blue-700 text-sm" wire:navigate>
                                 <i class="fas fa-box-open text-lg"></i>
                                 <span class="ml-3">Productos</span>
                             </a>

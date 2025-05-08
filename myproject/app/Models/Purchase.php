@@ -31,6 +31,7 @@ class Purchase extends Model
     /**
      * @var array
      */
+    public $timestamps = false;
     protected $fillable = ['Supplier_ID', 'User_ID', 'Time_ID', 'Total_Amount', 'Purchase_Status', 'Payment_Type_ID'];
 
     /**
