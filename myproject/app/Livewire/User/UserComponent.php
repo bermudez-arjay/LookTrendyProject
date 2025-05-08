@@ -17,7 +17,7 @@ class UserComponent extends Component
         // Código que quieres ejecutar
         info("¡Función llamada desde otro componente!");
     }
-    public $searchEmail = '';
+    public $keyWord = '';
     
     public function updatingSearchEmail()
     {
@@ -26,7 +26,7 @@ class UserComponent extends Component
 
     public function clearFilter()
 {
-    $this->searchEmail = '';
+    $this->keyWord = '';
     $this->resetPage();
 }
 public function someMethod()
@@ -35,24 +35,27 @@ public function someMethod()
     $this->dispatch('userUpdated');
     $this->dispatch('userDeleted');
 }
-    public function filterByEmail()
-    {
-        $this->resetPage(); 
-    }
+public function filteredUsers()
+{
+    $keyWord = '%' . $this->keyWord . '%';
+
+    return User::where('Removed', 0)
+        ->where(function ($query) use ($keyWord) {
+            $query->orWhere('User_ID', 'LIKE', $keyWord)
+                
+                  ->orWhere('User_FirstName', 'LIKE', $keyWord)
+                  ->orWhere('User_LastName', 'LIKE', $keyWord)
+                  ->orWhere('User_Address', 'LIKE', $keyWord)
+                  ->orWhere('User_Phone', 'LIKE', $keyWord)
+                  ->orWhere('User_Email', 'LIKE', $keyWord);
+        })
+        ->paginate(10);
+}
     
     public function render()
     {
-        $query = User::where('Removed', false);
-
-        if (!empty($this->searchEmail)) {
-            $query->where('User_Email', 'like', '%' . $this->searchEmail . '%');
-            $this->searchEmail = '';
-        }
-
-        $users = $query->paginate(6);
-
         return view('livewire.user.user-component', [
-            'users' => $users
+            'users' => $this->filteredUsers()
         ])->layout('layouts.app');
     }
 }

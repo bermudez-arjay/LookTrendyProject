@@ -5,7 +5,7 @@
             <div class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
                 <div class="bg-white p-6 rounded-lg shadow-lg">
                     <h2 class="text-lg font-semibold">
-                        ¿Estás seguro de que deseas eliminar a {{ $productToDelete->Product_Name }} {{ $productToDelete->Product_Name }}?
+                        ¿Estás seguro de que deseas eliminar a {{ $productToDelete->Product_Name }}?
                     </h2>
                     <p class="mb-4 text-sm text-gray-600">Esta acción no se puede deshacer.</p>
                     

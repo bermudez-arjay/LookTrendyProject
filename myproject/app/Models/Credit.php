@@ -27,6 +27,7 @@ class Credit extends Model
      * @var string
      */
     protected $primaryKey = 'Credit_ID';
+    public $timestamps = false;
 
     /**
      * @var array

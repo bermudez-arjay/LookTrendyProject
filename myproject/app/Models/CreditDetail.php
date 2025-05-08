@@ -7,13 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * @property integer $Credit_Detail_ID
  * @property integer $Credit_ID
- * @property string $Payment_Date
- * @property float $Payment_Amount
  * @property integer $Product_ID
  * @property integer $Quantity
  * @property float $Subtotal
  * @property float $VAT
- * @property float $Total_With_VAT
  * @property Credit $credit
  * @property Product $product
  */
@@ -26,10 +23,11 @@ class CreditDetail extends Model
      */
     protected $primaryKey = 'Credit_Detail_ID';
 
+    public $timestamps = false;
     /**
      * @var array
      */
-    protected $fillable = ['Credit_ID', 'Payment_Date', 'Payment_Amount', 'Product_ID', 'Quantity', 'Subtotal', 'VAT', 'Total_With_VAT'];
+    protected $fillable = ['Credit_ID', 'Product_ID', 'Quantity', 'Subtotal', 'VAT'];
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo

@@ -25,6 +25,7 @@ class Time extends Model
      */
     public $timestamps = false;
     protected $primaryKey = 'Time_ID';
+    public $timestamps = false;
 
     /**
      * @var array

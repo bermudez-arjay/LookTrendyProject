@@ -6,18 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 
 /**
  * @property integer $Transaction_ID
- * @property integer $Product_ID
  * @property integer $Supplier_ID
  * @property integer $User_ID
  * @property integer $Time_ID
  * @property integer $Credit_ID
- * @property integer $Quantity
- * @property float $Unit_Price
  * @property float $Total
  * @property string $Transaction_Type
  * @property integer $Purchase_ID
  * @property integer $Payment_Type_ID
- * @property Product $product
+
  * @property Supplier $supplier
  * @property User $user
  * @property Time $time
@@ -32,21 +29,14 @@ class Transaction extends Model
      * @var string
      */
     protected $primaryKey = 'Transaction_ID';
+    public $timestamps = false;
 
     /**
      * @var array
      */
-    public $timestamps = false;
-    protected $fillable = ['Product_ID', 'Supplier_ID', 'User_ID', 'Time_ID', 'Credit_ID', 'Quantity', 'Unit_Price', 'Total', 'Transaction_Type', 'Purchase_ID', 'Payment_Type_ID'];
+    protected $fillable = [ 'Supplier_ID', 'User_ID', 'Time_ID', 'Credit_ID',  'Total', 'Transaction_Type', 'Purchase_ID', 'Payment_Type_ID'];
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function product()
-    {
-        return $this->belongsTo('App\Models\Product', 'Product_ID', 'Product_ID');
-    }
-
+  
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */

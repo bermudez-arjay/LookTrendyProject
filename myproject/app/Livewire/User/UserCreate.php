@@ -67,6 +67,9 @@ class UserCreate extends Component
     
         $this->resetForm();
         $this->dispatch('userCreated');
+        $this->dispatch('product-notify', [ 
+        'title' => 'Usuario creado exitosament',
+        ]);
         $this->closeModal();
     }
     
