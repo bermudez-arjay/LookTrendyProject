@@ -34,10 +34,15 @@ class ClientDelete extends Component
         if ($this->clientToDelete) {
             $this->clientToDelete->update(['Removed' => 1]);
 
-            session()->flash('success', 'Cliente eliminado correctamente.');
+           
 
             $this->confirmingClientDeletion = false;
             $this->clientToDelete = null;
+            $this->dispatch('client-notify', [
+                'title' => '¡Eliminación exitosa!',
+                'message' => 'Cliente eliminado correctamente.'
+            ]);
+            
             $this->dispatch('clientDeleted'); 
            $this->reset();
            
