@@ -7,6 +7,8 @@ use App\Livewire\Clients\Clients;
 use App\Livewire\Inicio\Inicio;
 use App\Livewire\Clients\ClientComponent;
 use App\Livewire\User\UserComponent;
+use App\Livewire\Products\ProductComponent;
+use App\Livewire\Credit\CreateCredit;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 /*
@@ -23,8 +25,7 @@ use Illuminate\Support\Facades\Session;
 Route::get("/", function () {
     return view('welcome'); //no tocar
 });
-Route::get('/usuarios',UserComponent::class)->name('usuarios');//no tocar
-Route::get('/clientes',ClientComponent::class)->name('clientes');
+
 // Ruta de login
 Route::get('/login', Login::class)->name('login');//no tocar
 
@@ -38,10 +39,19 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/inicio', Inicio::class)->name('inicio');
    
 });
-
-
-
-
-
-
-
+Route::middleware(['auth'])->group(function () {
+    Route::get('/usuarios', UserComponent::class)->name('usuarios');
+   
+});
+Route::middleware(['auth'])->group(function () {
+    Route::get('/clientes', ClientComponent::class)->name('clientes');
+   
+});
+Route::middleware(['auth'])->group(function () {
+    Route::get('/productos', ProductComponent::class)->name('productos');
+   
+});
+Route::middleware(['auth'])->group(function () {
+    Route::get('/creditos', CreateCredit::class)->name('creditos');
+   
+});

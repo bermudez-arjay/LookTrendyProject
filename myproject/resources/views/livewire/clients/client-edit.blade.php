@@ -1,5 +1,6 @@
 <div>
     @if($open)
+    
     <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
         <div class="bg-white p-6 rounded-lg w-full max-w-max">
             <h2 class="text-xl font-semibold mb-4">Editar Cliente</h2>
@@ -21,5 +22,6 @@
             </div>
         </div>
     </div>
+    
     @endif
 </div>

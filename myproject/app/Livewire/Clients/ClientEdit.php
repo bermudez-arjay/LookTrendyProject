@@ -80,9 +80,10 @@ protected function rules(){
             'Client_Phone' => $this->Client_Phone,
             'Client_Email' => $this->Client_Email
         ]);
-
+       
         $this->resetForm();
         $this->dispatch('clientUpdated');
+        $this->dispatch('client-notify', ['message' => 'Cliente actualizado exitosamente.']);
         $this->closeModal();
     }
 

@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $Description
  * @property string $Category
  * @property float $Unit_Price
- * @property boolean $Active
+ * @property boolean $Removed
  * @property PurchaseDetail[] $purchaseDetails
  * @property CreditDetail[] $creditDetails
  * @property Inventory[] $inventories
@@ -24,6 +24,7 @@ class Product extends Model
      * @var string
      */
     protected $primaryKey = 'Product_ID';
+    public $timestamps = false;
 
     /**
      * @var array

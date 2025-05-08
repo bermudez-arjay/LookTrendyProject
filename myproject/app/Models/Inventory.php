@@ -20,6 +20,7 @@ class Inventory extends Model
      * @var string
      */
     protected $primaryKey = 'Inventory_ID';
+    public $timestamps= false;
 
     /**
      * @var array

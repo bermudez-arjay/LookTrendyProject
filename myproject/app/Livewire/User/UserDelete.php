@@ -24,9 +24,19 @@ class UserDelete extends Component
     public function deleteUser()
     {
         if ($this->userToDelete) {
-            $this->userToDelete->delete();
+            $this->userToDelete->update(['Removed' => 1]);
+
+            session()->flash('success', 'Usuario eliminado correctamente.');
+
             $this->confirmingUserDeletion = false;
-            $this->dispatch('userDeleted'); 
+            $this->userToDelete = null;
+            $this->dispatch('userDeleted');
+            $this->dispatch('user-notify', [
+                'title' => '¡Eliminación exitosa!',
+                'message' => 'Usuario eliminado correctamente.'
+            ]); 
+           $this->reset();
+           
         }
     }
     public function render()
