@@ -32,8 +32,10 @@ Route::get('/login', Login::class)->name('login');//no tocar
 
 Route::get('/recuperar', ForgotPassword::class)->name('recuperar');
 
-Route::get('/reset-password', ResetPassword::class)->name('reset-password');
-Route::get('/transaction', \App\Livewire\PurchaseTransaction\PurchaseTrasanction::class)->name('transaction');//no tocar
+Route::get('/reset-password/{token}', ResetPassword::class)
+    ->middleware('guest')
+    ->name('password.reset');
+    Route::get('/transaction', \App\Livewire\PurchaseTransaction\PurchaseTrasanction::class)->name('transaction');//no tocar
 // Grupo de rutas protegidas por autenticación 
 Route::middleware(['auth'])->group(function () {
     Route::get('/inicio', Inicio::class)->name('inicio');
