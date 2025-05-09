@@ -3,9 +3,10 @@
 use App\Livewire\Auth\Login;
 use App\Livewire\Inicio\Inicio;
 use App\Livewire\Clients\ClientComponent;
+use App\Livewire\Payments\PaymentComponent;
 use App\Livewire\User\UserComponent;
 use App\Livewire\Products\ProductComponent;
-use App\Livewire\Credit\CreateCredit;
+use App\Livewire\CreditTransaction\CreateCredit;
 use Illuminate\Support\Facades\Route;
 use App\Livewire\PurchaseTransaction\PurchaseTrasanction;
 
@@ -48,5 +49,9 @@ Route::middleware(['auth'])->group(function () {
 });
 Route::middleware(['auth'])->group(function () {
     Route::get('/creditos', CreateCredit::class)->name('creditos');
+   
+});
+Route::middleware(['auth'])->group(function () {
+    Route::get('/abonos', PaymentComponent::class)->name('abonos');
    
 });
