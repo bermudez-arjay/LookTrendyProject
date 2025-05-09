@@ -28,6 +28,7 @@ class PurchaseDetail extends Model
     /**
      * @var array
      */
+    public $timestamps = false;
     protected $fillable = ['Purchase_ID', 'Product_ID', 'Quantity', 'Unit_Price', 'Subtotal', 'VAT', 'Total_With_VAT'];
 
     /**

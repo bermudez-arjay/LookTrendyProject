@@ -8,6 +8,8 @@ use App\Livewire\User\UserComponent;
 use App\Livewire\Products\ProductComponent;
 use App\Livewire\CreditTransaction\CreateCredit;
 use Illuminate\Support\Facades\Route;
+use App\Livewire\PurchaseTransaction\PurchaseTrasanction;
+
 use Illuminate\Support\Facades\Session;
 /*
 |--------------------------------------------------------------------------
@@ -23,20 +25,20 @@ use Illuminate\Support\Facades\Session;
 Route::get("/", function () {
     return view('welcome'); //no tocar
 });
-
+// Route::middleware(['auth'])->group(function () {
+    Route::get('/usuarios', UserComponent::class)->name('usuarios');
+   
+// });
 // Ruta de login
 Route::get('/login', Login::class)->name('login');//no tocar
 
-Route::get('/transaction', \App\Livewire\PurchaseTransaction\PurchaseTrasanction::class)->name('transaction');//no tocar
+Route::get('/transaction',PurchaseTrasanction::class)->name('transaction');//no tocar
 // Grupo de rutas protegidas por autenticación 
 Route::middleware(['auth'])->group(function () {
     Route::get('/inicio', Inicio::class)->name('inicio');
    
 });
-Route::middleware(['auth'])->group(function () {
-    Route::get('/usuarios', UserComponent::class)->name('usuarios');
-   
-});
+
 Route::middleware(['auth'])->group(function () {
     Route::get('/clientes', ClientComponent::class)->name('clientes');
    

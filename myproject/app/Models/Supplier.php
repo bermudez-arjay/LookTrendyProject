@@ -28,6 +28,7 @@ class Supplier extends Model
     /**
      * @var array
      */
+    public $timestamps = false;
     protected $fillable = ['Supplier_Identity', 'Supplier_Name', 'Supplier_Address', 'Supplier_Phone', 'Supplier_Email', 'Supplier_RUC', 'Removed'];
 
     /**
