@@ -7,6 +7,7 @@ use App\Models\PurchaseDetail;
 use App\Models\Product;
 use App\Models\Supplier;
 use App\Models\User;
+use App\Models\PaymentType;
 use App\Models\Inventory;
 use App\Models\Transaction;
 use App\Models\Time;
@@ -17,10 +18,10 @@ use Livewire\Component;
 
 class PurchaseTrasanction extends Component
 {
-    public $users, $suppliers, $products;
+    public $users, $suppliers, $products,$paymentsType;
     public $userId;
-
-    public $selectedUserId, $selectedSupplierId;
+      public $payment_type_id;
+      public $selectedUserId, $selectedSupplierId,$SelectpaymentsTypes;
     public $transactionType = 'Compra';
 
     public $productList = [];
@@ -28,6 +29,7 @@ class PurchaseTrasanction extends Component
 
     protected $rules = [
         'selectedUserId' => 'required|exists:users,User_ID',
+        'payment_type_id' => 'required|exists:payment_types,Payment_Type_ID',
         'selectedSupplierId' => 'required|exists:suppliers,Supplier_ID',
     ];
 
@@ -37,6 +39,7 @@ class PurchaseTrasanction extends Component
         $this->users = User::where('Removed', 0)->get();
         $this->suppliers = Supplier::where('Removed', 0)->get();
         $this->products = Product::where('Removed', 0)->get();
+        $this->paymentsType = PaymentType::all(); // Corrected variable name
         $this->selectedUserId = $this->userId; // Usuario logueado por defecto
     }
 
@@ -123,6 +126,7 @@ class PurchaseTrasanction extends Component
                 'Time_ID' => $time->Time_ID,
                 'Total_Amount' => $total,
                 'Purchase_Status' => 'Completado',
+                'Payment_Type_ID' => $this->SelectpaymentsTypes,
             ]);
 
             foreach ($this->productList as $item) {
@@ -136,20 +140,25 @@ class PurchaseTrasanction extends Component
                     'Total_With_VAT' => $item['total_with_tax'],
                 ]);
 
-                Transaction::create([
-                    'Supplier_ID' => $this->selectedSupplierId,
-                    'User_ID' => $this->selectedUserId,
-                    'Time_ID' => $time->Time_ID,
-                    'Total' => $item['total_with_tax'],
-                    'Transaction_Type' => $this->transactionType,
-                    'Purchase_ID' => $purchase->Purchase_ID
-                ]);
-
                 $inventory = Inventory::firstOrNew(['Product_ID' => $item['product_id']]);
                 $inventory->Current_Stock = ($inventory->Current_Stock ?? 0) + $item['quantity'];
                 $inventory->Last_Update = $now->toDateString();
+                if (!$inventory->exists) {
+                    $inventory->Minimum_Stock = 5;
+                }
+
                 $inventory->save();
+            
             }
+             Transaction::create([
+                    'Supplier_ID' => $this->selectedSupplierId,
+                    'User_ID' => $this->selectedUserId,
+                    'Time_ID' => $time->Time_ID,
+                    'Total' => $total,
+                    'Transaction_Type' => $this->transactionType,
+                    'Purchase_ID' => $purchase->Purchase_ID,
+                    'Payment_Type_ID' => $this->SelectpaymentsTypes,
+                ]);
 
             $this->resetAll();
             session()->flash('success', 'Compra registrada exitosamente.');

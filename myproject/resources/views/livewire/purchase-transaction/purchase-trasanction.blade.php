@@ -35,6 +35,17 @@
             </select>
             @error('selectedProductId') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
         </div>
+             <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700">Tipo de Pago <span class="text-red-500">*</span></label>
+                    <select wire:model="SelectpaymentsTypes" id="SelectpaymentsTypes" name="SelectpaymentsTypes" required
+                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 border">
+                        <option value="">Seleccione tipo de pago</option>
+                        @foreach($paymentsType as $type)
+                            <option value="{{ $type->Payment_Type_ID }}">{{ $type->Payment_Type_Name }}</option>
+                        @endforeach
+                    </select>
+                    @error('payment_type_id') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                </div>
         <div>
             <label class="block mb-1 text-sm font-semibold">Cantidad:</label>
             <input type="number" wire:model="quantity" class="w-full border-gray-300 rounded p-2" min="1">
