@@ -32,9 +32,9 @@ class PurchaseTrasanction extends Component
 
     public function mount()
     {
-        $this->users = User::where('Active', 1)->get();
-        $this->suppliers = Supplier::where('Active', 1)->get();
-        $this->products = Product::where('Active', 1)->get();
+        $this->users = User::where('Removed', 0)->get();
+        $this->suppliers = Supplier::where('Removed', 0)->get();
+        $this->products = Product::where('Removed', 0)->get();
     }
 
     public function addProduct()
