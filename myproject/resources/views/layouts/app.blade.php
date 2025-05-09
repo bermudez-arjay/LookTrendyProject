@@ -22,9 +22,9 @@
             
             <!-- Logo -->
             <div class="flex flex-col items-center justify-center mt-3 mb-6">
-                <img src="/logotipo.png" alt="Logo" class="transition-all duration-300 ease-in-out" id="logo-img">
-                <h2 class="font-semibold text-white text-center" id="logo-text">
-                    {{-- {{ Auth::user()->User_FirstName }} --}}
+                <img src="/logotipo.png" alt="Logo" class="w-35 h-35 max-w-full max-h-full transition-all duration-300 ease-in-out" id="logo-img">
+                <h2 class="text-sm font-semibold text-white text-center truncate" id="logo-text">
+                    {{ Auth::user()->User_FirstName }}
                 </h2>
             </div>
             <!-- Menú -->
@@ -170,12 +170,12 @@
     toggleIcon.classList.toggle('fa-chevron-right');
 
     if (sidebar.classList.contains('w-20')) {
-        logoImg.classList.remove('w-64', 'h-64');
+        logoImg.classList.remove('w-35', 'h-35');
         logoImg.classList.add('w-16', 'h-16');
         logoText.classList.add('hidden');
     } else {
         logoImg.classList.remove('w-16', 'h-16');
-        logoImg.classList.add('w-64', 'h-64');
+        logoImg.classList.add('w-35', 'h-35');
         logoText.classList.remove('hidden');
     }
 

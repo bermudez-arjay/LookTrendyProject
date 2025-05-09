@@ -24,7 +24,7 @@ class PurchaseTrasanction extends Component
     public $transactionType = 'Compra';
 
     public $productList = [];
-    public $selectedProductId, $quantity, $unitPrice;
+    public $selectedProductId, $quantity, $unitPrice, $tax = 0.15; // impuesto fijo
 
     protected $rules = [
         'selectedUserId' => 'required|exists:users,User_ID',
@@ -33,7 +33,7 @@ class PurchaseTrasanction extends Component
 
     public function mount()
     {
-        $this->userId = Auth::id();
+        $this->userId = Auth::user()->User_ID;  // CORREGIDO
         $this->users = User::where('Removed', 0)->get();
         $this->suppliers = Supplier::where('Removed', 0)->get();
         $this->products = Product::where('Removed', 0)->get();
@@ -45,16 +45,20 @@ class PurchaseTrasanction extends Component
         $this->validate([
             'selectedProductId' => 'required|exists:products,Product_ID',
             'quantity' => 'required|numeric|min:1',
-            // 'unitPrice' => 'required|numeric|min:0',
+            'unitPrice' => 'required|numeric|min:0',
         ]);
 
         $product = Product::find($this->selectedProductId);
         if (!$product) return;
 
+        $subtotal = $this->quantity * $this->unitPrice;
+        $totalWithTax = $subtotal + ($subtotal * $this->tax);
+
         foreach ($this->productList as &$item) {
             if ($item['product_id'] == $product->Product_ID) {
                 $item['quantity'] += $this->quantity;
                 $item['subtotal'] = $item['quantity'] * $item['unit_price'];
+                $item['total_with_tax'] = $item['subtotal'] + ($item['subtotal'] * $this->tax);
                 $this->resetInputs();
                 return;
             }
@@ -65,7 +69,9 @@ class PurchaseTrasanction extends Component
             'name' => $product->Product_Name,
             'quantity' => $this->quantity,
             'unit_price' => $this->unitPrice,
-            'subtotal' => $this->quantity * $this->unitPrice
+            'subtotal' => $subtotal,
+            'tax' => $this->tax,
+            'total_with_tax' => $totalWithTax
         ];
 
         $this->resetInputs();
@@ -77,15 +83,9 @@ class PurchaseTrasanction extends Component
         $this->quantity = null;
         $this->unitPrice = null;
     }
-
     public function updatedSelectedProductId($productId)
     {
-        if ($productId) {
-            $product = Product::find($productId);
-            if ($product) {
-                $this->unitPrice = $product->Unit_Price;
-            }
-        } else {
+        if (!$productId) {
             $this->unitPrice = null;
         }
     }
@@ -98,15 +98,13 @@ class PurchaseTrasanction extends Component
 
     public function saveTransaction()
     {
-       // $this->validate();
-
         if (empty($this->productList)) {
             $this->addError('productList', 'Debe agregar al menos un producto.');
             return;
         }
 
         DB::transaction(function () {
-            $total = collect($this->productList)->sum('subtotal');
+            $total = collect($this->productList)->sum('total_with_tax');
 
             $now = Carbon::now();
             $time = Time::create([
@@ -126,7 +124,7 @@ class PurchaseTrasanction extends Component
                 'Total_Amount' => $total,
                 'Purchase_Status' => 'Completado',
             ]);
-            dd($purchase);
+
             foreach ($this->productList as $item) {
                 PurchaseDetail::create([
                     'Purchase_ID' => $purchase->Purchase_ID,
@@ -134,15 +132,15 @@ class PurchaseTrasanction extends Component
                     'Quantity' => $item['quantity'],
                     'Unit_Price' => $item['unit_price'],
                     'Subtotal' => $item['subtotal'],
-                    'VAT' => 0,
-                    'Total_With_VAT' => $item['subtotal'],
+                    'VAT' => $item['tax'],
+                    'Total_With_VAT' => $item['total_with_tax'],
                 ]);
 
                 Transaction::create([
                     'Supplier_ID' => $this->selectedSupplierId,
                     'User_ID' => $this->selectedUserId,
                     'Time_ID' => $time->Time_ID,
-                    'Total' => $item['subtotal'],
+                    'Total' => $item['total_with_tax'],
                     'Transaction_Type' => $this->transactionType,
                     'Purchase_ID' => $purchase->Purchase_ID
                 ]);
@@ -160,7 +158,7 @@ class PurchaseTrasanction extends Component
 
     private function resetAll()
     {
-        $this->selectedUserId = $this->userId; // Mantener el usuario logueado
+        $this->selectedUserId = $this->userId;
         $this->selectedSupplierId = null;
         $this->productList = [];
     }

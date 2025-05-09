@@ -9,6 +9,7 @@
         <div>
             <label class="block mb-1 text-sm font-semibold">Usuario:</label>
             <input type="text" value="{{ Auth::user()->User_FirstName }}" class="w-full border-gray-300 rounded p-2" readonly>
+            <input type="hidden" wire:model="selectedUserId">
         </div>
 
         <div>
@@ -23,7 +24,7 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
         <div>
             <label class="block mb-1 text-sm font-semibold">Producto:</label>
             <select wire:model="selectedProductId" class="w-full border-gray-300 rounded p-2">
@@ -41,8 +42,12 @@
         </div>
         <div>
             <label class="block mb-1 text-sm font-semibold">Precio Unitario:</label>
-            <input type="number" wire:model="unitPrice" id="unitPrice" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500" readonly>
+            <input type="number" step="0.01" wire:model="unitPrice" class="w-full border-gray-300 rounded p-2">
             @error('unitPrice') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+        </div>
+        <div>
+            <label class="block mb-1 text-sm font-semibold">Impuesto (15%):</label>
+            <input type="number" value="0.15" readonly class="w-full border-gray-300 rounded p-2 bg-gray-100 text-gray-700">
         </div>
     </div>
 
@@ -61,6 +66,7 @@
                         <th class="py-2 px-4 border-b">Cantidad</th>
                         <th class="py-2 px-4 border-b">Precio Unitario</th>
                         <th class="py-2 px-4 border-b">Subtotal</th>
+                        <th class="py-2 px-4 border-b">Total con IVA</th>
                         <th class="py-2 px-4 border-b">Acciones</th>
                     </tr>
                 </thead>
@@ -71,17 +77,17 @@
                             <td class="py-2 px-4 border-b">{{ $item['quantity'] }}</td>
                             <td class="py-2 px-4 border-b">${{ number_format($item['unit_price'], 2) }}</td>
                             <td class="py-2 px-4 border-b">${{ number_format($item['subtotal'], 2) }}</td>
+                            <td class="py-2 px-4 border-b">${{ number_format($item['total_with_tax'], 2) }}</td>
                             <td class="py-2 px-4 border-b">
-                                <button wire:click="removeProduct({{ $index }})"
-                                    class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600">
+                                <button wire:click="removeProduct({{ $index }})" class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600">
                                     Eliminar
                                 </button>
                             </td>
                         </tr>
                     @endforeach
                     <tr class="font-bold">
-                        <td colspan="3" class="py-2 px-4 border-t text-right">Total:</td>
-                        <td class="py-2 px-4 border-t">${{ number_format(collect($productList)->sum('subtotal'), 2) }}</td>
+                        <td colspan="4" class="py-2 px-4 border-t text-right">Total General:</td>
+                        <td class="py-2 px-4 border-t">${{ number_format(collect($productList)->sum('total_with_tax'), 2) }}</td>
                         <td></td>
                     </tr>
                 </tbody>
@@ -89,8 +95,7 @@
         </div>
 
         <div class="mt-6">
-            <button wire:click="saveTransaction"
-                class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+            <button wire:click="saveTransaction" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
                 Guardar Transacción
             </button>
         </div>
