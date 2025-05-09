@@ -1,15 +1,15 @@
         
-        <div>
-            <div class="max-w-4xl mx-auto p-6 bg-white rounded-xl shadow-sm">
+ 
+           <div class="max-w-full px-8 mx-auto p-6 bg-white rounded-xl shadow-lg border border-gray-200" >
             <h2 class="text-2xl font-bold mb-6 text-gray-800 border-b pb-3">Crear Nuevo Crédito</h2>
         
             <form wire:submit.prevent="save" class="space-y-6">
                 <!-- Sección Cliente y Plazo -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <!-- Cliente -->
                     <div class="space-y-2">
                         <label class="block text-sm font-medium text-gray-700">Cliente <span class="text-red-500">*</span></label>
-                        <select wire:model="client_id" id="client_id" 
+                        <select wire:model.live="client_id" id="client_id" 
                             class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 border">
                             <option value="">Seleccione un cliente</option>
                             @foreach($clients as $client)
@@ -22,7 +22,7 @@
                     <!-- Plazo -->
                     <div class="space-y-2">
                         <label class="block text-sm font-medium text-gray-700">Plazo (Meses) <span class="text-red-500">*</span></label>
-                        <select wire:model="term" id="term" 
+                        <select wire:model.live="term" id="term" 
                             class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 border">
                             <option value="">Seleccione el plazo</option>
                             <option value="1">1 mes</option>
@@ -34,11 +34,11 @@
                 </div>
         
                 <!-- Sección Fechas -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <!-- Fecha de Inicio -->
                     <div class="space-y-2">
                         <label class="block text-sm font-medium text-gray-700">Fecha de Inicio <span class="text-red-500">*</span></label>
-                        <input type="date" wire:model="start_date" 
+                        <input type="date" wire:model.live="start_date" 
                             class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 border">
                         @error('start_date') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                     </div>
@@ -54,7 +54,7 @@
                 <!-- Sección Tipo de Pago -->
                 <div class="space-y-2">
                     <label class="block text-sm font-medium text-gray-700">Tipo de Pago <span class="text-red-500">*</span></label>
-                    <select wire:model="payment_type_id" id="payment_type_id" 
+                    <select wire:model.live="payment_type_id" id="payment_type_id" 
                         class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 border">
                         <option value="">Seleccione tipo de pago</option>
                         @foreach($paymentTypes as $type)
@@ -78,8 +78,8 @@
                     </div>
         
                     @if(count($creditDetails))
-                        <div class="overflow-x-auto rounded-lg border border-gray-200">
-                            <table class="min-w-full divide-y divide-gray-200">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">  
                                 <thead class="bg-gray-50">
                                     <tr>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Producto</th>
@@ -99,7 +99,7 @@
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${{ number_format($detail['vat'], 2) }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${{ number_format($detail['total_with_vat'], 2) }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                <button type="button" wire:click="removeDetail({{ $index }})" 
+                                                <button type="button" wire:click="doRemoveDetail({{ $index }})" 
                                                     class="text-red-600 hover:text-red-900">
                                                     Eliminar
                                                 </button>
@@ -218,42 +218,26 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-    document.addEventListener('livewire:init', function () {
- 
-    function initProductSelect() {
-        $('#product_id').select2({
-            dropdownParent: $('.fixed')
-        }).on('change', function() {
-           
-            @this.set('product_id', $(this).val());
+    
+    document.addEventListener('livewire:initialized', () => {
+    Livewire.on('swal:success', (event) => {
+        Swal.fire({
+            icon: 'success',
+            title: event.title || 'Éxito',
+            text: event.message,
+            timer: event.timer || 3000,
+            showConfirmButton: !event.timer
         });
-    }
-
-    Livewire.on('showProductModal', () => {
-        setTimeout(() => {
-            initProductSelect();
-        }, 100);
     });
 
-    Livewire.on('resetSelect2', () => {
-        $('#product_id').val(null).trigger('change');
-        $('#product_id').select2('destroy');
-    });
-
-  
-    function initSelect2(selector, eventName) {
-        $(selector).select2({
-            dropdownParent: $(selector).closest('div'),
-        }).on('change', function () {
-            @this.set(eventName, $(this).val());
+    Livewire.on('swal:error', (event) => {
+        Swal.fire({
+            icon: 'error',
+            title: event.title || 'Error',
+            text: event.message
         });
-    }
-
-    initSelect2('#client_id', 'client_id');
-    initSelect2('#payment_type_id', 'payment_type_id');
-    initSelect2('#term', 'term');
+    });
 });
-
 window.addEventListener('swal:success', event => {
     Swal.fire({
         icon: 'success',
