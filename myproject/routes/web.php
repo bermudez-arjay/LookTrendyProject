@@ -58,3 +58,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/abonos', PaymentComponent::class)->name('abonos');
    
 });
+
+Route::get('/recuperar', function () {
+    return view('forgot-password');
+})->name('recuperar');
+
+
+Route::get('/reset-password/{token}', ResetPassword::class)
+    ->middleware('guest')
+    ->name('password.reset');
