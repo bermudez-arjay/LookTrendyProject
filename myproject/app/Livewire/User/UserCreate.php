@@ -6,7 +6,8 @@ use Livewire\Component;
 use App\Models\User;
 
 class UserCreate extends Component
-{ public $open = false;
+{ 
+    public $open = false;
 
     // Propiedades alineadas con los nombres de las columnas
     public $User_FirstName, $User_LastName, $User_Address, $User_Phone, $User_Email, $Password, $User_Role;
