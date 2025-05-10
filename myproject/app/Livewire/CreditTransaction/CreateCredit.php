@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Credit;
+namespace App\Livewire\CreditTransaction;
 
 use App\Models\Client;
 use App\Models\Product;
@@ -32,7 +32,52 @@ class CreateCredit extends Component
     public $product_id, $quantity, $payment_date, $payment_amount;
 
     protected $listeners = ['selectProductChanged', 'selectClientChanged', 'selectPaymentTypeChanged', 'selectTermChanged', 'product-changed' => 'updateProductInfo'];
-
+    protected function rules()
+    {
+        return [
+            'client_id' => 'required|exists:clients,Client_ID',
+            'payment_type_id' => 'required|exists:payment_types,Payment_Type_ID',
+            'start_date' => 'required|date',
+            'due_date' => 'required|date|after_or_equal:start_date',
+            'total_amount' => 'required|numeric|min:0',
+            'interest_rate' => 'required|numeric|min:0',
+            'installments' => 'required|integer|min:1',
+            'creditDetails' => 'required|array|min:1',
+        ];
+    }
+    protected function messages()
+{
+    return [
+        'client_id.required' => 'Debe seleccionar un cliente',
+        'client_id.exists' => 'El cliente seleccionado no es válido',
+        
+        'payment_type_id.required' => 'Debe seleccionar un tipo de pago',
+        'payment_type_id.exists' => 'El tipo de pago seleccionado no es válido',
+        
+        'start_date.required' => 'La fecha de inicio es obligatoria',
+        'start_date.date' => 'La fecha de inicio debe ser una fecha válida',
+        
+        'due_date.required' => 'La fecha de vencimiento es obligatoria',
+        'due_date.date' => 'La fecha de vencimiento debe ser una fecha válida',
+        'due_date.after_or_equal' => 'La fecha de vencimiento debe ser igual o posterior a la fecha de inicio',
+        
+        'total_amount.required' => 'El monto total es obligatorio',
+        'total_amount.numeric' => 'El monto total debe ser un valor numérico',
+        'total_amount.min' => 'El monto total no puede ser negativo',
+        
+        'interest_rate.required' => 'La tasa de interés es obligatoria',
+        'interest_rate.numeric' => 'La tasa de interés debe ser un valor numérico',
+        'interest_rate.min' => 'La tasa de interés no puede ser negativa',
+        
+        'installments.required' => 'El número de cuotas es obligatorio',
+        'installments.integer' => 'El número de cuotas debe ser un número entero',
+        'installments.min' => 'Debe haber al menos 1 cuota',
+        
+        'creditDetails.required' => 'Debe agregar al menos un producto',
+        'creditDetails.array' => 'Los productos deben estar en formato válido',
+        'creditDetails.min' => 'Debe agregar al menos un producto',
+    ];
+}
     public function mount()
     {
         $this->start_date = date('Y-m-d');
@@ -76,7 +121,7 @@ class CreateCredit extends Component
         $this->updateProductInfo($value);
     }
 
-    private function obtenerInteresPorPlazo()
+    private function getInterestPerTerm()
     {
         switch ($this->term) {
             case 1:
@@ -90,9 +135,9 @@ class CreateCredit extends Component
         }
     }
 
-    public function calcularCredito()
+    public function calculateCredit()
     {
-        $tasaInteres = $this->obtenerInteresPorPlazo();
+        $tasaInteres = $this->getInterestPerTerm();
 
         $interes = $this->total_amount * $tasaInteres;
         $this->totalWithInterest = $this->total_amount + $interes;
@@ -276,17 +321,7 @@ class CreateCredit extends Component
 
     public function save()
     {
-        $this->validate([
-            'client_id' => 'required|exists:clients,Client_ID',
-            'payment_type_id' => 'required|exists:payment_types,Payment_Type_ID',
-            'start_date' => 'required|date',
-            'due_date' => 'required|date|after_or_equal:start_date',
-            'total_amount' => 'required|numeric|min:0',
-            'interest_rate' => 'required|numeric|min:0',
-            'installments' => 'required|integer|min:1',
-            'creditDetails' => 'required|array|min:1',
-        ]);
-
+        $this->validate();
         $date = Carbon::parse($this->start_date);
         DB::beginTransaction();
         try {
@@ -300,7 +335,7 @@ class CreateCredit extends Component
                 'Day_of_Week' => $date->dayOfWeekIso,
             ]);
 
-            $tasaInteres = $this->obtenerInteresPorPlazo();
+            $tasaInteres = $this->getInterestPerTerm();
             $interes = $this->total_amount * $tasaInteres;
             $totalConInteres = $this->total_amount + $interes;
 
@@ -350,58 +385,51 @@ class CreateCredit extends Component
             DB::commit();
 
             $this->dispatch('swal:success', [
-                'title' => 'Crédito creado',
-                'message' => 'El crédito se ha registrado correctamente.',
-                'timer' => 3000,
-                'callback' => 'Livewire.emit("resetForm")'
+                'title' => 'Éxito',
+                'message' => 'Crédito creado correctamente',
+                'timer' => 3000
             ]);
-
+            
             $this->resetForm();
-
-        } catch (\Exception $e) {
+        }  catch (\Illuminate\Validation\ValidationException $e) {
             DB::rollBack();
-
-            $this->dispatch('swal:error', [
-                'title' => 'Error al guardar',
-                'message' => 'Ocurrió un error al intentar guardar el crédito: ' . $e->getMessage()
-            ]);
+                $this->dispatch('swal:error', [
+                    'title' => 'Error de validación',
+                    'message' => implode('<br>', $e->validator->errors()->all())
+                ]);
+                return;
         }
     }
 
     private function resetForm()
     {
-        $this->reset([
-            'client_id',
-            'payment_type_id',
-            'start_date',
-            'due_date',
-            'term',
-            'total_amount',
-            'interest_rate',
-            'installments',
-            'creditDetails',
-            'product_id',
-            'quantity',
-            'payment_date',
-            'payment_amount',
-            'showProductModal'
-        ]);
-
-
+      
+        $this->paymentId = '';
+        $this->credit_id = '';
+        $this->payment_date = '';
+        $this->payment_amount = '';
+        $this->client_id = '';
+        $this->term = '';
+        $this->payment_type_id = '';
+        $this->total_amount = 0;
+        $this->installments = 0;
+        $this->creditDetails = [];
+        $this->interest_rate= 0;
+        $this->credit_status = 'Pendiente';  
+        $this->product_id = '';
+        $this->quantity = '';
+        $this->selectedStock = 0;
+        $this->selectedPrice = 0.0;
+        $this->showProductModal = false;
         $this->totalWithInterest = 0;
         $this->quotaAmount = 0;
-        $this->selectedStock = 0;
-        $this->selectedPrice = 0;
-        $this->credit_status = 'Pendiente';
-
-        $this->start_date = date('Y-m-d');
-        $this->due_date = date('Y-m-d', strtotime('+30 days'));
-
+        $this->start_date = now()->format('Y-m-d');
+        $this->due_date = now()->addDays(30)->format('Y-m-d');
+        
         $this->dispatch('resetSelect2');
-
-        $this->resetErrorBag();
-        $this->resetValidation();
     }
+
+       
 
     public function render()
     {
