@@ -14,8 +14,8 @@
         
                 <div class="relative px-4 py-10 bg-white shadow-lg sm:rounded-3xl sm:p-20">
                     <div class="max-w-md mx-auto">
-                        <div class="flex justify-end mb-6">
-                            <img src="/logotipo.png" alt="LOOK TRENDY" class="h-49 w-auto"> 
+                        <div class="flex justify-center">
+                            <img src="/logotipo.png" alt="LOOK TRENDY" class="h-49 w-auto mb-6"> 
                         </div>
                         {{-- Mensaje de error --}}
                         @if (session()->has('error'))
@@ -62,7 +62,7 @@
         
                                 {{-- Enlace a recuperar contraseña --}}
                                 <div class="relative flex items-center justify-center">
-                                    <a href="#" class="text-pink-600 hover:underline text-sm">¿Olvidaste tu contraseña?</a>
+                                <a href="{{ route('recuperar') }}" class="text-pink-600 hover:underline text-sm">¿Olvidaste tu contraseña?</a>
                                 </div>
                             </form>
                             <div class="mt-8 text-center">
