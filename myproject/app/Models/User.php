@@ -6,7 +6,11 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
+use Illuminate\Contracts\Auth\CanResetPassword;
+use Illuminate\Auth\Passwords\CanResetPassword as CanResetPasswordTrait;
 
+
+        
 /**
  * @property integer $User_ID
  * @property string $User_FirstName
@@ -20,10 +24,9 @@ use Laravel\Sanctum\HasApiTokens;
  * @property Purchase[] $purchases
  * @property Transaction[] $transactions
  */
-class User extends Authenticatable
-
+class User extends Authenticatable 
 {
-    use HasApiTokens,Notifiable;
+    use HasApiTokens,Notifiable, CanResetPasswordTrait;
     /**
      * The primary key for the model.
      * 
@@ -42,10 +45,41 @@ class User extends Authenticatable
     {
         return $this->Password;
     }
+
+    public function getEmailForPasswordReset()
+    {
+        return $this->User_Email;
+    }    
+
+    public function routeNotificationForMail($notification)
+    {
+        return $this->User_Email;
+    }
+
     public function getAuthIdentifierName()
     {
         return 'User_Email';
     }
+
+    public function getEmailAttribute()
+    {
+        return $this->User_Email;
+    }
+
+    public function setEmailAttribute($value)
+    {
+        $this->attributes['User_Email'] = $value;
+    }
+
+
+    // public function sendPasswordResetNotification($token)
+    // {
+    //     $this->notify(new \App\Notifications\ResetPasswordCustom($token));
+    // }
+
+
+
+   
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
@@ -61,4 +95,6 @@ class User extends Authenticatable
     {
         return $this->hasMany('App\Models\Transaction', 'User_ID', 'User_ID');
     }
+    // protected $email = 'User_Email';
+    
 }
