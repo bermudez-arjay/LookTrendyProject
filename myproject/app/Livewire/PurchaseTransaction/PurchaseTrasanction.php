@@ -23,7 +23,7 @@ class PurchaseTrasanction extends Component
       public $payment_type_id;
       public $selectedUserId, $selectedSupplierId,$SelectpaymentsTypes;
     public $transactionType = 'Compra';
-
+ public $showProductModal = false;
     public $productList = [];
     public $selectedProductId, $quantity, $unitPrice, $tax = 0.15; // impuesto fijo
 
@@ -76,7 +76,7 @@ class PurchaseTrasanction extends Component
             'tax' => $this->tax,
             'total_with_tax' => $totalWithTax
         ];
-
+         $this->showProductModal = false;
         $this->resetInputs();
     }
 
