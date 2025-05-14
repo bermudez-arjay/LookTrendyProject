@@ -33,8 +33,9 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-gray-500 text-sm">Total Abonos</p>
-                    <p class="text-2xl font-bold text-gray-800">${{ number_format(App\Models\Payment::sum('Payment_Amount'), 2) }}</p>
-                </div>
+<p class="text-2xl font-bold text-gray-800 mt-1">
+                ${{ number_format($totalPaymentAmount, 2) }}
+            </p>                </div>
                 <div class="bg-blue-100 p-3 rounded-full">
                     <i class="fas fa-wallet text-blue-600 text-xl"></i>
                 </div>
@@ -51,7 +52,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-gray-500 text-sm">Abonos Este Mes</p>
-                    <p class="text-2xl font-bold text-gray-800">${{ number_format(App\Models\Payment::whereMonth('Payment_Date', now()->month)->sum('Payment_Amount'), 2) }}</p>
+                    <p class="text-2xl font-bold text-gray-800">${{ number_format($paymentMonth,0)}}</p>
                 </div>
                 <div class="bg-green-100 p-3 rounded-full">
                     <i class="fas fa-calendar-alt text-green-600 text-xl"></i>

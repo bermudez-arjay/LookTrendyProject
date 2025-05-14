@@ -29,6 +29,10 @@ class Payment extends Model
         'Payment_Amount' => 'decimal:2',
     ];
 
+       public static function getTotalPayments()
+    {
+        return self::sum('Payment_Amount');
+    }
   
     public function credit(): BelongsTo
     {
