@@ -14,14 +14,13 @@ class ClientCreate extends Component
 
     protected $rules = [
         'Client_Identity' => 'required|string|max:15',
-        'Client_FirstName' => 'required|string|max:100',
+        'Client_FirstName' => 'required|string|max:100|min:6',
         'Client_LastName' => 'required|string|max:100',
         'Client_Email' => 'required|email|max:100|unique:clients,Client_Email',
         'Client_Address' => 'required|string|max:255',
         'Client_Phone' => 'required|string|max:8'
         
-    ];
-    
+    ];   
 
     protected $listeners = ['openCreateClientModal' => 'openModal'];
 
@@ -45,7 +44,6 @@ class ClientCreate extends Component
             'Client_Email',
             'Client_Address',
             'Client_Phone'
-           
         ]);
     }
 
@@ -63,7 +61,7 @@ class ClientCreate extends Component
 				'Client_Email' => $this->Client_Email
         ]);
       dd($this->Client_Identity);
-        session()->flash('message', 'Cliente creado exitosamente.');
+        session()->flash('status', 'Cliente creado exitosamente.');
         $this->resetForm();
         $this->dispatch('clientCreated');
         $this->dispatch('client-notify', ['message' => 'Cliente creado exitosamente.']);
