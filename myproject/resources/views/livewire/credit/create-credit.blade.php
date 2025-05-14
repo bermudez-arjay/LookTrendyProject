@@ -1,6 +1,6 @@
         
  
-           <div class="max-w-full px-8 mx-auto p-6 bg-white rounded-xl shadow-lg border border-gray-200" >
+           <div id="form" class="max-w-full px-8 mx-auto p-6 bg-white rounded-xl shadow-lg border border-gray-200" >
             <h2 class="text-2xl font-bold mb-6 text-gray-800 border-b pb-3">Crear Nuevo Crédito</h2>
         
             <form wire:submit.prevent="save" class="space-y-6">
@@ -131,7 +131,13 @@
                     </div>
         
                     <div class="flex items-end">
-                        <button type="submit" 
+                        <button type="submit" onclick="
+                            document.getElementById('client_id').value ='';
+                            document.getElementById('term').innerHTML ='';
+                            document.getElementById('payment_type_id').innerHTML ='';
+                            document.getElementById('start_date').value ='';
+                             document.getElementById('due_date').value ='';
+                            " 
                             class="w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                             Guardar Crédito
                         </button>
@@ -216,10 +222,8 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-<script>
-    
-    document.addEventListener('livewire:initialized', () => {
+<script> 
+document.addEventListener('livewire:initialized', () => {
     Livewire.on('swal:success', (event) => {
         Swal.fire({
             icon: 'success',

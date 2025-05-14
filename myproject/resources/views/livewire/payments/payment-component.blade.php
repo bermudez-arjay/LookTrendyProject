@@ -1,23 +1,12 @@
-<div class="container mx-auto px-4 py-8">
-    <!-- Header y botón de nuevo -->
+<div class="container mx-auto px-4 py-4">
+<div>
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
             <h1 class="text-3xl font-bold text-gray-800">Gestión de Abonos</h1>
             <p class="text-gray-600">Registro y seguimiento de pagos a créditos</p>
         </div>
         
-        <div class="w-full md:w-auto flex flex-col sm:flex-row gap-3">
-            <div class="relative w-full">
-                <input 
-                    wire:model.debounce.500ms="search"
-                    type="text" 
-                    placeholder="Buscar abonos por cliente, crédito o monto..." 
-                    class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                >
-                <div class="absolute left-3 top-2.5 text-gray-400">
-                    <i class="fas fa-search"></i>
-                </div>
-            </div>
+       
             
             <button 
                 wire:click="create"
@@ -26,9 +15,7 @@
                 <i class="fas fa-plus mr-2"></i> Nuevo Abono
             </button>
         </div>
-    </div>
-
-    <!-- Mensajes flash -->
+        </div>
     @if (session()->has('message'))
         <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded" role="alert">
             <div class="flex items-center">
@@ -36,17 +23,19 @@
                 <p>{{ session('message') }}</p>
             </div>
         </div>
+    </div>
     @endif
 
-    <!-- Tarjetas de resumen -->
+  
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <!-- Tarjeta 1: Total abonos -->
+      
         <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 transition-transform hover:scale-[1.02]">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-gray-500 text-sm">Total Abonos</p>
-                    <p class="text-2xl font-bold text-gray-800">${{ number_format(App\Models\Payment::sum('Payment_Amount'), 2) }}</p>
-                </div>
+<p class="text-2xl font-bold text-gray-800 mt-1">
+                ${{ number_format($totalPaymentAmount, 2) }}
+            </p>                </div>
                 <div class="bg-blue-100 p-3 rounded-full">
                     <i class="fas fa-wallet text-blue-600 text-xl"></i>
                 </div>
@@ -59,12 +48,11 @@
             </div>
         </div>
 
-        <!-- Tarjeta 2: Abonos este mes -->
         <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 transition-transform hover:scale-[1.02]">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-gray-500 text-sm">Abonos Este Mes</p>
-                    <p class="text-2xl font-bold text-gray-800">${{ number_format(App\Models\Payment::whereMonth('Payment_Date', now()->month)->sum('Payment_Amount'), 2) }}</p>
+                    <p class="text-2xl font-bold text-gray-800">${{ number_format($paymentMonth,0)}}</p>
                 </div>
                 <div class="bg-green-100 p-3 rounded-full">
                     <i class="fas fa-calendar-alt text-green-600 text-xl"></i>
@@ -78,13 +66,12 @@
             </div>
         </div>
 
-        <!-- Tarjeta 3: Último abono -->
         <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 transition-transform hover:scale-[1.02]">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-gray-500 text-sm">Último Abono</p>
                     <p class="text-2xl font-bold text-gray-800">
-                        @if($lastPayment = App\Models\Payment::latest('Payment_Date')->first())
+                        @if($lastPayment)
                             ${{ number_format($lastPayment->Payment_Amount, 2) }}
                         @else
                             $0.00
@@ -103,15 +90,12 @@
             <div class="mt-4 pt-4 border-t border-gray-100">
                 <p class="text-xs text-gray-500 flex items-center">
                     <span class="inline-block w-2 h-2 rounded-full bg-purple-500 mr-2"></span>
-                    @if($lastPayment)
-                        {{ $lastPayment->Payment_Date->diffForHumans() }}
-                    @else
-                        Sin registros
-                    @endif
+                    {{ $lastPaymentHumanDate }}
                 </p>
             </div>
         </div>
-    </div>
+        </div>
+    
 
     <!-- Tabla de abonos -->
     <div class="bg-white shadow-sm rounded-lg border border-gray-100 overflow-hidden">
@@ -152,8 +136,13 @@
                                         <i class="fas fa-user text-indigo-600"></i>
                                     </div>
                                     <div class="ml-4">
-                                        <div class="text-sm font-medium text-gray-900">{{ optional($payment->credit->client)->name ?? 'N/A' }}</div>
-                                        <div class="text-sm text-gray-500">{{ optional($payment->credit->client)->email ?? '' }}</div>
+                                        <div class="text-sm font-medium text-gray-900">
+                                            {{ optional($payment->credit->client)->Client_FirstName }} 
+                                            {{ optional($payment->credit->client)->Client_LastName }}
+                                        </div>
+                                        <div class="text-sm text-gray-500">
+                                            {{ optional($payment->credit->client)->Client_Phone ?? '' }}
+                                        </div>
                                     </div>
                                 </div>
                             </td>
@@ -186,14 +175,11 @@
                                     >
                                         <i class="fas fa-trash"></i>
                                     </button>
-                                    <a 
-                                        href="{{ route('payments.receipt', $payment->Payment_ID) }}" 
-                                        class="text-blue-600 hover:text-blue-900"
-                                        title="Recibo"
-                                        target="_blank"
-                                    >
-                                        <i class="fas fa-receipt"></i>
-                                    </a>
+                                    <button wire:click="generatePdf({{ $payment->Payment_ID }})" 
+                                        title="Descargar PDF"
+                                        class="text-blue-500 hover:text-blue-700 p-2 rounded-full hover:bg-blue-100">
+                                    <i class="fas fa-file-pdf text-xl"></i>
+                                </button>
                                 </div>
                             </td>
                         </tr>
@@ -226,18 +212,16 @@
         @endif
     </div>
 
-    <!-- Modal para crear/editar -->
+  
     @if ($isOpen)
     <div class="fixed z-50 inset-0 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <!-- Fondo del modal -->
+          
             <div 
                 class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" 
                 aria-hidden="true"
                 wire:click="closeModal"
             ></div>
-
-            <!-- Contenido del modal -->
             <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
                 <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                     <div class="sm:flex sm:items-start">
@@ -249,13 +233,11 @@
                                 {{ $paymentId ? 'Editar Abono' : 'Registrar Nuevo Abono' }}
                             </h3>
                             <div class="mt-2">
-                                
-                                <!-- Campo de búsqueda de créditos -->
                                 <div class="mb-4">
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Buscar Crédito</label>
                                     <div class="relative">
                                         <input 
-                                            wire:model.debounce.300ms="searchCredit"
+                                            wire:model.live="searchCredit"
                                             type="text" 
                                             placeholder="Buscar créditos por ID o nombre de cliente..." 
                                             class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
@@ -266,147 +248,162 @@
                                     </div>
                                 </div>
                                 
-                                <!-- Lista de créditos -->
-                                <div class="mb-6 border border-gray-200 rounded-lg overflow-hidden">
-                                    <div class="max-h-64 overflow-y-auto">
-                                        <table class="min-w-full divide-y divide-gray-200">
-                                            <thead class="bg-gray-50 sticky top-0">
-                                                <tr>
-                                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                        Seleccionar
-                                                    </th>
-                                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                        Crédito
-                                                    </th>
-                                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                        Cliente
-                                                    </th>
-                                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                        Saldo
-                                                    </th>
-                                                </tr>
-                                            </thead>
-                                            <tbody class="bg-white divide-y divide-gray-200">
-                                                @forelse ($credits as $credit)
-                                                <tr class="hover:bg-gray-50">
-                                                    <td class="px-6 py-4 whitespace-nowrap">
-                                                        <input 
-                                                            type="radio" 
-                                                            wire:model="credit_id"
-                                                            value="{{ $credit->Credit_ID }}"
-                                                            class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                                                        >
-                                                    </td>
-                                                    <td class="px-6 py-4 whitespace-nowrap">
-                                                        <div class="text-sm font-medium text-gray-900">#{{ $credit->Credit_ID }}</div>
-                                                        <div class="text-xs text-gray-500">
-                                                            ${{ number_format($credit->Total_Amount, 2) }} (Total)
+ 
+                            <div class="mb-6 border border-gray-200 rounded-lg overflow-hidden">
+                                <div class="max-h-64 overflow-y-auto">
+                                    <table class="min-w-full divide-y divide-gray-200">
+                                        <thead class="bg-gray-50 sticky top-0">
+                                            <tr>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                    Seleccionar
+                                                </th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                    Crédito
+                                                </th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                    Cliente
+                                                </th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                    Saldo
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="bg-white divide-y divide-gray-200">
+                                            @forelse ($credits as $credit)
+                                            <tr class="hover:bg-gray-50 @if($credit_id == $credit->Credit_ID) bg-blue-50 @endif">
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <input 
+                                                    type="radio" 
+                                                    wire:model.live="credit_id"
+                                                    value="{{ $credit->Credit_ID }}"
+                                                    class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                                                    name="credit_selection"
+                                                />
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <div class="text-sm font-medium text-gray-900">#{{ $credit->Credit_ID }}</div>
+                                                    <div class="text-xs text-gray-500">
+                                                        ${{ number_format($credit->Total_Amount, 2) }} (Total)
+                                                    </div>
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <div class="flex items-center">
+                                                        <div class="flex-shrink-0 h-10 w-10 bg-indigo-100 rounded-full flex items-center justify-center">
+                                                            <i class="fas fa-user text-indigo-600"></i>
                                                         </div>
-                                                    </td>
-                                                    <td class="px-6 py-4">
-                                                        <div class="text-sm text-gray-900">{{ $credit->client_full_name }}</div>
-                                                        <div class="text-xs text-gray-500">
-                                                            {{ optional($credit->client)->Client_Phone ?? '' }}
+                                                        <div class="ml-4">
+                                                            <div class="text-sm font-medium text-gray-900">
+                                                                {{ optional($credit->client)->Client_FirstName }} 
+                                                                {{ optional($credit->client)->Client_LastName }}
+                                                            </div>
+                                                            <div class="text-sm text-gray-500">
+                                                                {{ optional($credit->client)->Client_Phone ?? '' }}
+                                                            </div>
                                                         </div>
-                                                    </td>
-                                                    <td class="px-6 py-4 whitespace-nowrap">
-                                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                                            {{ $credit->remaining_balance > 0 ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800' }}">
-                                                            ${{ number_format($credit->remaining_balance, 2) }}
-                                                        </span>
-                                                    </td>
-                                                </tr>
+                                                    </div>
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                                        {{ $credit->remaining_balance > 0 ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800' }}">
+                                                        ${{ number_format($credit->remaining_balance, 2) }}
+                                                    </span>
+                                                    @if($credit_id == $credit->Credit_ID && $payment_amount)
+                                                    <div class="text-xs text-gray-500 mt-1">
+                                                        Nuevo saldo: ${{ number_format(max(0, $credit->remaining_balance - $payment_amount), 2) }}
+                                                    </div>
+                                                    @endif
+                                                </td>
+                                            </tr>
                                             @empty
-                                                <tr>
-                                                    <td colspan="4" class="px-6 py-4 text-center text-sm text-gray-500">
-                                                        No se encontraron créditos disponibles
-                                                    </td>
-                                                </tr>
+                                            <tr>
+                                                <td colspan="4" class="px-6 py-4 text-center text-sm text-gray-500">
+                                                    No se encontraron créditos disponibles
+                                                </td>
+                                            </tr>
                                             @endforelse
-                                            </tbody>
-                                        </table>
-                                    </div>
+                                        </tbody>
+                                    </table>
                                 </div>
+                            </div>
                                 
-                                <!-- Detalles del pago -->
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <!-- Fecha de pago -->
-                                    <div>
-                                        <label for="payment_date" class="block text-sm font-medium text-gray-700 mb-1">Fecha de Abono *</label>
-                                        <div class="relative">
-                                            <input 
-                                                wire:model="payment_date"
-                                                type="date" 
-                                                id="payment_date"
-                                                class="block w-full pl-4 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                            >
-                                            <div class="absolute right-3 top-2.5 text-gray-400">
-                                                <i class="fas fa-calendar-alt"></i>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                      
+                                        <div>
+                                            <label for="payment_date" class="block text-sm font-medium text-gray-700 mb-1">Fecha de Abono *</label>
+                                            <div class="relative">
+                                                <input 
+                                                    wire:model.live="payment_date"
+                                                    type="date" 
+                                                    id="payment_date"
+                                                    class="block w-full pl-4 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                                >
+                                                <div class="absolute right-3 top-2.5 text-gray-400">
+                                                    <i class="fas fa-calendar-alt"></i>
+                                                </div>
                                             </div>
+                                            @error('payment_date') 
+                                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                            @enderror
                                         </div>
-                                        @error('payment_date') 
-                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                        @enderror
-                                    </div>
-                                    
-                                    <!-- Monto del pago -->
-                                    <div>
-                                        <label for="payment_amount" class="block text-sm font-medium text-gray-700 mb-1">Monto del Abono *</label>
-                                        <div class="relative rounded-md shadow-sm">
-                                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                <span class="text-gray-500">$</span>
-                                            </div>
-                                            <input 
-                                                wire:model="payment_amount"
-                                                type="number" 
-                                                step="0.01"
-                                                min="0.01"
-                                                id="payment_amount"
-                                                class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-7 pr-12 py-2 border border-gray-300 rounded-lg"
-                                                placeholder="0.00"
-                                            >
-                                        </div>
-                                     
                                         
-                                        @if($credit_id)
-                                            @php
-                                                $selectedCredit = $credits->firstWhere('Credit_ID', $credit_id);
-                                                $maxAmount = $selectedCredit ? $selectedCredit->remaining_balance : 0;
-                                            @endphp
-                                            <p class="mt-1 text-xs text-gray-500">
-                                                Saldo pendiente: ${{ number_format($maxAmount, 2) }}
-                                            </p>
-                                        @endif
+                                    
+                                        <div>
+                                            <label for="payment_amount" class="block text-sm font-medium text-gray-700 mb-1">Monto del Abono *</label>
+                                            <div class="relative rounded-md shadow-sm">
+                                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                    <span class="text-gray-500">$</span>
+                                                </div>
+                                                <input 
+                                                    wire:model.live="payment_amount"
+                                                    type="number" 
+                                                    step="0.01"
+                                                    min="0.01"
+                                                    id="payment_amount"
+                                                    class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-7 pr-12 py-2 border border-gray-300 rounded-lg"
+                                                    placeholder="0.00"
+                                                >
+                                            </div>
+                                         
+                                            
+                                            @if($credit_id)
+                                                @php
+                                                    $selectedCredit = $credits->firstWhere('Credit_ID', $credit_id);
+                                                    $maxAmount = $selectedCredit ? $selectedCredit->remaining_balance : 0;
+                                                @endphp
+                                                <p class="mt-1 text-xs text-gray-500">
+                                                    Saldo pendiente: ${{ number_format($maxAmount, 2) }}
+                                                </p>
+                                            @endif
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                    <button 
-                        wire:click.prevent="store"
-                        type="button"
-                        class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50"
-                        @if(!$credit_id || !$payment_amount) disabled @endif
-                    >
-                        <i class="fas fa-save mr-2"></i> 
-                        {{ $paymentId ? 'Actualizar Abono' : 'Registrar Abono' }}
-                    </button>
-                    <button 
-                        wire:click="closeModal"
-                        type="button"
-                        class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-                    >
-                        <i class="fas fa-times mr-2"></i> Cancelar
-                    </button>
+                  
+                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                        <button 
+                            wire:click="store"
+                            type="button"
+                            class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50"
+                            @if(!$credit_id || !$payment_amount) disabled @endif
+                        >
+                            <i class="fas fa-save mr-2"></i> 
+                            {{ $paymentId ? 'Actualizar Abono' : 'Registrar Abono' }}
+                        </button>
+                        <button 
+                            wire:click="closeModal"
+                            type="button"
+                            class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                        >
+                            <i class="fas fa-times mr-2"></i> Cancelar
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    @endif
+        @endif
 
-    <!-- Script para confirmar eliminación -->
     <script>
         document.addEventListener('livewire:load', function () {
             Livewire.on('confirmDelete', paymentId => {

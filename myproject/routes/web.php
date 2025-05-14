@@ -28,9 +28,12 @@ use Illuminate\Support\Facades\Session;
 Route::get("/", function () {
     return view('welcome'); //no tocar
 });
+Route::get('/credits/{credit}', [CreateCredit::class, 'show'])->name('credits.show');
 // Route::middleware(['auth'])->group(function () {
-Route::get('/usuarios', UserComponent::class)->name('usuarios');
-
+    Route::get('/usuarios', UserComponent::class)->name('usuarios');
+    Route::get('/payments/{paymentid}/receipt', [PaymentComponent::class, 'receipt'])
+     ->name('payments.receipt');
+   
 // });
 // Ruta de login
 Route::get('/login', Login::class)->name('login');//no tocar
