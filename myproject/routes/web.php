@@ -3,13 +3,11 @@
 use App\Livewire\Auth\Login;
 use App\Livewire\Auth\ForgotPassword;
 use App\Livewire\Auth\ResetPassword;
-use App\Livewire\Clients\Clients;
 use App\Livewire\Inicio\Inicio;
 use App\Livewire\Clients\ClientComponent;
 use App\Livewire\Supplier\SupplierComponent;
 use App\Livewire\Payments\PaymentComponent;
 use App\Livewire\User\UserComponent;
-use App\Livewire\Supplier\SupplierComponent;
 use App\Livewire\InventoryDashboard\InventoryDashboard;
 use App\Livewire\Products\ProductComponent;
 use App\Livewire\CreditTransaction\CreateCredit;
@@ -52,16 +50,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/clientes', ClientComponent::class)->name('clientes');
     Route::get('/proveedores', SupplierComponent::class)->name('proveedores');
 
-});
-Route::middleware(['auth'])->group(function () {
-    Route::get('/proveedores', SupplierComponent::class)->name('proveedores');
-
-});
-Route::middleware(['auth'])->group(function () {
+    // Productos,Inventario 
     Route::get('/productos', ProductComponent::class)->name('productos');
+    Route::get('/inventario', InventoryDashboard::class)->name('inventario');
 
-});
-Route::middleware(['auth'])->group(function () {
+    //Créditos
     Route::get('/creditos', CreateCredit::class)->name('creditos');
     Route::get('/credits/{credit}', [CreateCredit::class, 'show'])->name('credits.show');
 
