@@ -27,48 +27,39 @@ use Illuminate\Support\Facades\Session;
 |
 */
 
+//Pagina de Bienvenida
 Route::get("/", function () {
     return view('welcome'); //no tocar
 });
-Route::get('/credits/{credit}', [CreateCredit::class, 'show'])->name('credits.show');
-// Route::middleware(['auth'])->group(function () {
-    Route::get('/usuarios', UserComponent::class)->name('usuarios');
-    Route::get('/payments/{paymentid}/receipt', [PaymentComponent::class, 'receipt'])
-     ->name('payments.receipt');
-   
-// });
-Route::get('/inventario', InventoryDashboard::class)->name('inventario');
-Route::get('/proveedores', SupplierComponent::class)->name('proveedores');
-// Ruta de login
+
+// Logout de la aplicación
 Route::get('/login', Login::class)->name('login');//no tocar
-
-Route::get('/transaction', PurchaseTrasanction::class)->name('transaction');//no tocar
-
+Route::get('/resetear-Contraseña/{token}', ResetPassword::class)->middleware('guest')->name('password.reset');
 Route::get('/recuperar', ForgotPassword::class)->name('recuperar');
 
-Route::get('/reset-password/{token}', ResetPassword::class)
-    ->middleware('guest')
-    ->name('password.reset');
-Route::get('/transaction', PurchaseTrasanction::class)->name('transaction');//no tocar
 // Grupo de rutas protegidas por autenticación 
 Route::middleware(['auth'])->group(function () {
+
+    //Inicio
     Route::get('/inicio', Inicio::class)->name('inicio');
 
-});
+    //compras
+    Route::get('/compras', PurchaseTrasanction::class)->name('transaction');
 
-Route::middleware(['auth'])->group(function () {
+    //Usuarios,Clientes y Proveedores
+    Route::get('/usuarios', UserComponent::class)->name('usuarios');
     Route::get('/clientes', ClientComponent::class)->name('clientes');
+    Route::get('/proveedores', SupplierComponent::class)->name('proveedores');
 
-});
-Route::middleware(['auth'])->group(function () {
+    // Productos,Inventario 
     Route::get('/productos', ProductComponent::class)->name('productos');
+    Route::get('/inventario', InventoryDashboard::class)->name('inventario');
 
-});
-Route::middleware(['auth'])->group(function () {
+    //Créditos
     Route::get('/creditos', CreateCredit::class)->name('creditos');
+    Route::get('/credits/{credit}', [CreateCredit::class, 'show'])->name('credits.show');
 
-});
-Route::middleware(['auth'])->group(function () {
+    //Pagos
+    Route::get('/payments/{paymentid}/receipt', [PaymentComponent::class, 'receipt'])->name('payments.receipt');
     Route::get('/abonos', PaymentComponent::class)->name('abonos');
-
 });
