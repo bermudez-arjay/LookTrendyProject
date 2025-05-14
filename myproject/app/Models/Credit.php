@@ -73,4 +73,9 @@ class Credit extends Model
     {
         return $this->hasMany('App\Models\Payment', 'Credit_ID', 'Credit_ID');
     }
+    
+public function getRemainingBalanceAttribute()
+{
+    return $this->Total_Amount - $this->payments->sum('Payment_Amount');
+}
 }

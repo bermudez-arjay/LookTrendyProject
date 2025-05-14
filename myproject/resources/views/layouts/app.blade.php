@@ -305,9 +305,9 @@
         </div>
     </div>
     
-    <!-- Main Content -->
+ 
     <div class="flex-1 flex flex-col overflow-hidden">
-        <!-- Page Content -->
+   
         <main class="flex-1 overflow-y-auto p-6 page-transition">
             {{ $slot }}
         </main>
@@ -315,7 +315,7 @@
 
     @livewireScripts
     <script>
-        // Transición mejorada al cambiar de página
+ 
         document.addEventListener('livewire:navigating', () => {
             const main = document.querySelector('main');
             main.style.opacity = '0';
@@ -330,8 +330,7 @@
             }, 50);
         });
 
-        // Efecto de hover en los elementos del menú
-        document.querySelectorAll('.menu-item').forEach(item => {
+           document.querySelectorAll('.menu-item').forEach(item => {
             item.addEventListener('mouseenter', () => {
                 item.style.transform = 'translateX(5px)';
             });
@@ -340,7 +339,7 @@
             });
         });
 
-        // Efecto de carga inicial
+      
         document.addEventListener('DOMContentLoaded', () => {
             const logo = document.querySelector('.logo-container');
             setTimeout(() => {
