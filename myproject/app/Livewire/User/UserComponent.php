@@ -25,33 +25,32 @@ class UserComponent extends Component
     }
 
     public function clearFilter()
-{
-    $this->keyWord = '';
-    $this->resetPage();
-}
-public function someMethod()
-{
-    $this->dispatch('userCreated');
-    $this->dispatch('userUpdated');
-    $this->dispatch('userDeleted');
-}
-public function filteredUsers()
-{
-    $keyWord = '%' . $this->keyWord . '%';
+    {
+        $this->keyWord = '';
+        $this->resetPage();
+    }
+    public function someMethod()
+    {
+        $this->dispatch('userCreated');
+        $this->dispatch('userUpdated');
+        $this->dispatch('userDeleted');
+    }
+    public function filteredUsers()
+    {
+        $keyWord = '%' . $this->keyWord . '%';
 
-    return User::where('Removed', 0)
-        ->where(function ($query) use ($keyWord) {
-            $query->orWhere('User_ID', 'LIKE', $keyWord)
-                
-                  ->orWhere('User_FirstName', 'LIKE', $keyWord)
-                  ->orWhere('User_LastName', 'LIKE', $keyWord)
-                  ->orWhere('User_Address', 'LIKE', $keyWord)
-                  ->orWhere('User_Phone', 'LIKE', $keyWord)
-                  ->orWhere('User_Email', 'LIKE', $keyWord);
-        })
-        ->paginate(10);
-}
-    
+        return User::where('Removed', 0)
+            ->where(function ($query) use ($keyWord) {
+                $query->orWhere('User_ID', 'LIKE', $keyWord)                    
+                    ->orWhere('User_FirstName', 'LIKE', $keyWord)
+                    ->orWhere('User_LastName', 'LIKE', $keyWord)
+                    ->orWhere('User_Address', 'LIKE', $keyWord)
+                    ->orWhere('User_Phone', 'LIKE', $keyWord)
+                    ->orWhere('User_Email', 'LIKE', $keyWord);
+            })
+            ->paginate(10);
+    }
+        
     public function render()
     {
         return view('livewire.user.user-component', [

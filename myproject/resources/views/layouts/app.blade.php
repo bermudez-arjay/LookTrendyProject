@@ -231,6 +231,16 @@
                                         <span>Clientes</span>
                                     </a>
                                 </div>
+                                <div x-show="open && expanded" x-collapse 
+                                    class="ml-10 pl-2 space-y-1 mt-1 animate-fadeIn">
+                                    <a href="{{ route('proveedores') }}" 
+                                    class="flex items-center p-2 rounded-lg hover:bg-amber-50 text-sm transition-all"
+                                    wire:navigate>
+                                        <i class="fas fa-truck text-amber-500 mr-2"></i>
+                                        <span>Proveedores</span>
+                                    </a>
+                                    
+                                </div>
                             </div>
                     @endif
                 @endauth
