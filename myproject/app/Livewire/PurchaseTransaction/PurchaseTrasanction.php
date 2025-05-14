@@ -18,21 +18,52 @@ use Livewire\Component;
 
 class PurchaseTrasanction extends Component
 {
-    public $users, $suppliers, $products,$paymentsType;
+    public $users, $suppliers, $products, $paymentsType;
     public $userId;
-      public $payment_type_id;
-      public $selectedUserId, $selectedSupplierId,$SelectpaymentsTypes;
+    public $payment_type_id;
+    public $selectedUserId, $selectedSupplierId, $SelectpaymentsTypes;
     public $transactionType = 'Compra';
- public $showProductModal = false;
+    public $showProductModal = false;
     public $productList = [];
     public $selectedProductId, $quantity, $unitPrice, $tax = 0.15; // impuesto fijo
 
     protected $rules = [
         'selectedUserId' => 'required|exists:users,User_ID',
-        'payment_type_id' => 'required|exists:payment_types,Payment_Type_ID',
         'selectedSupplierId' => 'required|exists:suppliers,Supplier_ID',
+        'SelectpaymentsTypes' => 'required|exists:payment_types,Payment_Type_ID',
+        'productList' => 'required|array|min:1',
+        'productList.*.product_id' => 'required|exists:products,Product_ID',
+        'productList.*.quantity' => 'required|numeric|min:1',
+        'productList.*.unit_price' => 'required|numeric|min:0.01',
     ];
 
+    protected function messages()
+    {
+        return [
+            'selectedUserId.required' => 'El usuario es requerido',
+            'selectedUserId.exists' => 'El usuario seleccionado no es válido',
+
+            'selectedSupplierId.required' => 'Debe seleccionar un proveedor',
+            'selectedSupplierId.exists' => 'El proveedor seleccionado no es válido',
+
+            'SelectpaymentsTypes.required' => 'Debe seleccionar un tipo de pago',
+            'SelectpaymentsTypes.exists' => 'El tipo de pago seleccionado no es válido',
+
+            'productList.required' => 'Debe agregar al menos un producto',
+            'productList.min' => 'Debe agregar al menos un producto',
+
+            'productList.*.product_id.required' => 'El producto es requerido',
+            'productList.*.product_id.exists' => 'El producto seleccionado no es válido',
+
+            'productList.*.quantity.required' => 'La cantidad es requerida',
+            'productList.*.quantity.numeric' => 'La cantidad debe ser un número',
+            'productList.*.quantity.min' => 'La cantidad debe ser al menos 1',
+
+            'productList.*.unit_price.required' => 'El precio unitario es requerido',
+            'productList.*.unit_price.numeric' => 'El precio unitario debe ser un número',
+            'productList.*.unit_price.min' => 'El precio unitario debe ser mayor a 0',
+        ];
+    }
     public function mount()
     {
         $this->userId = Auth::user()->User_ID;  // CORREGIDO
@@ -48,11 +79,16 @@ class PurchaseTrasanction extends Component
         $this->validate([
             'selectedProductId' => 'required|exists:products,Product_ID',
             'quantity' => 'required|numeric|min:1',
-            'unitPrice' => 'required|numeric|min:0',
+            'unitPrice' => 'required|numeric|min:0.01',
+        ], [
+            'selectedProductId.required' => 'Seleccione un producto',
+            'quantity.min' => 'La cantidad debe ser al menos 1',
+            'unitPrice.min' => 'El precio debe ser mayor a 0',
         ]);
 
         $product = Product::find($this->selectedProductId);
-        if (!$product) return;
+        if (!$product)
+            return;
 
         $subtotal = $this->quantity * $this->unitPrice;
         $totalWithTax = $subtotal + ($subtotal * $this->tax);
@@ -62,6 +98,7 @@ class PurchaseTrasanction extends Component
                 $item['quantity'] += $this->quantity;
                 $item['subtotal'] = $item['quantity'] * $item['unit_price'];
                 $item['total_with_tax'] = $item['subtotal'] + ($item['subtotal'] * $this->tax);
+                $this->showProductModal = false;
                 $this->resetInputs();
                 return;
             }
@@ -75,8 +112,9 @@ class PurchaseTrasanction extends Component
             'subtotal' => $subtotal,
             'tax' => $this->tax,
             'total_with_tax' => $totalWithTax
+
         ];
-         $this->showProductModal = false;
+        $this->showProductModal = false;
         $this->resetInputs();
     }
 
@@ -148,17 +186,17 @@ class PurchaseTrasanction extends Component
                 }
 
                 $inventory->save();
-            
+
             }
-             Transaction::create([
-                    'Supplier_ID' => $this->selectedSupplierId,
-                    'User_ID' => $this->selectedUserId,
-                    'Time_ID' => $time->Time_ID,
-                    'Total' => $total,
-                    'Transaction_Type' => $this->transactionType,
-                    'Purchase_ID' => $purchase->Purchase_ID,
-                    'Payment_Type_ID' => $this->SelectpaymentsTypes,
-                ]);
+            Transaction::create([
+                'Supplier_ID' => $this->selectedSupplierId,
+                'User_ID' => $this->selectedUserId,
+                'Time_ID' => $time->Time_ID,
+                'Total' => $total,
+                'Transaction_Type' => $this->transactionType,
+                'Purchase_ID' => $purchase->Purchase_ID,
+                'Payment_Type_ID' => $this->SelectpaymentsTypes,
+            ]);
 
             $this->resetAll();
             session()->flash('success', 'Compra registrada exitosamente.');
