@@ -194,7 +194,7 @@
         <!-- Encabezado con logo y título alineados -->
         <div class="header">
             <div class="logo-container">
-                <img src="./logosinfondo.png" alt="Logo de la empresa" class="logo">
+                <img src="./logotipo.png" alt="Logo de la empresa" class="logo">
             </div>
             <div class="header-content">
                 <div class="receipt-title">
