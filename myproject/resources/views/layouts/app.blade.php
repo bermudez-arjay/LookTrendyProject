@@ -8,7 +8,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script src="{{ mix('/js/app.js') }}"></script>
     <style>
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
@@ -231,6 +234,16 @@
                                         <span>Clientes</span>
                                     </a>
                                 </div>
+                                <div x-show="open && expanded" x-collapse 
+                                    class="ml-10 pl-2 space-y-1 mt-1 animate-fadeIn">
+                                    <a href="{{ route('proveedores') }}" 
+                                    class="flex items-center p-2 rounded-lg hover:bg-amber-50 text-sm transition-all"
+                                    wire:navigate>
+                                        <i class="fas fa-truck text-amber-500 mr-2"></i>
+                                        <span>Proveedores</span>
+                                    </a>
+                                    
+                                </div>
                             </div>
                     @endif
                 @endauth
@@ -250,7 +263,7 @@
                     </div>
                     <div x-show="open && expanded" x-collapse 
                          class="ml-10 pl-2 space-y-1 mt-1 animate-fadeIn">
-                        <a href="#" class="flex items-center p-2 rounded-lg hover:bg-rose-50 text-sm transition-all"
+                        <a href="{{route('inventario')}}" class="flex items-center p-2 rounded-lg hover:bg-rose-50 text-sm transition-all"
                            wire:navigate>
                             <i class="fas fa-clipboard-list text-rose-500 mr-2"></i>
                             <span>Inventario</span>
@@ -302,9 +315,9 @@
         </div>
     </div>
     
-    <!-- Main Content -->
+ 
     <div class="flex-1 flex flex-col overflow-hidden">
-        <!-- Page Content -->
+   
         <main class="flex-1 overflow-y-auto p-6 page-transition">
             {{ $slot }}
         </main>
@@ -312,7 +325,7 @@
 
     @livewireScripts
     <script>
-        // Transición mejorada al cambiar de página
+ 
         document.addEventListener('livewire:navigating', () => {
             const main = document.querySelector('main');
             main.style.opacity = '0';
@@ -327,8 +340,7 @@
             }, 50);
         });
 
-        // Efecto de hover en los elementos del menú
-        document.querySelectorAll('.menu-item').forEach(item => {
+           document.querySelectorAll('.menu-item').forEach(item => {
             item.addEventListener('mouseenter', () => {
                 item.style.transform = 'translateX(5px)';
             });
@@ -337,7 +349,7 @@
             });
         });
 
-        // Efecto de carga inicial
+      
         document.addEventListener('DOMContentLoaded', () => {
             const logo = document.querySelector('.logo-container');
             setTimeout(() => {

@@ -32,6 +32,11 @@ class CreateCredit extends Component
     public $product_id, $quantity, $payment_date, $payment_amount;
 
     protected $listeners = ['selectProductChanged', 'selectClientChanged', 'selectPaymentTypeChanged', 'selectTermChanged', 'product-changed' => 'updateProductInfo'];
+    public function show($creditId)
+    {
+        $credit = Credit::with(['client', 'payments'])->findOrFail($creditId);
+        return view('credits.show', compact('credit'));
+    }
     protected function rules()
     {
         return [
@@ -82,10 +87,16 @@ class CreateCredit extends Component
     {
         $this->start_date = date('Y-m-d');
         $this->due_date = date('Y-m-d', strtotime('+30 days'));
-        $this->clients = Client::all();
+        $this->clients = Client::where('Removed',0)->whereDoesntHave('credits')
+                     ->orWhereHas('credits', function($query) {
+                         $query->where('credit_status', 'Cancelado');
+                    })
+                     ->get();
+        
         $this->products = Product::whereHas('inventories', function ($query) {
             $query->where('Current_Stock', '>=', 10);
         })->get();
+        
         $this->paymentTypes = PaymentType::all();
         $this->term = null;
         $this->updatedProductId(null);
