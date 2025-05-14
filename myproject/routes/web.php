@@ -37,6 +37,7 @@ Route::get('/credits/{credit}', [CreateCredit::class, 'show'])->name('credits.sh
      ->name('payments.receipt');
    
 // });
+Route::get('/inventario', InventoryDashboard::class)->name('inventario');
 Route::get('/proveedores', SupplierComponent::class)->name('proveedores');
 // Ruta de login
 Route::get('/login', Login::class)->name('login');//no tocar
