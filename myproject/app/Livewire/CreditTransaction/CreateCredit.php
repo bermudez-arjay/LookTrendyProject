@@ -32,6 +32,25 @@ class CreateCredit extends Component
     public $product_id, $quantity, $payment_date, $payment_amount;
 
     protected $listeners = ['selectProductChanged', 'selectClientChanged', 'selectPaymentTypeChanged', 'selectTermChanged', 'product-changed' => 'updateProductInfo'];
+    public function showSuccessAlert($message)
+{
+    $this->dispatch('swal-toast', [
+        'type' => 'success',
+        'title' => 'Éxito',
+        'message' => $message,
+        'timer' => 3000
+    ]);
+}
+
+public function showErrorAlert($message)
+{
+    $this->dispatch('swal-toast', [
+        'type' => 'error',
+        'title' => 'Error',
+        'message' => $message,
+        'timer' => 5000
+    ]);
+}
     public function show($creditId)
     {
         $credit = Credit::with(['client', 'payments'])->findOrFail($creditId);
@@ -320,10 +339,11 @@ class CreateCredit extends Component
             $this->recalculateTotalWithInterest();
             $this->recalculateQuotaAmount();
 
-            $this->dispatch('swal:success', [
+            $this->dispatch('swal-toast', [
+                'type' => 'success', 
                 'title' => 'Producto eliminado',
-                'message' => 'El producto fue eliminado correctamente.',
-                'timer' => 2000
+                'message' => 'Producto eliminado correctamente',
+                'timer' => 3000 
             ]);
 
             $this->dispatch('resetSelect2');
@@ -394,20 +414,19 @@ class CreateCredit extends Component
             ]);
 
             DB::commit();
-
-            $this->dispatch('swal:success', [
-                'title' => 'Éxito',
-                'message' => 'Crédito creado correctamente',
-                'timer' => 3000
-            ]);
+           
+    
             
             $this->resetForm();
+            $this->showSuccessAlert('El crédito se ha guardado correctamente');
         }  catch (\Illuminate\Validation\ValidationException $e) {
             DB::rollBack();
-                $this->dispatch('swal:error', [
-                    'title' => 'Error de validación',
-                    'message' => implode('<br>', $e->validator->errors()->all())
-                ]);
+            $this->dispatch('swal-toast', [
+                'type' => 'error', 
+                'title' => 'Título',
+                'message' => 'Mensaje',
+                'timer' => 3000 
+            ]);
                 return;
         }
     }

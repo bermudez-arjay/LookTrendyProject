@@ -222,64 +222,69 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script> 
+<script>
 document.addEventListener('livewire:initialized', () => {
-    Livewire.on('swal:success', (event) => {
-        Swal.fire({
-            icon: 'success',
-            title: event.title || 'Éxito',
-            text: event.message,
-            timer: event.timer || 3000,
-            showConfirmButton: !event.timer
+ 
+    Livewire.on('swal-toast', (event) => {
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: event.timer,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer)
+                toast.addEventListener('mouseleave', Swal.resumeTimer)
+            }
         });
-    });
-
-    Livewire.on('swal:error', (event) => {
-        Swal.fire({
-            icon: 'error',
-            title: event.title || 'Error',
+        
+        Toast.fire({
+            icon: event.type,
+            title: event.title,
             text: event.message
         });
     });
-});
-window.addEventListener('swal:success', event => {
-    Swal.fire({
-        icon: 'success',
-        title: event.detail.title || 'Éxito',
-        text: event.detail.message,
-        timer: event.detail.timer || 3000,
-        showConfirmButton: !event.detail.timer,
-        confirmButtonColor: '#3085d6',
-    }).then((result) => {
-        if (event.detail.callback) {
-            eval(event.detail.callback);
+   
+    Livewire.on('swal-confirm', (event) => {
+        Swal.fire({
+            title: event.title,
+            text: event.message,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Sí, continuar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Livewire.dispatch(event.method, event.params || []);
+            }
+        });
+    });
+   
+    Livewire.on('validation-failed', (errors) => {
+        let errorMessages = '';
+        
+        for (const field in errors) {
+            errorMessages += `<li>${errors[field][0]}</li>`;
         }
+        
+        Swal.fire({
+            icon: 'error',
+            title: 'Error de validación',
+            html: `<ul class="text-left pl-5">${errorMessages}</ul>`,
+            confirmButtonText: 'Entendido'
+        });
     });
 });
 
-window.addEventListener('swal:error', event => {
-    Swal.fire({
-        icon: 'error',
-        title: event.detail.title || 'Error',
-        text: event.detail.message,
-        confirmButtonColor: '#d33',
+$(document).ready(function() {
+    $('#client_id, #payment_type_id, #product_id').select2({
+        width: '100%'
     });
-});
-
-window.addEventListener('swal:confirm', event => {
-    Swal.fire({
-        icon: 'question',
-        title: event.detail.title || 'Confirmación',
-        text: event.detail.message,
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: event.detail.confirmText || 'Sí, continuar',
-        cancelButtonText: event.detail.cancelText || 'Cancelar',
-    }).then((result) => {
-        if (result.isConfirmed) {
-            Livewire.dispatch(event.detail.method, event.detail.params || []);
-        }
+  
+    $('#client_id, #payment_type_id, #product_id').on('change', function(e) {
+        @this.set($(this).attr('id'), $(this).val());
     });
 });
 </script>
