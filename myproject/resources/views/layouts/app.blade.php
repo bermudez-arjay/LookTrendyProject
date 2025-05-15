@@ -8,7 +8,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script src="{{ mix('/js/app.js') }}"></script>
     <style>
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
@@ -135,33 +138,38 @@
                     </div>
                 </a>
                 
-                <!-- Compras -->
-                <div x-data="{ open: false }">
-                    <div @click="open = !open; expanded = true; activeMenu = 'compras'" 
-                         class="relative flex items-center p-3 rounded-xl hover:bg-white hover:shadow-md transition-all cursor-pointer group menu-item nav-link overflow-hidden"
-                         :class="{'active-menu-item': activeMenu === 'compras'}">
-                        <div class="w-8 h-8 flex items-center justify-center bg-blue-100 rounded-lg group-hover:bg-blue-200 transition-all">
-                            <i class="fas fa-shopping-cart text-blue-600 group-hover:text-blue-700"></i>
+                @auth
+                    @if(Auth::user()->User_Role === 'Administrador')
+                        <!-- Compras -->
+                        <div x-data="{ open: false }">
+                            <div @click="open = !open; expanded = true; activeMenu = 'compras'" 
+                                class="relative flex items-center p-3 rounded-xl hover:bg-white hover:shadow-md transition-all cursor-pointer group menu-item nav-link overflow-hidden"
+                                :class="{'active-menu-item': activeMenu === 'compras'}">
+                                <div class="w-8 h-8 flex items-center justify-center bg-blue-100 rounded-lg group-hover:bg-blue-200 transition-all">
+                                    <i class="fas fa-shopping-cart text-blue-600 group-hover:text-blue-700"></i>
+                                </div>
+                                <span x-show="expanded" class="ml-3 text-sm font-medium text-purple-800 flex-1 animate-fadeIn">Compras</span>
+                                <i x-show="expanded" class="fas fa-chevron-down text-xs transition-transform duration-200 text-purple-500"
+                                :class="{'rotate-180': open}"></i>
+                            </div>
+                            <div x-show="open && expanded" x-collapse 
+                                class="ml-10 pl-2 space-y-1 mt-1 animate-fadeIn">
+                                <a href="#" class="flex items-center p-2 rounded-lg hover:bg-blue-50 text-sm transition-all"
+                                wire:navigate>
+                                    <i class="fas fa-chart-line text-blue-500 mr-2"></i>
+                                    <span>Dashboard</span>
+                                </a>
+                                <a href="{{ route('transaction') }}" 
+                                class="flex items-center p-2 rounded-lg hover:bg-blue-50 text-sm transition-all"
+                                wire:navigate>
+                                    <i class="fas fa-plus-circle text-blue-500 mr-2"></i>
+                                    <span>Nueva Compra</span>
+                                </a>
+                            </div>
                         </div>
-                        <span x-show="expanded" class="ml-3 text-sm font-medium text-purple-800 flex-1 animate-fadeIn">Compras</span>
-                        <i x-show="expanded" class="fas fa-chevron-down text-xs transition-transform duration-200 text-purple-500"
-                           :class="{'rotate-180': open}"></i>
-                    </div>
-                    <div x-show="open && expanded" x-collapse 
-                         class="ml-10 pl-2 space-y-1 mt-1 animate-fadeIn">
-                        <a href="#" class="flex items-center p-2 rounded-lg hover:bg-blue-50 text-sm transition-all"
-                           wire:navigate>
-                            <i class="fas fa-chart-line text-blue-500 mr-2"></i>
-                            <span>Dashboard</span>
-                        </a>
-                        <a href="{{ route('transaction') }}" 
-                           class="flex items-center p-2 rounded-lg hover:bg-blue-50 text-sm transition-all"
-                           wire:navigate>
-                            <i class="fas fa-plus-circle text-blue-500 mr-2"></i>
-                            <span>Nueva Compra</span>
-                        </a>
-                    </div>
-                </div>
+                    @endif
+                @endauth
+                
                 
                 <!-- Crédito -->
                 <div x-data="{ open: false }">
@@ -197,34 +205,49 @@
                     </div>
                 </div>
                 
-                <!-- Gestión de Usuarios -->
-                <div x-data="{ open: false }">
-                    <div @click="open = !open; expanded = true; activeMenu = 'usuarios'" 
-                         class="relative flex items-center p-3 rounded-xl hover:bg-white hover:shadow-md transition-all cursor-pointer group menu-item nav-link overflow-hidden"
-                         :class="{'active-menu-item': activeMenu === 'usuarios'}">
-                        <div class="w-8 h-8 flex items-center justify-center bg-amber-100 rounded-lg group-hover:bg-amber-200 transition-all">
-                            <i class="fas fa-users text-amber-600 group-hover:text-amber-700"></i>
-                        </div>
-                        <span x-show="expanded" class="ml-3 text-sm font-medium text-purple-800 flex-1 animate-fadeIn">Usuarios</span>
-                        <i x-show="expanded" class="fas fa-chevron-down text-xs transition-transform duration-200 text-purple-500"
-                           :class="{'rotate-180': open}"></i>
-                    </div>
-                    <div x-show="open && expanded" x-collapse 
-                         class="ml-10 pl-2 space-y-1 mt-1 animate-fadeIn">
-                        <a href="{{ route('usuarios') }}" 
-                           class="flex items-center p-2 rounded-lg hover:bg-amber-50 text-sm transition-all"
-                           wire:navigate>
-                            <i class="fas fa-user-cog text-amber-500 mr-2"></i>
-                            <span>Usuarios</span>
-                        </a>
-                        <a href="{{ route('clientes') }}" 
-                           class="flex items-center p-2 rounded-lg hover:bg-amber-50 text-sm transition-all"
-                           wire:navigate>
-                            <i class="fas fa-users text-amber-500 mr-2"></i>
-                            <span>Clientes</span>
-                        </a>
-                    </div>
-                </div>
+                @auth
+                    @if(Auth::user()->User_Role === 'Administrador')
+                        <!-- Gestión de Usuarios -->
+                    <div x-data="{ open: false }">
+                                <div @click="open = !open; expanded = true; activeMenu = 'usuarios'" 
+                                    class="relative flex items-center p-3 rounded-xl hover:bg-white hover:shadow-md transition-all cursor-pointer group menu-item nav-link overflow-hidden"
+                                    :class="{'active-menu-item': activeMenu === 'usuarios'}">
+                                    <div class="w-8 h-8 flex items-center justify-center bg-amber-100 rounded-lg group-hover:bg-amber-200 transition-all">
+                                        <i class="fas fa-users text-amber-600 group-hover:text-amber-700"></i>
+                                    </div>
+                                    <span x-show="expanded" class="ml-3 text-sm font-medium text-purple-800 flex-1 animate-fadeIn">Usuarios</span>
+                                    <i x-show="expanded" class="fas fa-chevron-down text-xs transition-transform duration-200 text-purple-500"
+                                    :class="{'rotate-180': open}"></i>
+                                </div>
+                                <div x-show="open && expanded" x-collapse 
+                                    class="ml-10 pl-2 space-y-1 mt-1 animate-fadeIn">
+                                    <a href="{{ route('usuarios') }}" 
+                                    class="flex items-center p-2 rounded-lg hover:bg-amber-50 text-sm transition-all"
+                                    wire:navigate>
+                                        <i class="fas fa-user-cog text-amber-500 mr-2"></i>
+                                        <span>Usuarios</span>
+                                    </a>
+                                    <a href="{{ route('clientes') }}" 
+                                    class="flex items-center p-2 rounded-lg hover:bg-amber-50 text-sm transition-all"
+                                    wire:navigate>
+                                        <i class="fas fa-users text-amber-500 mr-2"></i>
+                                        <span>Clientes</span>
+                                    </a>
+                                </div>
+                                <div x-show="open && expanded" x-collapse 
+                                    class="ml-10 pl-2 space-y-1 mt-1 animate-fadeIn">
+                                    <a href="{{ route('proveedores') }}" 
+                                    class="flex items-center p-2 rounded-lg hover:bg-amber-50 text-sm transition-all"
+                                    wire:navigate>
+                                        <i class="fas fa-truck text-amber-500 mr-2"></i>
+                                        <span>Proveedores</span>
+                                    </a>
+                                    
+                                </div>
+                            </div>
+                    @endif
+                @endauth
+                
                 
                 <!-- Inventario -->
                 <div x-data="{ open: false }">
@@ -240,7 +263,7 @@
                     </div>
                     <div x-show="open && expanded" x-collapse 
                          class="ml-10 pl-2 space-y-1 mt-1 animate-fadeIn">
-                        <a href="#" class="flex items-center p-2 rounded-lg hover:bg-rose-50 text-sm transition-all"
+                        <a href="{{route('inventario')}}" class="flex items-center p-2 rounded-lg hover:bg-rose-50 text-sm transition-all"
                            wire:navigate>
                             <i class="fas fa-clipboard-list text-rose-500 mr-2"></i>
                             <span>Inventario</span>
@@ -253,18 +276,24 @@
                         </a>
                     </div>
                 </div>
+
+                @auth
+                        @if(Auth::user()->User_Role === 'Administrador')
+                            <!-- Configuración -->
+                            <a href="#" 
+                            x-on:click="activeMenu = 'configuracion'"
+                            class="relative flex items-center p-3 rounded-xl hover:bg-white hover:shadow-md transition-all group menu-item nav-link overflow-hidden"
+                            :class="activeMenu === 'configuracion' ? 'active-menu-item' : ''"
+                            wire:navigate>
+                                <div class="w-8 h-8 flex items-center justify-center bg-indigo-100 rounded-lg group-hover:bg-indigo-200 transition-all">
+                                    <i class="fas fa-cog text-indigo-600 group-hover:text-indigo-700"></i>
+                                </div>
+                                <span x-show="expanded" class="ml-3 text-sm font-medium text-purple-800 animate-fadeIn">Configuración</span>
+                            </a>
+                        @endif
+                @endauth
                 
-                <!-- Configuración -->
-                <a href="#" 
-                   x-on:click="activeMenu = 'configuracion'"
-                   class="relative flex items-center p-3 rounded-xl hover:bg-white hover:shadow-md transition-all group menu-item nav-link overflow-hidden"
-                   :class="activeMenu === 'configuracion' ? 'active-menu-item' : ''"
-                   wire:navigate>
-                    <div class="w-8 h-8 flex items-center justify-center bg-indigo-100 rounded-lg group-hover:bg-indigo-200 transition-all">
-                        <i class="fas fa-cog text-indigo-600 group-hover:text-indigo-700"></i>
-                    </div>
-                    <span x-show="expanded" class="ml-3 text-sm font-medium text-purple-800 animate-fadeIn">Configuración</span>
-                </a>
+                
             </nav>
             
             <!-- User Profile (Bottom) -->
@@ -275,8 +304,8 @@
                         <div class="absolute -bottom-1 -right-1 bg-green-400 rounded-full w-3 h-3 border-2 border-white"></div>
                     </div>
                     <div class="ml-3">
-                        <p class="text-sm font-medium text-purple-800">Nombre Usuario</p>
-                        <p class="text-xs text-purple-600">Admin</p>
+                        <p class="text-sm font-medium text-purple-800">{{ Auth::user()->User_FirstName }}</p>
+                        <p class="text-xs text-purple-600">{{ Auth::user()->User_Role }}</p>
                     </div>
                     <button class="ml-auto text-purple-500 hover:text-purple-700 transition-transform hover:rotate-90">
                         <i class="fas fa-ellipsis-v"></i>

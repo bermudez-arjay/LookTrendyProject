@@ -19,32 +19,34 @@ class ProductComponent extends Component
         info("¡Función llamada desde otro componente!");
     }
     public $keyWord;
+    
     public function clearFilter()
-{
-    $this->searchName = '';
-    $this->resetPage();
-}
-public function someMethod()
-{
-    $this->dispatch('productCreated');
-    $this->dispatch('productUpdated');
-    $this->dispatch('productDeleted');
-}
+    {
+        $this->keyWord = '';  
+        $this->resetPage();
+    }
 
-public function filteredProducts()
-{
-    $keyWord = '%' . $this->keyWord . '%';
+    public function someMethod()
+    {
+        $this->dispatch('productCreated');
+        $this->dispatch('productUpdated');
+        $this->dispatch('productDeleted');
+    }
 
-    return Product::where('Removed', 0)
-        ->where(function ($query) use ($keyWord) {
-            $query->where('Product_ID', 'LIKE', $keyWord)
-            ->orWhere('Product_Name', 'LIKE', $keyWord)
-            ->orWhere('Description', 'LIKE', $keyWord)
-            ->orWhere('Category', 'LIKE', $keyWord)
-            ->orWhere('Unit_Price', 'LIKE', $keyWord);
-        })
-        ->paginate(10);
-}
+    public function filteredProducts()
+    {
+        $keyWord = '%' . $this->keyWord . '%';
+
+        return Product::where('Removed', 0)
+            ->where(function ($query) use ($keyWord) {
+                $query->where('Product_ID', 'LIKE', $keyWord)
+                ->orWhere('Product_Name', 'LIKE', $keyWord)
+                ->orWhere('Description', 'LIKE', $keyWord)
+                ->orWhere('Category', 'LIKE', $keyWord)
+                ->orWhere('Unit_Price', 'LIKE', $keyWord);
+            })
+            ->paginate(10);
+    }
 
     public function render()
 

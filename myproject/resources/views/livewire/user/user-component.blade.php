@@ -27,16 +27,18 @@
             <p class="text-sm text-gray-500 mb-6 mt-[-3px]">En la siguiente tabla puede observar la lista de usuarios</p>
             <div class="flex space-x-2 items-center">
                 <input 
-                    id="searchEmail"
+                    id="searchName"
                     type="text" 
-                    placeholder="Buscar por Email..." 
+                    placeholder="Buscar Usuarios..." 
                     class="border border-gray-300 rounded-lg px-4 py-2 w-full max-w-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     wire:model.live='keyWord'
                 >
                 
                 <button 
-                class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600"
                 wire:click="clearFilter"
+                onclick="document.getElementById('searchName').value = ''"
+                class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600"              
+                
             >
                 Limpiar
             </button>
