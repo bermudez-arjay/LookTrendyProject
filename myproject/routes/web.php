@@ -13,6 +13,7 @@ use App\Livewire\Products\ProductComponent;
 use App\Livewire\CreditTransaction\CreateCredit;
 use Illuminate\Support\Facades\Route;
 use App\Livewire\PurchaseTransaction\PurchaseTrasanction;
+use App\Livewire\DatabaseBackup\DatabaseBackup;
 
 use Illuminate\Support\Facades\Session;
 /*
@@ -31,11 +32,12 @@ Route::get("/", function () {
     return view('welcome'); //no tocar
 });
 
+
 // Logout de la aplicación
 Route::get('/login', Login::class)->name('login');//no tocar
-Route::get('/resetear-Contraseña/{token}', ResetPassword::class)->middleware('guest')->name('password.reset');
+Route::get('/resetear-Contraseña/{token}', ResetPassword::class)->name('password.reset');
 Route::get('/recuperar', ForgotPassword::class)->name('recuperar');
-
+Route::get('/backup', DatabaseBackup::class)->name('backup');
 // Grupo de rutas protegidas por autenticación 
 Route::middleware(['auth'])->group(function () {
 

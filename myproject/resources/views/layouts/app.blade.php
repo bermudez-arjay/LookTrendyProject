@@ -279,18 +279,36 @@
 
                 @auth
                         @if(Auth::user()->User_Role === 'Administrador')
-                            <!-- Configuración -->
-                            <a href="#" 
-                            x-on:click="activeMenu = 'configuracion'"
-                            class="relative flex items-center p-3 rounded-xl hover:bg-white hover:shadow-md transition-all group menu-item nav-link overflow-hidden"
-                            :class="activeMenu === 'configuracion' ? 'active-menu-item' : ''"
-                            wire:navigate>
-                                <div class="w-8 h-8 flex items-center justify-center bg-indigo-100 rounded-lg group-hover:bg-indigo-200 transition-all">
-                                    <i class="fas fa-cog text-indigo-600 group-hover:text-indigo-700"></i>
-                                </div>
-                                <span x-show="expanded" class="ml-3 text-sm font-medium text-purple-800 animate-fadeIn">Configuración</span>
-                            </a>
-                        @endif
+    <!-- Configuración con submenú -->
+    <div x-data="{ open: activeMenu === 'configuracion' }">
+        <!-- Botón principal -->
+        <a href="#" 
+           x-on:click="open = !open; activeMenu = 'configuracion'"
+           class="relative flex items-center p-3 rounded-xl hover:bg-white hover:shadow-md transition-all group menu-item nav-link overflow-hidden"
+           :class="activeMenu === 'configuracion' ? 'active-menu-item' : ''"
+           wire:navigate>
+            <div class="w-8 h-8 flex items-center justify-center bg-indigo-100 rounded-lg group-hover:bg-indigo-200 transition-all">
+                <i class="fas fa-cog text-indigo-600 group-hover:text-indigo-700"></i>
+            </div>
+            <span x-show="expanded" class="ml-3 text-sm font-medium text-purple-800 animate-fadeIn">Configuración</span>
+            <i x-show="expanded" class="fas fa-chevron-down ml-auto text-xs text-purple-800 transition-transform duration-200" 
+               :class="{'transform rotate-180': open}"></i>
+        </a>
+        
+        <!-- Submenú -->
+       <div x-show="open && expanded" x-collapse class="pl-4 mt-1 space-y-1">
+    <a href="{{ route('backup') }}" 
+       x-on:click="activeMenu = 'backup'"
+       class="flex items-center p-2 text-sm font-medium text-purple-700 rounded-lg hover:bg-indigo-50 transition-all"
+       :class="activeMenu === 'backup' ? 'bg-indigo-100' : ''"
+       wire:navigate>
+        <i class="fas fa-cloud-upload-alt text-xs mr-3 ml-1"></i>
+        <span>Respaldar Archivos</span>
+    </a>
+</div>
+
+    </div>
+@endif
                 @endauth
                 
                 
