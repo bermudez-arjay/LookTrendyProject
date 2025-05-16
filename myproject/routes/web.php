@@ -3,7 +3,6 @@
 use App\Livewire\Auth\Login;
 use App\Livewire\Auth\ForgotPassword;
 use App\Livewire\Auth\ResetPassword;
-use App\Livewire\Clients\Clients;
 use App\Livewire\Inicio\Inicio;
 use App\Livewire\Clients\ClientComponent;
 use App\Livewire\Supplier\SupplierComponent;
@@ -14,6 +13,7 @@ use App\Livewire\Products\ProductComponent;
 use App\Livewire\CreditTransaction\CreateCredit;
 use Illuminate\Support\Facades\Route;
 use App\Livewire\PurchaseTransaction\PurchaseTrasanction;
+use App\Livewire\DatabaseBackup\DatabaseBackup;
 
 use Illuminate\Support\Facades\Session;
 /*
@@ -32,11 +32,12 @@ Route::get("/", function () {
     return view('welcome'); //no tocar
 });
 
+
 // Logout de la aplicación
 Route::get('/login', Login::class)->name('login');//no tocar
-Route::get('/resetear-Contraseña/{token}', ResetPassword::class)->middleware('guest')->name('password.reset');
+Route::get('/resetear-Contraseña/{token}', ResetPassword::class)->name('password.reset');
 Route::get('/recuperar', ForgotPassword::class)->name('recuperar');
-
+Route::get('/backup', DatabaseBackup::class)->name('backup');
 // Grupo de rutas protegidas por autenticación 
 Route::middleware(['auth'])->group(function () {
 
@@ -51,16 +52,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/clientes', ClientComponent::class)->name('clientes');
     Route::get('/proveedores', SupplierComponent::class)->name('proveedores');
 
-});
-Route::middleware(['auth'])->group(function () {
-    Route::get('/proveedores', SupplierComponent::class)->name('proveedores');
-
-});
-Route::middleware(['auth'])->group(function () {
+    // Productos,Inventario 
     Route::get('/productos', ProductComponent::class)->name('productos');
+    Route::get('/inventario', InventoryDashboard::class)->name('inventario');
 
-});
-Route::middleware(['auth'])->group(function () {
+    //Créditos
     Route::get('/creditos', CreateCredit::class)->name('creditos');
     Route::get('/credits/{credit}', [CreateCredit::class, 'show'])->name('credits.show');
 

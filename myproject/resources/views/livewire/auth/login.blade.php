@@ -5,9 +5,18 @@
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         @vite('resources/css/app.css')
+        <style>
+     .fashion-bg {
+      background-image: url('https://images.unsplash.com/photo-1483985988355-763728e1935b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80');
+      background-size: cover;
+      background-position: center;
+      background-blend-mode: overlay;
+      background-color: rgba(255, 255, 255, 0.85);
+    }
+        </style>
       </head>
       <body>
-        <div class="min-h-screen bg-gray-100 py-6 flex flex-col justify-center sm:py-12">
+        <div class="min-h-screen bg-gray-100 py-6 flex flex-col fashion-bg px-6 text-center justify-center sm:py-12">
             <div class="relative py-3 sm:max-w-xl sm:mx-auto">
                 <div class="absolute inset-0 bg-gradient-to-r from-gray-100 via-pink-200 to-gray-300 shadow-lg transform -skew-y-6 sm:skew-y-0 sm:-rotate-6 sm:rounded-3xl">
                 </div>
