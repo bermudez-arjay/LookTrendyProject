@@ -263,7 +263,7 @@
                     </div>
                     <div x-show="open && expanded" x-collapse 
                          class="ml-10 pl-2 space-y-1 mt-1 animate-fadeIn">
-                        <a href="{{route('inventario')}}" class="flex items-center p-2 rounded-lg hover:bg-rose-50 text-sm transition-all"
+                        <a href="#" class="flex items-center p-2 rounded-lg hover:bg-rose-50 text-sm transition-all"
                            wire:navigate>
                             <i class="fas fa-clipboard-list text-rose-500 mr-2"></i>
                             <span>Inventario</span>

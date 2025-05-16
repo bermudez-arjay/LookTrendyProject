@@ -9,7 +9,6 @@ use App\Livewire\Clients\ClientComponent;
 use App\Livewire\Supplier\SupplierComponent;
 use App\Livewire\Payments\PaymentComponent;
 use App\Livewire\User\UserComponent;
-use App\Livewire\Supplier\SupplierComponent;
 use App\Livewire\InventoryDashboard\InventoryDashboard;
 use App\Livewire\Products\ProductComponent;
 use App\Livewire\CreditTransaction\CreateCredit;
