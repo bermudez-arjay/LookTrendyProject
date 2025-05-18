@@ -268,61 +268,72 @@ public function updatedSearchProduct()
         })->toArray();
 }
 
-   public function addDetail($productId = null)
+public function addDetail($productId = null)
 {
-  
-    $product = Product::find($productId);
-    $quantity = $this->quantities[$productId] ?? 0;
-    $availableStock = $product->inventories->Current_Stock ?? 0;
-
-    if ($quantity > $availableStock) {
-        $this->addError("quantities.$productId", "La cantidad solicitada supera el stock disponible ($availableStock unidades).");
+   
+    if (!$productId) {
+        $this->addError('modal_error', 'Debe seleccionar un producto.');
         return;
     }
 
-   if (!$productId || !$quantity || $quantity <= 0) {
-    $this->dispatch('swal:error', [
-        'title' => 'Datos incompletos',
-        'message' => 'Debe seleccionar un producto y una cantidad válida.'
-    ]);
-    return;
-     
-}
+    $quantity = $this->quantities[$productId] ?? 0;
+    
+    if ($quantity <= 0) {
+        $this->addError('modal_error', 'Debe ingresar una cantidad válida mayor que cero.');
+        $this->addError('quantity_'.$productId, 'Cantidad inválida');
+        return;
+    }
+
     $product = Product::find($productId);
     $inventory = Inventory::where('Product_ID', $productId)->first();
     $availableStock = $inventory ? $inventory->Current_Stock : 0;
 
-    if ($quantity > $availableStock) {
-        $this->dispatch('swal:error', [
-            'title' => 'Stock insuficiente',
-            'message' => 'La cantidad supera el stock disponible.'
-        ]);
-        return;
-    }
-
-    if (!$product) {
-        $this->dispatch('swal:error', [
-            'title' => 'Producto no válido',
-            'message' => 'El producto seleccionado no existe en la base de datos.'
-        ]);
-        return;
-    }
-
+    $existingIndex = null;
+    $previousQuantity = 0;
     
-    $existingDetailIndex = collect($this->creditDetails)->search(function ($detail) use ($productId) {
-        return $detail['product_id'] == $productId;
-    });
+    foreach ($this->creditDetails as $index => $detail) {
+        if ($detail['product_id'] == $productId) {
+            $existingIndex = $index;
+            $previousQuantity = $detail['quantity'];
+            break;
+        }
+    }
 
-    $subtotal = $product->Unit_Price * $quantity;
+ 
+    $newQuantity = $previousQuantity + $quantity;
+
+  
+    if ($newQuantity > $availableStock) {
+        $remainingStock = $availableStock - $previousQuantity;
+        $message = $previousQuantity > 0 
+            ? "Ya tiene $previousQuantity unidades. Solo puede agregar $remainingStock más (stock total: $availableStock)."
+            : "La cantidad solicitada ($newQuantity) supera el stock disponible ($availableStock unidades).";
+
+        $this->addError('modal_error', $message);
+        $this->addError('quantity_'.$productId, 'Stock insuficiente');
+        return;
+    }
+
+  
+  
+    $subtotal = $product->Unit_Price * $newQuantity;
     $vat = $subtotal * 0.15;
     $total = $subtotal + $vat;
 
-    if ($existingDetailIndex !== false) {
-        $this->creditDetails[$existingDetailIndex]['quantity'] = $quantity;
-        $this->creditDetails[$existingDetailIndex]['subtotal'] = $subtotal;
-        $this->creditDetails[$existingDetailIndex]['vat'] = $vat;
-        $this->creditDetails[$existingDetailIndex]['total_with_vat'] = $total;
+    if ($existingIndex !== null) {
+     
+        $this->creditDetails[$existingIndex] = [
+            'product_id' => $product->Product_ID,
+            'product_name' => $product->Product_Name,
+            'quantity' => $newQuantity,
+            'subtotal' => $subtotal,
+            'vat' => $vat,
+            'total_with_vat' => $total,
+        ];
+        
+        $this->showSuccessAlert("Se agregaron $quantity unidades más a {$product->Product_Name} (Total: $newQuantity)");
     } else {
+       
         $this->creditDetails[] = [
             'product_id' => $product->Product_ID,
             'product_name' => $product->Product_Name,
@@ -331,30 +342,18 @@ public function updatedSearchProduct()
             'vat' => $vat,
             'total_with_vat' => $total,
         ];
+        
+      
     }
-    if ($productId === $this->product_id) {
-     
-        $this->product_id = '';
-        $this->quantity = '';
-        $this->selectedStock = 0;
-        $this->selectedPrice = 0;
-        $this->showProductModal = false;
-    } else {
-     
-        unset($this->quantities[$productId]);
-    }
-        $this->recalculateTotalAmount();
-        $this->recalculateTotalWithInterest();
-        $this->recalculateQuotaAmount();
-        $this->product_id = '';
-        $this->quantity = '';
-        $this->selectedStock = 0;
-        $this->selectedPrice = 0;
-        $this->showProductModal = false;
-        $this->dispatch('resetSelect2');
+    unset($this->quantities[$productId]);
+    $this->recalculateTotalAmount();
+    $this->recalculateTotalWithInterest();
+    $this->recalculateQuotaAmount();
+    $this->dispatch('resetSelect2');
+    $this->resetErrorBag();
+    $this->showProductModal = false;
 
-    }
-
+}
     public function removeDetail($index)
     {
         $this->dispatch('swal:confirm', [
@@ -366,7 +365,17 @@ public function updatedSearchProduct()
             'params' => [$index]
         ]);
     }
-
+public function updatedQuantities($value, $key)
+{
+    $productId = str_replace('quantities.', '', $key);
+    $availableStock = Inventory::where('Product_ID', $productId)->value('Current_Stock') ?? 0;
+    
+    if ($value > $availableStock) {
+        $this->addError('quantities.'.$productId, "No hay suficiente stock. Disponible: $availableStock");
+    } else {
+        $this->resetErrorBag('quantities.'.$productId);
+    }
+}
     public function doRemoveDetail($index)
     {
         if (isset($this->creditDetails[$index])) {

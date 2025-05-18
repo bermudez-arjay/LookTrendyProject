@@ -1,7 +1,7 @@
-<div class="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
+<div class="min-h-screen w-full bg-gradient-to-br from-blue-50 to-purple-50">
     <!-- Encabezado -->
     <div class="bg-white shadow-sm border-b border-gray-200 bg-indigo-100">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div class="mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Gestión de Productos</h1>
@@ -27,7 +27,7 @@
     </div>
 
     <!-- Contenido principal -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div class="w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div class="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200">
             <!-- Encabezado de la tabla -->
             <div class="px-6 py-4 border-b border-gray-200 bg-white-100">

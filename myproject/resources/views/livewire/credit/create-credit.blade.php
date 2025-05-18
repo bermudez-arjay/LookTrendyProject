@@ -205,8 +205,12 @@
                                 class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                         </div>
                     </div>
-
-                    <!-- Tabla de productos -->
+            @error('modal_error')
+                <div class="mt-2 text-sm text-red-600 bg-red-50 p-2 rounded-md">
+                    {{$message }}
+                </div>
+            @enderror
+                                <!-- Tabla de productos -->
                     <div class="px-6 pb-4">
                         <div class="overflow-y-auto max-h-96">
                             <table class="min-w-full divide-y divide-gray-200">
@@ -246,22 +250,23 @@
         C${{ number_format($product['Unit_Price'], 2) }}
     </td>
     <td class="px-6 py-4 whitespace-nowrap">
-        <input 
-            type="number" 
-            wire:model="quantities.{{ $product['Product_ID'] }}"
-            min="1" 
-            max="{{ $product['inventories']['Current_Stock'] ?? 0 }}"
-            class="w-20 px-2 py-1 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-            {{ ($product['inventories']['Current_Stock'] ?? 0) <= 0 ? 'disabled' : '' }}
-        >
-          @error('quantities.' . $product['Product_ID'])
-            <span class="text-red-500 text-sm block mt-1">{{ $message }}</span>
-        @enderror
-    </td>
-    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+    <input 
+        type="number" 
+        wire:model="quantities.{{ $product['Product_ID'] }}"
+        min="1" 
+        max="{{ $product['inventories']['Current_Stock'] ?? 0 }}"
+        class="w-20 px-2 py-1 border rounded-md sm:text-sm @error('quantity_'.$product['Product_ID']) border-red-500 @enderror"
+        {{ ($product['inventories']['Current_Stock'] ?? 0) <= 0 ? 'disabled' : '' }}
+    >
+    @error('quantity_'.$product['Product_ID'])
+        <span class="text-red-500 text-xs block mt-1">{{ $message }}</span>
+    @enderror
+</td>
+   <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
     <button 
         wire:click="addDetail({{ $product['Product_ID'] }})"
-        class="text-indigo-600 hover:text-indigo-900"
+        class="text-indigo-600 hover:text-indigo-900 px-3 py-1 rounded @if(($product['inventories']['Current_Stock'] ?? 0) <= 0) opacity-50 cursor-not-allowed @endif"
+        @if(($product['inventories']['Current_Stock'] ?? 0) <= 0) disabled @endif
     >
         Agregar
     </button>
