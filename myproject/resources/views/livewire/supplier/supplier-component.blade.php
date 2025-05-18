@@ -45,6 +45,7 @@
                                 </svg>
                             </div>
                             <input 
+                                 id="search"
                                 wire:model.live.debounce.300ms="keyWord"
                                 type="text" 
                                 placeholder="Buscar proveedor..." 
@@ -53,6 +54,7 @@
                         </div>
                         <button 
                             wire:click="clearFilter"
+                            onclick="document.getElementById('search').value = ''"
                             class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors flex items-center justify-center text-sm font-medium"
                         >
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -63,8 +65,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Mensajes de estado -->
             @if (session()->has('message'))
                 <div class="bg-green-50 border-l-4 border-green-500 p-4 mx-6 mt-4 rounded">
                     <div class="flex items-center">
@@ -94,8 +94,6 @@
                     </div>
                 </div>
             @endif
-
-            <!-- Tabla de proveedores -->
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">

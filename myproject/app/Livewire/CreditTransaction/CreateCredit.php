@@ -25,6 +25,7 @@ class CreateCredit extends Component
     public float $interest_rate = 40.0;
     public $showProductModal = false;
     public $credit_status = 'Pendiente';
+    public $quantities = [];
 
     public $creditDetails = [];
 
@@ -100,6 +101,11 @@ public function showErrorAlert($message)
         'creditDetails.required' => 'Debe agregar al menos un producto',
         'creditDetails.array' => 'Los productos deben estar en formato válido',
         'creditDetails.min' => 'Debe agregar al menos un producto',
+
+        'creditDetails.*.quantity.required' => 'Debe indicar una cantidad',
+        'creditDetails.*.quantity.integer' => 'La cantidad debe ser un número entero',
+        'creditDetails.*.quantity.min' => 'La cantidad debe ser al menos 1',
+        'creditDetails.*.quantity.max_stock' => 'La cantidad solicitada supera el stock disponible.',
     ];
 }
     public function mount()
@@ -239,72 +245,104 @@ public function showErrorAlert($message)
             $this->quotaAmount = 0;
         }
     }
-
-    public function addDetail()
-    {
-
-        if (!$this->product_id || !$this->quantity) {
-            $this->dispatch('swal:error', [
-                'title' => 'Datos incompletos',
-                'message' => 'Debe seleccionar un producto y una cantidad.'
-            ]);
-            return;
-        }
-
-        if ($this->quantity > $this->selectedStock) {
-            $this->dispatch('swal:error', [
-                'title' => 'Stock insuficiente',
-                'message' => 'La cantidad supera el stock disponible.'
-            ]);
-            return;
-        }
-
-        $product = Product::find($this->product_id);
-
-        if (!$product) {
-            $this->dispatch('swal:error', [
-                'title' => 'Producto no válido',
-                'message' => 'El producto seleccionado no existe en la base de datos.'
-            ]);
-            return;
-        }
-
-        $existingDetailIndex = collect($this->creditDetails)->search(function ($detail) {
-            return $detail['product_id'] == $this->product_id;
-        });
-
-        if ($existingDetailIndex !== false) {
-
-            $newQuantity = $this->creditDetails[$existingDetailIndex]['quantity'] + $this->quantity;
-            if ($newQuantity > $this->selectedStock) {
-                $this->dispatch('swal:error', ['message' => 'La cantidad total supera el stock disponible.']);
-                return;
-            }
-
-            $this->creditDetails[$existingDetailIndex]['quantity'] = $newQuantity;
-            $subtotal = $product->Unit_Price * $newQuantity;
-            $vat = $subtotal * 0.15;
-            $total = $subtotal + $vat;
-
-            $this->creditDetails[$existingDetailIndex]['subtotal'] = $subtotal;
-            $this->creditDetails[$existingDetailIndex]['vat'] = $vat;
-            $this->creditDetails[$existingDetailIndex]['total_with_vat'] = $total;
-        } else {
-
-            $subtotal = $product->Unit_Price * $this->quantity;
-            $vat = $subtotal * 0.15;
-            $total = $subtotal + $vat;
-
-            $this->creditDetails[] = [
-                'product_id' => $product->Product_ID,
-                'product_name' => $product->Product_Name,
-                'quantity' => $this->quantity,
-                'subtotal' => $subtotal,
-                'vat' => $vat,
-                'total_with_vat' => $total,
+    
+public function updatedSearchProduct()
+{
+    $this->products = Product::with('inventories')
+        ->when($this->searchProduct, function($query) {
+            $query->where('Product_Name', 'like', '%'.$this->searchProduct.'%');
+        })
+        ->get()
+        ->map(function($product) {
+            return [
+                'Product_ID' => $product->Product_ID,
+                'Product_Name' => $product->Product_Name,
+                'Category' => $product->Category,
+                'Unit_Price' => $product->Unit_Price,
+                'inventories' => [
+                    'Current_Stock' => $product->inventories->Current_Stock ?? 0,
+                    'Inventory_ID' => $product->inventories->Inventory_ID ?? null,
+                    'Product_ID' => $product->Product_ID
+                ]
             ];
-        }
+        })->toArray();
+}
 
+   public function addDetail($productId = null)
+{
+  
+    $product = Product::find($productId);
+    $quantity = $this->quantities[$productId] ?? 0;
+    $availableStock = $product->inventories->Current_Stock ?? 0;
+
+    if ($quantity > $availableStock) {
+        $this->addError("quantities.$productId", "La cantidad solicitada supera el stock disponible ($availableStock unidades).");
+        return;
+    }
+
+   if (!$productId || !$quantity || $quantity <= 0) {
+    $this->dispatch('swal:error', [
+        'title' => 'Datos incompletos',
+        'message' => 'Debe seleccionar un producto y una cantidad válida.'
+    ]);
+    return;
+     
+}
+    $product = Product::find($productId);
+    $inventory = Inventory::where('Product_ID', $productId)->first();
+    $availableStock = $inventory ? $inventory->Current_Stock : 0;
+
+    if ($quantity > $availableStock) {
+        $this->dispatch('swal:error', [
+            'title' => 'Stock insuficiente',
+            'message' => 'La cantidad supera el stock disponible.'
+        ]);
+        return;
+    }
+
+    if (!$product) {
+        $this->dispatch('swal:error', [
+            'title' => 'Producto no válido',
+            'message' => 'El producto seleccionado no existe en la base de datos.'
+        ]);
+        return;
+    }
+
+    
+    $existingDetailIndex = collect($this->creditDetails)->search(function ($detail) use ($productId) {
+        return $detail['product_id'] == $productId;
+    });
+
+    $subtotal = $product->Unit_Price * $quantity;
+    $vat = $subtotal * 0.15;
+    $total = $subtotal + $vat;
+
+    if ($existingDetailIndex !== false) {
+        $this->creditDetails[$existingDetailIndex]['quantity'] = $quantity;
+        $this->creditDetails[$existingDetailIndex]['subtotal'] = $subtotal;
+        $this->creditDetails[$existingDetailIndex]['vat'] = $vat;
+        $this->creditDetails[$existingDetailIndex]['total_with_vat'] = $total;
+    } else {
+        $this->creditDetails[] = [
+            'product_id' => $product->Product_ID,
+            'product_name' => $product->Product_Name,
+            'quantity' => $quantity,
+            'subtotal' => $subtotal,
+            'vat' => $vat,
+            'total_with_vat' => $total,
+        ];
+    }
+    if ($productId === $this->product_id) {
+     
+        $this->product_id = '';
+        $this->quantity = '';
+        $this->selectedStock = 0;
+        $this->selectedPrice = 0;
+        $this->showProductModal = false;
+    } else {
+     
+        unset($this->quantities[$productId]);
+    }
         $this->recalculateTotalAmount();
         $this->recalculateTotalWithInterest();
         $this->recalculateQuotaAmount();
@@ -414,21 +452,23 @@ public function showErrorAlert($message)
             ]);
 
             DB::commit();
-           
-    
-            
+ 
             $this->resetForm();
-            $this->showSuccessAlert('El crédito se ha guardado correctamente');
-        }  catch (\Illuminate\Validation\ValidationException $e) {
-            DB::rollBack();
-            $this->dispatch('swal-toast', [
-                'type' => 'error', 
-                'title' => 'Título',
-                'message' => 'Mensaje',
-                'timer' => 3000 
+            $this->dispatch('credit-notify', [
+                'type' => 'success',
+                'title' => 'Éxito',
+                'message' => 'Crédito creado exitosamente.'
             ]);
-                return;
-        }
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            DB::rollBack();
+            $this->dispatch('credit-notify', [
+                'type' => 'error',
+                'title' => 'Error',
+                'message' => 'Ocurrió un error al crear el crédito.',
+                'timer' => 3000
+            ]);
+            return;
+}
     }
 
     private function resetForm()
@@ -459,10 +499,9 @@ public function showErrorAlert($message)
         $this->dispatch('resetSelect2');
     }
 
-       
-
     public function render()
     {
+        
         return view('livewire.credit.create-credit')
             ->layout('layouts.app');
     }
