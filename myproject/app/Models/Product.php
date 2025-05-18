@@ -52,14 +52,14 @@ class Product extends Model
      */
     public function inventories()
     {
-        return $this->hasMany('App\Models\Inventory', 'Product_ID', 'Product_ID');
+        return $this->hasOne(Inventory::class, 'Product_ID', 'Product_ID');
     }
-
-    /**
+        /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function transactions()
     {
         return $this->hasMany('App\Models\Transaction', 'Product_ID', 'Product_ID');
     }
+    
 }

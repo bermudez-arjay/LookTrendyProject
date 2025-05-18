@@ -25,6 +25,7 @@ class CreateCredit extends Component
     public float $interest_rate = 40.0;
     public $showProductModal = false;
     public $credit_status = 'Pendiente';
+    public $quantities = [];
 
     public $creditDetails = [];
 
@@ -32,6 +33,25 @@ class CreateCredit extends Component
     public $product_id, $quantity, $payment_date, $payment_amount;
 
     protected $listeners = ['selectProductChanged', 'selectClientChanged', 'selectPaymentTypeChanged', 'selectTermChanged', 'product-changed' => 'updateProductInfo'];
+    public function showSuccessAlert($message)
+{
+    $this->dispatch('swal-toast', [
+        'type' => 'success',
+        'title' => 'Éxito',
+        'message' => $message,
+        'timer' => 3000
+    ]);
+}
+
+public function showErrorAlert($message)
+{
+    $this->dispatch('swal-toast', [
+        'type' => 'error',
+        'title' => 'Error',
+        'message' => $message,
+        'timer' => 5000
+    ]);
+}
     public function show($creditId)
     {
         $credit = Credit::with(['client', 'payments'])->findOrFail($creditId);
@@ -81,6 +101,11 @@ class CreateCredit extends Component
         'creditDetails.required' => 'Debe agregar al menos un producto',
         'creditDetails.array' => 'Los productos deben estar en formato válido',
         'creditDetails.min' => 'Debe agregar al menos un producto',
+
+        'creditDetails.*.quantity.required' => 'Debe indicar una cantidad',
+        'creditDetails.*.quantity.integer' => 'La cantidad debe ser un número entero',
+        'creditDetails.*.quantity.min' => 'La cantidad debe ser al menos 1',
+        'creditDetails.*.quantity.max_stock' => 'La cantidad solicitada supera el stock disponible.',
     ];
 }
     public function mount()
@@ -220,84 +245,115 @@ class CreateCredit extends Component
             $this->quotaAmount = 0;
         }
     }
-
-    public function addDetail()
-    {
-
-        if (!$this->product_id || !$this->quantity) {
-            $this->dispatch('swal:error', [
-                'title' => 'Datos incompletos',
-                'message' => 'Debe seleccionar un producto y una cantidad.'
-            ]);
-            return;
-        }
-
-        if ($this->quantity > $this->selectedStock) {
-            $this->dispatch('swal:error', [
-                'title' => 'Stock insuficiente',
-                'message' => 'La cantidad supera el stock disponible.'
-            ]);
-            return;
-        }
-
-        $product = Product::find($this->product_id);
-
-        if (!$product) {
-            $this->dispatch('swal:error', [
-                'title' => 'Producto no válido',
-                'message' => 'El producto seleccionado no existe en la base de datos.'
-            ]);
-            return;
-        }
-
-        $existingDetailIndex = collect($this->creditDetails)->search(function ($detail) {
-            return $detail['product_id'] == $this->product_id;
-        });
-
-        if ($existingDetailIndex !== false) {
-
-            $newQuantity = $this->creditDetails[$existingDetailIndex]['quantity'] + $this->quantity;
-            if ($newQuantity > $this->selectedStock) {
-                $this->dispatch('swal:error', ['message' => 'La cantidad total supera el stock disponible.']);
-                return;
-            }
-
-            $this->creditDetails[$existingDetailIndex]['quantity'] = $newQuantity;
-            $subtotal = $product->Unit_Price * $newQuantity;
-            $vat = $subtotal * 0.15;
-            $total = $subtotal + $vat;
-
-            $this->creditDetails[$existingDetailIndex]['subtotal'] = $subtotal;
-            $this->creditDetails[$existingDetailIndex]['vat'] = $vat;
-            $this->creditDetails[$existingDetailIndex]['total_with_vat'] = $total;
-        } else {
-
-            $subtotal = $product->Unit_Price * $this->quantity;
-            $vat = $subtotal * 0.15;
-            $total = $subtotal + $vat;
-
-            $this->creditDetails[] = [
-                'product_id' => $product->Product_ID,
-                'product_name' => $product->Product_Name,
-                'quantity' => $this->quantity,
-                'subtotal' => $subtotal,
-                'vat' => $vat,
-                'total_with_vat' => $total,
+    
+public function updatedSearchProduct()
+{
+    $this->products = Product::with('inventories')
+        ->when($this->searchProduct, function($query) {
+            $query->where('Product_Name', 'like', '%'.$this->searchProduct.'%');
+        })
+        ->get()
+        ->map(function($product) {
+            return [
+                'Product_ID' => $product->Product_ID,
+                'Product_Name' => $product->Product_Name,
+                'Category' => $product->Category,
+                'Unit_Price' => $product->Unit_Price,
+                'inventories' => [
+                    'Current_Stock' => $product->inventories->Current_Stock ?? 0,
+                    'Inventory_ID' => $product->inventories->Inventory_ID ?? null,
+                    'Product_ID' => $product->Product_ID
+                ]
             ];
-        }
+        })->toArray();
+}
 
-        $this->recalculateTotalAmount();
-        $this->recalculateTotalWithInterest();
-        $this->recalculateQuotaAmount();
-        $this->product_id = '';
-        $this->quantity = '';
-        $this->selectedStock = 0;
-        $this->selectedPrice = 0;
-        $this->showProductModal = false;
-        $this->dispatch('resetSelect2');
-
+public function addDetail($productId = null)
+{
+   
+    if (!$productId) {
+        $this->addError('modal_error', 'Debe seleccionar un producto.');
+        return;
     }
 
+    $quantity = $this->quantities[$productId] ?? 0;
+    
+    if ($quantity <= 0) {
+        $this->addError('modal_error', 'Debe ingresar una cantidad válida mayor que cero.');
+        $this->addError('quantity_'.$productId, 'Cantidad inválida');
+        return;
+    }
+
+    $product = Product::find($productId);
+    $inventory = Inventory::where('Product_ID', $productId)->first();
+    $availableStock = $inventory ? $inventory->Current_Stock : 0;
+
+    $existingIndex = null;
+    $previousQuantity = 0;
+    
+    foreach ($this->creditDetails as $index => $detail) {
+        if ($detail['product_id'] == $productId) {
+            $existingIndex = $index;
+            $previousQuantity = $detail['quantity'];
+            break;
+        }
+    }
+
+ 
+    $newQuantity = $previousQuantity + $quantity;
+
+  
+    if ($newQuantity > $availableStock) {
+        $remainingStock = $availableStock - $previousQuantity;
+        $message = $previousQuantity > 0 
+            ? "Ya tiene $previousQuantity unidades. Solo puede agregar $remainingStock más (stock total: $availableStock)."
+            : "La cantidad solicitada ($newQuantity) supera el stock disponible ($availableStock unidades).";
+
+        $this->addError('modal_error', $message);
+        $this->addError('quantity_'.$productId, 'Stock insuficiente');
+        return;
+    }
+
+  
+  
+    $subtotal = $product->Unit_Price * $newQuantity;
+    $vat = $subtotal * 0.15;
+    $total = $subtotal + $vat;
+
+    if ($existingIndex !== null) {
+     
+        $this->creditDetails[$existingIndex] = [
+            'product_id' => $product->Product_ID,
+            'product_name' => $product->Product_Name,
+            'quantity' => $newQuantity,
+            'subtotal' => $subtotal,
+            'vat' => $vat,
+            'total_with_vat' => $total,
+        ];
+        
+        $this->showSuccessAlert("Se agregaron $quantity unidades más a {$product->Product_Name} (Total: $newQuantity)");
+    } else {
+       
+        $this->creditDetails[] = [
+            'product_id' => $product->Product_ID,
+            'product_name' => $product->Product_Name,
+            'quantity' => $quantity,
+            'subtotal' => $subtotal,
+            'vat' => $vat,
+            'total_with_vat' => $total,
+        ];
+        
+      
+    }
+    unset($this->quantities[$productId]);
+    $this->recalculateTotalAmount();
+    $this->recalculateTotalWithInterest();
+    $this->recalculateQuotaAmount();
+    $this->dispatch('resetSelect2');
+    $this->resetErrorBag();
+    $this->showProductModal = false;
+
+}
     public function removeDetail($index)
     {
         $this->dispatch('swal:confirm', [
@@ -309,7 +365,17 @@ class CreateCredit extends Component
             'params' => [$index]
         ]);
     }
-
+public function updatedQuantities($value, $key)
+{
+    $productId = str_replace('quantities.', '', $key);
+    $availableStock = Inventory::where('Product_ID', $productId)->value('Current_Stock') ?? 0;
+    
+    if ($value > $availableStock) {
+        $this->addError('quantities.'.$productId, "No hay suficiente stock. Disponible: $availableStock");
+    } else {
+        $this->resetErrorBag('quantities.'.$productId);
+    }
+}
     public function doRemoveDetail($index)
     {
         if (isset($this->creditDetails[$index])) {
@@ -320,10 +386,11 @@ class CreateCredit extends Component
             $this->recalculateTotalWithInterest();
             $this->recalculateQuotaAmount();
 
-            $this->dispatch('swal:success', [
+            $this->dispatch('swal-toast', [
+                'type' => 'success', 
                 'title' => 'Producto eliminado',
-                'message' => 'El producto fue eliminado correctamente.',
-                'timer' => 2000
+                'message' => 'Producto eliminado correctamente',
+                'timer' => 3000 
             ]);
 
             $this->dispatch('resetSelect2');
@@ -394,22 +461,23 @@ class CreateCredit extends Component
             ]);
 
             DB::commit();
-
-            $this->dispatch('swal:success', [
+ 
+            $this->resetForm();
+            $this->dispatch('credit-notify', [
+                'type' => 'success',
                 'title' => 'Éxito',
-                'message' => 'Crédito creado correctamente',
+                'message' => 'Crédito creado exitosamente.'
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            DB::rollBack();
+            $this->dispatch('credit-notify', [
+                'type' => 'error',
+                'title' => 'Error',
+                'message' => 'Ocurrió un error al crear el crédito.',
                 'timer' => 3000
             ]);
-            
-            $this->resetForm();
-        }  catch (\Illuminate\Validation\ValidationException $e) {
-            DB::rollBack();
-                $this->dispatch('swal:error', [
-                    'title' => 'Error de validación',
-                    'message' => implode('<br>', $e->validator->errors()->all())
-                ]);
-                return;
-        }
+            return;
+}
     }
 
     private function resetForm()
@@ -440,10 +508,9 @@ class CreateCredit extends Component
         $this->dispatch('resetSelect2');
     }
 
-       
-
     public function render()
     {
+        
         return view('livewire.credit.create-credit')
             ->layout('layouts.app');
     }

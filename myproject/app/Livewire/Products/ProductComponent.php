@@ -12,10 +12,11 @@ class ProductComponent extends Component
 
     protected $paginationTheme = 'tailwind';
     protected $listeners = ['productCreated','productUpdated','productDeleted','llamarFuncion'];
+    
 
     public function llamarFuncion()
     {
-        // Código que quieres ejecutar
+       
         info("¡Función llamada desde otro componente!");
     }
     public $keyWord;
@@ -51,6 +52,7 @@ class ProductComponent extends Component
     public function render()
 
     {
+        
         return view('livewire.products.product-component', [
         'products' => $this->filteredProducts()
     ])->layout('layouts.app');
