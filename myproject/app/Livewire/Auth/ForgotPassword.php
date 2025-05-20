@@ -5,36 +5,44 @@ namespace App\Livewire\Auth;
 use Livewire\Component;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Http\Client\ConnectionException;
 
-use App\Models\User;
 class ForgotPassword extends Component
 {
-    public $User_Email;  
+    public $User_Email;
+    
     protected $rules = [
-        'User_Email' => 'required|email|exists:users,User_Email',  
+        'User_Email' => 'required|email|exists:users,User_Email',
     ];
 
     protected $messages = [
-        'User_Email.exists' => 'Este correo no está registrado.',
+        'User_Email.required' => 'El campo correo electrónico es obligatorio.',
+        'User_Email.email' => 'Por favor ingresa una dirección de correo electrónico válida.',
+        'User_Email.exists' => 'Este correo electrónico no está registrado en nuestro sistema.',
     ];
-
 
     public function send()
     {
         $this->validate();
 
-        $response = Password::sendResetLink(
-            ['User_Email' => $this->User_Email] 
-        );
+        try {
+            $response = Password::sendResetLink(
+                ['User_Email' => $this->User_Email]
+            );
 
-        if ($response == Password::RESET_LINK_SENT) {
-            session()->flash('status', 'Te hemos enviado un enlace para restablecer tu contraseña.');
-        } else {
-            session()->flash('error', 'Hubo un problema al enviar el enlace de restablecimiento.');
+            if ($response == Password::RESET_LINK_SENT) {
+                session()->flash('status', 'Te hemos enviado un enlace para restablecer tu contraseña. Por favor revisa tu bandeja de entrada.');
+            } else {
+                session()->flash('error', 'Hubo un problema al enviar el enlace de restablecimiento. Por favor intenta nuevamente.');
+            }
+        } catch (ConnectionException $e) {
+            session()->flash('error', 'No se pudo conectar al servidor. Por favor verifica tu conexión a internet e intenta nuevamente.');
+        } catch (\Exception $e) {
+            session()->flash('error', 'Ocurrió un error inesperado. Por favor intenta más tarde.');
         }
 
         $this->reset('User_Email');
-    }   
+    }
     
     public function render()
     {

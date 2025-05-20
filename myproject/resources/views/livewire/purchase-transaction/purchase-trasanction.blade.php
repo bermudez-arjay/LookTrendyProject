@@ -14,14 +14,14 @@
                 <input type="text" value="{{ Auth::user()->User_FirstName }}"
                     class="mt-1 block w-full rounded-lg bg-gray-50 border-gray-300 shadow-sm py-2 px-3 border" readonly>
                 <input type="hidden" wire:model="selectedUserId">
+                @error('selectedUserId') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
             </div>
 
             <!-- Proveedor -->
             <div class="space-y-2">
-                <label class="block text-sm font-medium text-gray-700">Proveedor <span
-                        class="text-red-500">*</span></label>
+                <label class="block text-sm font-medium text-gray-700">Proveedor <span class="text-red-500">*</span></label>
                 <select wire:model="selectedSupplierId"
-                    class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 border">
+                    class="mt-1 block w-full rounded-lg  shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 border @error('selectedSupplierId') border-red-500 @enderror">
                     <option value="">Seleccionar proveedor</option>
                     @foreach ($suppliers as $supplier)
                         <option value="{{ $supplier->Supplier_ID }}">{{ $supplier->Supplier_Name }}</option>
@@ -98,6 +98,7 @@
             @else
                 <div class="text-center py-6 bg-gray-50 rounded-lg">
                     <p class="text-gray-500">No hay productos agregados</p>
+                    @error('productList') <p class="text-red-500 text-xs mt-2">{{ $message }}</p> @enderror
                 </div>
             @endif
         </div>
@@ -144,46 +145,44 @@
                     <div class="space-y-4">
                         <!-- Producto -->
                         <div class="space-y-2">
-                            <label class="block text-sm font-medium text-gray-700">Producto <span
-                                    class="text-red-500">*</span></label>
+                            <label class="block text-sm font-medium text-gray-700">Producto <span class="text-red-500">*</span></label>
                             <select wire:model.live="selectedProductId"
-                                class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 border">
+                                class="mt-1 block w-full rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 border @error('selectedProductId') border-red-500 @enderror">
                                 <option value="">Seleccionar producto</option>
                                 @foreach ($products as $product)
                                     <option value="{{ $product->Product_ID }}">{{ $product->Product_Name }}</option>
                                 @endforeach
                             </select>
-                            {{-- @error('selectedProductId') <span class="text-red-500 text-xs">{{ $message }}</span>
-                            @enderror --}}
+                            @error('selectedProductId') <span class="text-red-500 text-xs">{{$message}}</span> @enderror
                         </div>
 
                         <!-- Cantidad -->
                         <div class="space-y-2">
-                            <label class="block text-sm font-medium text-gray-700">Cantidad <span
-                                    class="text-red-500">*</span></label>
+                            <label class="block text-sm font-medium text-gray-700">Cantidad <span class="text-red-500">*</span></label>
                             <input type="number" wire:model="quantity" min="1"
-                                class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 border">
+                                class="mt-1 block w-full rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 border @error('quantity') border-red-500 @enderror">
+                            @error('quantity') <span class="text-red-500 text-xs">{{$message}}</span> @enderror
                         </div>
 
                         <!-- Precio Unitario -->
                         <div class="space-y-2">
-                            <label class="block text-sm font-medium text-gray-700">Precio Unitario <span
-                                    class="text-red-500">*</span></label>
-                            <input type="number" step="0.01" wire:model="unitPrice"
-                                class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 border">
+                            <label class="block text-sm font-medium text-gray-700">Precio Unitario <span class="text-red-500">*</span></label>
+                            <input type="number" step="0.01" wire:model="unitPrice" min="0.01"
+                                class="mt-1 block w-full rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 border @error('unitPrice') border-red-500 @enderror">
+                            @error('unitPrice') <span class="text-red-500 text-xs">{{$message}}</span> @enderror
                         </div>
 
                         <!-- Tipo de Pago -->
                         <div class="space-y-2">
-                            <label class="block text-sm font-medium text-gray-700">Tipo de Pago <span
-                                    class="text-red-500">*</span></label>
-                            <select wire:model="SelectpaymentsTypes"
-                                class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 border">
+                            <label class="block text-sm font-medium text-gray-700">Tipo de Pago <span class="text-red-500">*</span></label>
+                            <select wire:model="payment_type_id"
+                                class="mt-1 block w-full rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 border @error('payment_type_id') border-red-500 @enderror">
                                 <option value="">Seleccione tipo de pago</option>
                                 @foreach($paymentsType as $type)
                                     <option value="{{ $type->Payment_Type_ID }}">{{ $type->Payment_Type_Name }}</option>
                                 @endforeach
                             </select>
+                            @error('payment_type_id') <span class="text-red-500 text-xs">{{$message}}</span> @enderror
                         </div>
 
                         <!-- Impuesto -->
@@ -218,27 +217,23 @@
 @push('styles')
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <style>
-        /* Estilo personalizado para el scroll */
         .max-h-96 {
             max-height: 24rem;
-            /* 96px = 24rem */
         }
-
-        /* Estilo para mantener visibles los encabezados y totales al hacer scroll */
         thead.sticky th {
             position: sticky;
             top: 0;
             background-color: #f9fafb;
-            /* bg-gray-50 */
             z-index: 10;
         }
-
         tr.sticky td {
             position: sticky;
             bottom: 0;
             background-color: #f9fafb;
-            /* bg-gray-50 */
             z-index: 10;
+        }
+        .border-red-500 {
+            border-color: #ef4444;
         }
     </style>
 @endpush
@@ -250,39 +245,20 @@
 
     <script>
         document.addEventListener('livewire:initialized', () => {
-            Livewire.on('swal:success', (event) => {
+            Livewire.on('purchase-completed', (event) => {
                 Swal.fire({
                     icon: 'success',
-                    title: event.title || 'Éxito',
-                    text: event.message,
-                    timer: event.timer || 3000,
-                    showConfirmButton: !event.timer
+                    title: 'Compra registrada',
+                    text: 'La compra se ha registrado exitosamente',
+                    timer: 3000,
+                    showConfirmButton: false
                 });
             });
 
-            Livewire.on('swal:error', (event) => {
-                Swal.fire({
-                    icon: 'error',
-                    title: event.title || 'Error',
-                    text: event.message
-                });
-            });
-        });
-
-        window.addEventListener('swal:confirm', event => {
-            Swal.fire({
-                icon: 'question',
-                title: event.detail.title || 'Confirmación',
-                text: event.detail.message,
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: event.detail.confirmText || 'Sí, continuar',
-                cancelButtonText: event.detail.cancelText || 'Cancelar',
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    Livewire.dispatch(event.detail.method, event.detail.params || []);
-                }
+            $('select').select2({
+                width: '100%'
+            }).on('change', function() {
+                @this.set($(this).attr('wire:model'), $(this).val());
             });
         });
     </script>

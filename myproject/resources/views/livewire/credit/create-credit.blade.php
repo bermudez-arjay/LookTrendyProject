@@ -158,8 +158,7 @@
                             document.getElementById('client_id').value ='';
                             document.getElementById('term').innerHTML ='';
                             document.getElementById('payment_type_id').innerHTML ='';
-                            document.getElementById('start_date').value ='';
-                             document.getElementById('due_date').value ='';
+
                             "
                     class="w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                     Guardar Crédito
