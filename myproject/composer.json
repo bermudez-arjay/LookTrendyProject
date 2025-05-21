@@ -17,6 +17,7 @@
         "spatie/db-dumper": "^3.8"
     },
     "require-dev": {
+        "enlightn/enlightn": "^2.10",
         "fakerphp/faker": "^1.9.1",
         "laravel-lang/common": "^6.7",
         "laravel/pint": "^1.0",

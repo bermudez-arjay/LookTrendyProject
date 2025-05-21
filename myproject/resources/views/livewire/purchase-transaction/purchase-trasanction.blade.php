@@ -19,10 +19,11 @@
 
             <!-- Proveedor -->
             <div class="space-y-2">
-                <label class="block text-sm font-medium text-gray-700">Proveedor <span class="text-red-500">*</span></label>
-                <select wire:model="selectedSupplierId"
-                    class="mt-1 block w-full rounded-lg  shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 border @error('selectedSupplierId') border-red-500 @enderror">
-                    <option value="">Seleccionar proveedor</option>
+                <label class="block text-sm font-medium text-gray-700">Proveedor <span
+                        class="text-red-500">*</span></label>
+                <select wire:model="selectedSupplierId" wire:key="supplier-select-{{ now()->timestamp }}"
+                    class="mt-1 block w-full rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 border @error('selectedSupplierId') border-red-500 @enderror">
+                    <option value="0">Seleccionar proveedor</option>
                     @foreach ($suppliers as $supplier)
                         <option value="{{ $supplier->Supplier_ID }}">{{ $supplier->Supplier_Name }}</option>
                     @endforeach
@@ -119,10 +120,15 @@
             </div>
 
             <div class="flex items-end">
+                <button type="button" wire:click="cancelTransaction"
+                    class="w-full mr-2 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                    Cancelar
+                </button>
                 <button type="submit"
                     class="w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                     Guardar Compra
                 </button>
+
             </div>
         </div>
     </form>
@@ -145,7 +151,8 @@
                     <div class="space-y-4">
                         <!-- Producto -->
                         <div class="space-y-2">
-                            <label class="block text-sm font-medium text-gray-700">Producto <span class="text-red-500">*</span></label>
+                            <label class="block text-sm font-medium text-gray-700">Producto <span
+                                    class="text-red-500">*</span></label>
                             <select wire:model.live="selectedProductId"
                                 class="mt-1 block w-full rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 border @error('selectedProductId') border-red-500 @enderror">
                                 <option value="">Seleccionar producto</option>
@@ -158,7 +165,8 @@
 
                         <!-- Cantidad -->
                         <div class="space-y-2">
-                            <label class="block text-sm font-medium text-gray-700">Cantidad <span class="text-red-500">*</span></label>
+                            <label class="block text-sm font-medium text-gray-700">Cantidad <span
+                                    class="text-red-500">*</span></label>
                             <input type="number" wire:model="quantity" min="1"
                                 class="mt-1 block w-full rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 border @error('quantity') border-red-500 @enderror">
                             @error('quantity') <span class="text-red-500 text-xs">{{$message}}</span> @enderror
@@ -166,7 +174,8 @@
 
                         <!-- Precio Unitario -->
                         <div class="space-y-2">
-                            <label class="block text-sm font-medium text-gray-700">Precio Unitario <span class="text-red-500">*</span></label>
+                            <label class="block text-sm font-medium text-gray-700">Precio Unitario <span
+                                    class="text-red-500">*</span></label>
                             <input type="number" step="0.01" wire:model="unitPrice" min="0.01"
                                 class="mt-1 block w-full rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 border @error('unitPrice') border-red-500 @enderror">
                             @error('unitPrice') <span class="text-red-500 text-xs">{{$message}}</span> @enderror
@@ -174,7 +183,8 @@
 
                         <!-- Tipo de Pago -->
                         <div class="space-y-2">
-                            <label class="block text-sm font-medium text-gray-700">Tipo de Pago <span class="text-red-500">*</span></label>
+                            <label class="block text-sm font-medium text-gray-700">Tipo de Pago <span
+                                    class="text-red-500">*</span></label>
                             <select wire:model="payment_type_id"
                                 class="mt-1 block w-full rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 border @error('payment_type_id') border-red-500 @enderror">
                                 <option value="">Seleccione tipo de pago</option>
@@ -220,18 +230,21 @@
         .max-h-96 {
             max-height: 24rem;
         }
+
         thead.sticky th {
             position: sticky;
             top: 0;
             background-color: #f9fafb;
             z-index: 10;
         }
+
         tr.sticky td {
             position: sticky;
             bottom: 0;
             background-color: #f9fafb;
             z-index: 10;
         }
+
         .border-red-500 {
             border-color: #ef4444;
         }
@@ -257,7 +270,7 @@
 
             $('select').select2({
                 width: '100%'
-            }).on('change', function() {
+            }).on('change', function () {
                 @this.set($(this).attr('wire:model'), $(this).val());
             });
         });

@@ -37,39 +37,38 @@ class ResetPassword extends Component
         }
     }
     
-    public function resetPassword()
-    {
-        $this->validate();
+public function resetPassword()
+{
+    $this->validate();
 
-        try {
-            $status = Password::reset(
-                [
-                    'User_Email' => $this->User_Email,
-                    'token' => $this->token,
-                    'password' => $this->password,
-                    'password_confirmation' => $this->password_confirmation,
-                ],
-                function ($user, $password) {
-                    $user->forceFill([
-                        'password' => Hash::make($password)
-                    ])->save();
-                }
-            );
-
-            if ($status == Password::PASSWORD_RESET) {
-                session()->flash('success', '¡Contraseña restablecida con éxito! Ya puedes iniciar sesión con tu nueva contraseña.');
-                return redirect()->route('login');
+    try {
+        $status = Password::reset(
+            [
+                'User_Email' => $this->User_Email,
+                'token' => $this->token,
+                'password' => $this->password,
+                'password_confirmation' => $this->password_confirmation,
+            ],
+            function ($user, $password) {
+                $user->forceFill([
+                    'password' => Hash::make($password)
+                ])->save();
             }
+        );
 
-            session()->flash('error', $this->getStatusMessage($status));
-            
-        } catch (ConnectionException $e) {
-            session()->flash('error', 'No se pudo conectar al servidor. Por favor verifica tu conexión a internet e intenta nuevamente.');
-        } catch (\Exception $e) {
-            session()->flash('error', 'Ocurrió un error inesperado: ' . $e->getMessage());
+        if ($status == Password::PASSWORD_RESET) {
+            session()->flash('success', '¡Contraseña restablecida con éxito! Ya puedes iniciar sesión con tu nueva contraseña.');
+            return redirect()->route('login');
         }
-    }
 
+        session()->flash('error', $this->getStatusMessage($status));
+        
+    } catch (ConnectionException $e) {
+        session()->flash('error', 'No se pudo conectar al servidor. Por favor verifica tu conexión a internet e intenta nuevamente.');
+    } catch (\Exception $e) {
+        session()->flash('error', 'Ocurrió un error inesperado: ' . $e->getMessage());
+    }
+}
     protected function getStatusMessage($status)
     {
         $messages = [

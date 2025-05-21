@@ -21,7 +21,8 @@ class PurchaseTrasanction extends Component
     public $users, $suppliers, $products, $paymentsType;
     public $userId;
     public $payment_type_id;
-    public $selectedUserId, $selectedSupplierId;
+    public $selectedUserId;
+    public $selectedSupplierId = 0;
     public $transactionType = 'Compra';
     public $showProductModal = false;
     public $productList = [];
@@ -143,6 +144,13 @@ class PurchaseTrasanction extends Component
         $this->productList = array_values($this->productList);
     }
 
+    public function cancelTransaction()
+    {$this->selectedSupplierId=0;
+        $this->resetAll();
+        $this->resetErrorBag();
+        session()->flash('info', 'La transacción ha sido cancelada.');
+    }
+
     public function saveTransaction()
     {
         $this->validate();
@@ -204,6 +212,7 @@ class PurchaseTrasanction extends Component
             ]);
 
             $this->resetAll();
+             $this->selectedSupplierId = 0;
             session()->flash('success', 'Compra registrada exitosamente.');
             $this->dispatch('purchase-completed');
         });
@@ -215,6 +224,7 @@ class PurchaseTrasanction extends Component
         $this->selectedSupplierId = null;
         $this->payment_type_id = null;
         $this->productList = [];
+        $this->showProductModal = false;
     }
 
     public function render()
