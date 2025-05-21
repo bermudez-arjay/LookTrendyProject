@@ -326,7 +326,7 @@
                                 </div>
                             </div>
                                 
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                       
                                         <div>
                                             <label for="payment_date" class="block text-sm font-medium text-gray-700 mb-1">Fecha de Abono *</label>
@@ -363,6 +363,7 @@
                                                     placeholder="0.00"
                                                 >
                                             </div>
+                                            
                                          
                                             
                                             @if($credit_id)
@@ -375,6 +376,23 @@
                                                 </p>
                                             @endif
                                         </div>
+                                        <div>
+                                                    <label for="payment_type"
+                                                        class="block text-sm font-medium text-gray-700 mb-1">Tipo de Pago
+                                                        *</label>
+                                                    <select wire:model="payment_type_id" id="payment_type"
+                                                        class="block w-full pl-3 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                                        <option value="">Seleccione un tipo</option>
+                                                        @foreach(\App\Models\PaymentType::all() as $type)
+                                                            <option value="{{ $type->Payment_Type_ID }}">
+                                                                {{ $type->Payment_Type_Name }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                    @error('payment_type_id')
+                                                        <p class="mt-1 text-sm text-red-600">{{$message }}</p>
+                                                    @enderror
+                                                </div>
+                                        
                                     </div>
                                 </div>
                             </div>
@@ -404,29 +422,5 @@
         </div>
         @endif
 
-    <script>
-        document.addEventListener('livewire:load', function () {
-            Livewire.on('confirmDelete', paymentId => {
-                Swal.fire({
-                    title: '¿Estás seguro?',
-                    text: "¡No podrás revertir esta acción!",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: 'Sí, eliminar',
-                    cancelButtonText: 'Cancelar'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        Livewire.emit('delete', paymentId);
-                        Swal.fire(
-                            '¡Eliminado!',
-                            'El abono ha sido eliminado.',
-                            'success'
-                        );
-                    }
-                });
-            });
-        });
-    </script>
+    
 </div>
