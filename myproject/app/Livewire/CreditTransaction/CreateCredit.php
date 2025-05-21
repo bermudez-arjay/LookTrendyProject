@@ -114,9 +114,11 @@ class CreateCredit extends Component
                     })
                      ->get();
         
-        $this->products = Product::whereHas('inventories', function ($query) {
-            $query->where('Current_Stock', '>=', 5);
-        })->get();
+  $this->products = Product::where('Removed', 0)
+    ->whereHas('inventories', function ($query) {
+        $query->where('Current_Stock', '>=', 5);
+    })
+    ->get();
         
         $this->paymentTypes = PaymentType::all();
         $this->term = null;
@@ -429,7 +431,7 @@ public function updatedQuantities($value, $key)
 
             $credit = Credit::create([
                 'Client_ID' => $this->client_id,
-                'Payment_Type_ID' => $this->payment_type_id,
+                // 'Payment_Type_ID' => $this->payment_type_id,
                 'Start_Date' => $this->start_date,
                 'Due_Date' => $this->due_date,
                 'Total_Amount' => $totalConInteres,
@@ -467,7 +469,7 @@ public function updatedQuantities($value, $key)
                 'Total' => $this->total_amount,
                 'Transaction_Type' => 'Crédito',
                 'Purchase_ID' => null,
-                'Payment_Type_ID' => $this->payment_type_id,
+                'Payment_Type_ID' => 1,
             ]);
 
             DB::commit();
