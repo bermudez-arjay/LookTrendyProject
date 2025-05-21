@@ -152,32 +152,7 @@
   </section>
   <!-- Footer -->
   <footer class="bg-gray-900 text-white justify-center py-12 px-6">
-    <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
-      <div>
-        <h3 class="text-xl font-bold mb-4 gradient-text">LookTrendy</h3>
-        <p class="text-gray-400">Tu estilo, tu actitud. Viste Look Trendy</p>
-      </div>
-      <div>
-        <h4 class="font-semibold mb-4">Contacto</h4>
-        <ul class="space-y-2 text-gray-400">
-          <li><i class="fas fa-map-marker-alt mr-2"></i> Av. Moda 123</li>
-          <li><i class="fas fa-phone mr-2"></i> +123 456 789</li>
-          <li><i class="fas fa-envelope mr-2"></i> info@looktrendy.com</li>
-        </ul>
-      </div>
-      <div>
-        <h4 class="font-semibold mb-4">Redes Sociales</h4>
-        <div class="flex space-x-4">
-          <a href="#" class="text-gray-400 hover:text-pink-500 text-xl"><i class="fab fa-facebook-f"></i></a>
-          <a href="#" class="text-gray-400 hover:text-pink-500 text-xl"><i class="fab fa-instagram"></i></a>
-          <a href="#" class="text-gray-400 hover:text-pink-500 text-xl"><i class="fab fa-twitter"></i></a>
-          <a href="#" class="text-gray-400 hover:text-pink-500 text-xl"><i class="fab fa-pinterest-p"></i></a>
-        </div>
-      </div>
-    </div>
-    <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
       © 2025 LookTrendy. Todos los derechos reservados.
-    </div>
   </footer>
 </body>
 </html>

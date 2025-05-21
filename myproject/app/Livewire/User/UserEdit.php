@@ -13,20 +13,37 @@ class UserEdit extends Component
     public $roles = ['Administrador', 'Empleado'];
     protected $listeners = ['editUserByEmail' => 'loadUserByEmail'];
 
-    // Reglas de validación
-    protected function rules()
-    {
-        return [
-            'User_FirstName' => 'required|string|max:100',
-            'User_LastName' => 'required|string|max:100',
-            'User_Email' => 'required|email|max:100|unique:users,User_Email,' . ($this->userId ?? 'null') . ',User_ID',
-            'User_Address' => 'required|string|max:255',
-            'User_Phone' => 'required|string|max:20',
-            'User_Role' => 'required|string',
-            'Password' => 'nullable|string|min:6'
-        ];
-    }
+// Reglas de validación mejoradas
+protected function rules()
+{
+    return [
+        'User_FirstName' => 'required|string|max:100|regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/',
+        'User_LastName' => 'required|string|max:100|regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/',
+        'User_Email' => 'required|email|max:100|unique:users,User_Email,' . ($this->userId ?? 'null') . ',User_ID',
+        'User_Address' => 'required|string|max:255',
+        'User_Phone' => 'required|string|max:20|regex:/^[\d\s\+\-\(\)]{7,20}$/',
+        'User_Role' => 'required|string|in:Administrador,Empleado',
+        'Password' => 'nullable|string|min:8|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/'
+    ];
+}
 
+// Mensajes de error personalizados
+protected $messages = [
+    'User_FirstName.required' => 'El nombre es obligatorio.',
+    'User_FirstName.regex' => 'El nombre solo puede contener letras y espacios.',
+    'User_LastName.required' => 'El apellido es obligatorio.',
+    'User_LastName.regex' => 'El apellido solo puede contener letras y espacios.',
+    'User_Email.required' => 'El correo electrónico es obligatorio.',
+    'User_Email.email' => 'Ingrese un correo electrónico válido.',
+    'User_Email.unique' => 'Este correo electrónico ya está registrado.',
+    'User_Address.required' => 'La dirección es obligatoria.',
+    'User_Phone.required' => 'El teléfono es obligatorio.',
+    'User_Phone.regex' => 'Ingrese un número de teléfono válido.',
+    'User_Role.required' => 'El rol es obligatorio.',
+    'User_Role.in' => 'Seleccione un rol válido.',
+    'Password.min' => 'La contraseña debe tener al menos 8 caracteres.',
+    'Password.regex' => 'La contraseña debe contener al menos una mayúscula, una minúscula, un número y un carácter especial.'
+];
 
     public function loadUserByEmail($email)
     {

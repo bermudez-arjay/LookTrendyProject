@@ -115,7 +115,7 @@ class CreateCredit extends Component
                      ->get();
         
         $this->products = Product::whereHas('inventories', function ($query) {
-            $query->where('Current_Stock', '>=', 10);
+            $query->where('Current_Stock', '>=', 5);
         })->get();
         
         $this->paymentTypes = PaymentType::all();

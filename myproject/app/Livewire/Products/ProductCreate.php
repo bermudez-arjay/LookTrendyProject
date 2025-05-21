@@ -103,8 +103,6 @@ class ProductCreate extends Component
     public function save()
     {
         $validatedData = $this->validate();
-        dd($validatedData);
-
         try {
             Product::create([
                 'Product_Name' => trim($validatedData['Product_Name']),

@@ -92,8 +92,6 @@
     @livewireStyles
 </head>
 <body class="bg-gradient-to-br from-blue-50 to-purple-50 font-sans antialiased flex h-screen overflow-hidden">
-
-    <!-- Sidebar Moderno Integrado con Logo -->
     <div x-data="{ expanded: true, activeMenu: '' }" class="flex">
         <div class="gradient-bg border-r border-purple-100 h-screen p-4 pt-6 relative duration-300 transition-all ease-in-out shadow-lg"
             :class="expanded ? 'w-64' : 'w-20'">
