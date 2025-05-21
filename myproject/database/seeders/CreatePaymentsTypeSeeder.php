@@ -15,8 +15,8 @@ class CreatePaymentsTypeSeeder extends Seeder
     {
         DB::table('payment_types')->insert([
             ['payment_type_Name' => 'Córdobas'],
-            ['payment_type_Name' => 'Dólares'],
-            ['payment_type_Name' => 'Transferencia'],
+            // ['payment_type_Name' => 'Dólares'],
+            // ['payment_type_Name' => 'Transferencia'],
         ]);
     }
 }
