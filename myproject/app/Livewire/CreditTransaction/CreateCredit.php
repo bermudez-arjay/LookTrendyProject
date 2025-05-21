@@ -42,16 +42,12 @@ class CreateCredit extends Component
         'timer' => 3000
     ]);
 }
+ public function closeModal()
+    {
+       $this ->resetForm();
+    }
 
-public function showErrorAlert($message)
-{
-    $this->dispatch('swal-toast', [
-        'type' => 'error',
-        'title' => 'Error',
-        'message' => $message,
-        'timer' => 5000
-    ]);
-}
+
     public function show($creditId)
     {
         $credit = Credit::with(['client', 'payments'])->findOrFail($creditId);
@@ -135,6 +131,19 @@ public function showErrorAlert($message)
         $this->recalculateTotalWithInterest();
         $this->recalculateQuotaAmount();
     }
+    public function cancelTransaction()
+    {
+           
+        $this->clients=0;
+        $this->resetAll();
+        $this->resetErrorBag();
+        session()->flash('info', 'La transacción ha sido cancelada.');
+    }	
+    public function resetAll(){
+        $this->selectedSupplierId = null;
+        $this->payment_type_id = null;
+        $this->productList = [];
+    }
 
     public function updateProductInfo($productId)
     {
@@ -150,6 +159,7 @@ public function showErrorAlert($message)
         $this->selectedStock = $inventory ? $inventory->Current_Stock : 0;
         $this->selectedPrice = $product ? $product->Unit_Price : 0.0;
     }
+
 
     public function updatedProductId($value)
     {
