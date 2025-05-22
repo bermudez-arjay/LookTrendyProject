@@ -114,7 +114,7 @@ class CreateCredit extends Component
                     })
                      ->get();
         
-        $this->products = Product::whereHas('inventories', function ($query) {
+        $this->products = Product::where('Removed',0)->whereHas('inventories', function ($query) {
             $query->where('Current_Stock', '>=', 5);
         })->get();
         
@@ -131,14 +131,6 @@ class CreateCredit extends Component
         $this->recalculateTotalWithInterest();
         $this->recalculateQuotaAmount();
     }
-    public function cancelTransaction()
-    {
-           
-        $this->clients=0;
-        $this->resetAll();
-        $this->resetErrorBag();
-        session()->flash('info', 'La transacción ha sido cancelada.');
-    }	
     public function resetAll(){
         $this->selectedSupplierId = null;
         $this->payment_type_id = null;
@@ -194,6 +186,33 @@ class CreateCredit extends Component
             $this->quotaAmount = 0;
         }
     }
+
+ public function cancelTransaction()
+{
+    // Resetear todas las propiedades relevantes
+    $this->reset([
+        'client_id',
+        'payment_type_id',
+        'term',
+        'total_amount',
+        'installments',
+        'creditDetails',
+        'totalWithInterest',
+        'quotaAmount',
+        'quantities'
+    ]);
+    
+    // Establecer valores específicos para los selects
+    $this->client_id = '';
+    $this->payment_type_id = '';
+    $this->term = 0;
+    
+    // Resetear errores
+    $this->resetErrorBag();
+    
+    // Emitir evento para resetear selects en el frontend
+    $this->dispatch('reset-selects');
+}
 
     public function updated($propertyName)
     {
@@ -429,7 +448,7 @@ public function updatedQuantities($value, $key)
 
             $credit = Credit::create([
                 'Client_ID' => $this->client_id,
-                'Payment_Type_ID' => $this->payment_type_id,
+                //'Payment_Type_ID' => $this->payment_type_id,
                 'Start_Date' => $this->start_date,
                 'Due_Date' => $this->due_date,
                 'Total_Amount' => $totalConInteres,
@@ -467,7 +486,7 @@ public function updatedQuantities($value, $key)
                 'Total' => $this->total_amount,
                 'Transaction_Type' => 'Crédito',
                 'Purchase_ID' => null,
-                'Payment_Type_ID' => $this->payment_type_id,
+                'Payment_Type_ID' => 1,
             ]);
 
             DB::commit();

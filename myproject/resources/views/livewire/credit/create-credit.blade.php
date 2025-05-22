@@ -14,15 +14,12 @@
             <div class="space-y-2">
                 <label class="block text-sm font-medium text-gray-700">Cliente <span
                         class="text-red-500">*</span></label>
-                <select wire:model.live="client_id" id="client_id"
-                    class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 border">
-                    <option value="">Seleccione un cliente</option>
-                    @foreach($clients as $client)
-                        <option value="{{ $client->Client_ID }}">{{ $client->Client_FirstName }}
-                            {{ $client->Client_LastName }}
-                        </option>
-                    @endforeach
-                </select>
+                <select wire:model.live="client_id" id="client_id" class="...">
+    <option value="">Seleccione un cliente</option>
+    @foreach($clients as $client)
+        <option value="{{ $client->Client_ID }}">{{ $client->Client_FirstName }} {{ $client->Client_LastName }}</option>
+    @endforeach
+</select>
                 @error('client_id') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
             </div>
 
@@ -34,25 +31,23 @@
             <div class="space-y-2">
                 <label class="block text-sm font-medium text-gray-700">Tipo de Pago <span
                         class="text-red-500">*</span></label>
-                <select wire:model.live="payment_type_id" id="payment_type_id"
-                    class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 border">
-                    <option value="">Seleccione tipo de pago</option>
-                    @foreach($paymentTypes as $type)
-                        <option value="{{ $type->Payment_Type_ID }}">{{ $type->Payment_Type_Name }}</option>
-                    @endforeach
-                </select>
+            <select wire:model.live="payment_type_id" id="payment_type_id" class="...">
+    <option value="">Seleccione tipo de pago</option>
+    @foreach($paymentTypes as $type)
+        <option value="{{ $type->Payment_Type_ID }}">{{ $type->Payment_Type_Name }}</option>
+    @endforeach
+</select>
                 @error('payment_type_id') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
             </div>
             <div class="space-y-2">
                 <label class="block text-sm font-medium text-gray-700">Plazo (Meses) <span
                         class="text-red-500">*</span></label>
-                <select wire:model.live="term" id="term"
-                    class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 border">
-                    <option value="">Seleccione el plazo</option>
-                    <option value="1">1 mes</option>
-                    <option value="3">3 meses</option>
-                    <option value="6">6 meses</option>
-                </select>
+            <select wire:model.live="term" id="term" class="...">
+    <option value="0">Seleccione el plazo</option>
+    <option value="1">1 mes</option>
+    <option value="3">3 meses</option>
+    <option value="6">6 meses</option>
+</select>
                 @error('term') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
             </div>
         </div>
@@ -154,10 +149,10 @@
             </div>
 
             <div class="flex items-end">
-                <button type="button" wire:click="cancelTransaction"
-                    class="w-full mr-2 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
-                    Cancelar
-                </button>
+   <button type="button" wire:click="cancelTransaction"
+    class="w-full mr-2 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+    Cancelar
+</button>
                 <button type="submit" onclick="
                             document.getElementById('client_id').value ='';
                             document.getElementById('term').innerHTML ='';
@@ -292,28 +287,59 @@
         </div>
     @endif
 
-    @push('scripts')
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-        <script>
-            window.addEventListener('credit-notify', event => {
-                const Toast = Swal.mixin({
-                    toast: true,
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 3000,
-                    timerProgressBar: true,
-                    didOpen: (toast) => {
-                        toast.addEventListener('mouseenter', Swal.stopTimer)
-                        toast.addEventListener('mouseleave', Swal.resumeTimer)
-                    }
-                });
+   @push('scripts')
+   
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+              document.addEventListener('livewire:initialized', () => {
+        Livewire.on('reset-selects', () => {
+            // Resetear selects normales
+            document.getElementById('client_id').value = '';
+            document.getElementById('payment_type_id').value = '';
+            document.getElementById('term').value = '0';
+            
+            // Si usas Select2
+            if (typeof $ !== 'undefined') {
+                if ($('#client_id').hasClass('select2-hidden-accessible')) {
+                    $('#client_id').val('').trigger('change');
+                }
+                if ($('#payment_type_id').hasClass('select2-hidden-accessible')) {
+                    $('#payment_type_id').val('').trigger('change');
+                }
+                if ($('#term').hasClass('select2-hidden-accessible')) {
+                    $('#term').val('0').trigger('change');
+                }
+            }
+        });
+    });
 
-                Toast.fire({
-                    icon: event.detail.type || 'success',
-                    title: event.detail.title || '¡Operación exitosa!',
-                    text: event.detail.message || ''
-                });
+        // Agregar este listener para el evento reset-selects
+        window.addEventListener('reset-selects', event => {
+            // Resetear los selects a su valor por defecto
+            document.getElementById('client_id').value = '0';
+            document.getElementById('payment_type_id').value = '0';
+            document.getElementById('term').value = '0';
+        });
+
+        window.addEventListener('credit-notify', event => {
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
             });
-        </script>
-    @endpush
+
+            Toast.fire({
+                icon: event.detail.type || 'success',
+                title: event.detail.title || '¡Operación exitosa!',
+                text: event.detail.message || ''
+            });
+        });
+    </script>
+@endpush
 </div>
