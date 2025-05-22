@@ -54,13 +54,6 @@
                                     </label>
                                     @error('Password') <span class="text-sm text-red-600">{{ $message }}</span> @enderror
                                 </div>
-        
-                                <div class="flex items-center space-x-2">
-                                    <input type="checkbox" wire:model="remember" id="remember"
-                                        class="text-pink-600 focus:ring-pink-500">
-                                    <label for="remember" class="text-sm text-gray-600">Recuérdame</label>
-                                </div>
-        
                                 {{-- Botón de login --}}
                                 <div class="relative flex items-center justify-center">
                                     <button type="submit"

@@ -21,57 +21,50 @@ class PurchaseTrasanction extends Component
     public $users, $suppliers, $products, $paymentsType;
     public $userId;
     public $payment_type_id;
-    public $selectedUserId, $selectedSupplierId, $SelectpaymentsTypes;
+    public $selectedUserId;
+    public $selectedSupplierId = 0;
     public $transactionType = 'Compra';
     public $showProductModal = false;
     public $productList = [];
-    public $selectedProductId, $quantity, $unitPrice, $tax = 0.15; // impuesto fijo
+    public $selectedProductId, $quantity, $unitPrice, $tax = 0.15;
 
     protected $rules = [
         'selectedUserId' => 'required|exists:users,User_ID',
         'selectedSupplierId' => 'required|exists:suppliers,Supplier_ID',
-        'SelectpaymentsTypes' => 'required|exists:payment_types,Payment_Type_ID',
+        'payment_type_id' => 'required|exists:payment_types,Payment_Type_ID',
         'productList' => 'required|array|min:1',
         'productList.*.product_id' => 'required|exists:products,Product_ID',
         'productList.*.quantity' => 'required|numeric|min:1',
         'productList.*.unit_price' => 'required|numeric|min:0.01',
     ];
 
-    protected function messages()
-    {
-        return [
-            'selectedUserId.required' => 'El usuario es requerido',
-            'selectedUserId.exists' => 'El usuario seleccionado no es válido',
+    protected $messages = [
+        'selectedUserId.required' => 'El usuario es requerido',
+        'selectedUserId.exists' => 'El usuario seleccionado no es válido',
+        'selectedSupplierId.required' => 'Debe seleccionar un proveedor',
+        'selectedSupplierId.exists' => 'El proveedor seleccionado no es válido',
+        'payment_type_id.required' => 'Debe seleccionar un tipo de pago',
+        'payment_type_id.exists' => 'El tipo de pago seleccionado no es válido',
+        'productList.required' => 'Debe agregar al menos un producto',
+        'productList.min' => 'Debe agregar al menos un producto',
+        'productList.*.product_id.required' => 'El producto es requerido',
+        'productList.*.product_id.exists' => 'El producto seleccionado no es válido',
+        'productList.*.quantity.required' => 'La cantidad es requerida',
+        'productList.*.quantity.numeric' => 'La cantidad debe ser un número',
+        'productList.*.quantity.min' => 'La cantidad debe ser al menos 1',
+        'productList.*.unit_price.required' => 'El precio unitario es requerido',
+        'productList.*.unit_price.numeric' => 'El precio unitario debe ser un número',
+        'productList.*.unit_price.min' => 'El precio unitario debe ser mayor a 0',
+    ];
 
-            'selectedSupplierId.required' => 'Debe seleccionar un proveedor',
-            'selectedSupplierId.exists' => 'El proveedor seleccionado no es válido',
-
-            'SelectpaymentsTypes.required' => 'Debe seleccionar un tipo de pago',
-            'SelectpaymentsTypes.exists' => 'El tipo de pago seleccionado no es válido',
-
-            'productList.required' => 'Debe agregar al menos un producto',
-            'productList.min' => 'Debe agregar al menos un producto',
-
-            'productList.*.product_id.required' => 'El producto es requerido',
-            'productList.*.product_id.exists' => 'El producto seleccionado no es válido',
-
-            'productList.*.quantity.required' => 'La cantidad es requerida',
-            'productList.*.quantity.numeric' => 'La cantidad debe ser un número',
-            'productList.*.quantity.min' => 'La cantidad debe ser al menos 1',
-
-            'productList.*.unit_price.required' => 'El precio unitario es requerido',
-            'productList.*.unit_price.numeric' => 'El precio unitario debe ser un número',
-            'productList.*.unit_price.min' => 'El precio unitario debe ser mayor a 0',
-        ];
-    }
     public function mount()
     {
-        $this->userId = Auth::user()->User_ID;  // CORREGIDO
+        $this->userId = Auth::user()->User_ID;
         $this->users = User::where('Removed', 0)->get();
         $this->suppliers = Supplier::where('Removed', 0)->get();
         $this->products = Product::where('Removed', 0)->get();
-        $this->paymentsType = PaymentType::all(); // Corrected variable name
-        $this->selectedUserId = $this->userId; // Usuario logueado por defecto
+        $this->paymentsType = PaymentType::all();
+        $this->selectedUserId = $this->userId;
     }
 
     public function addProduct()
@@ -80,15 +73,22 @@ class PurchaseTrasanction extends Component
             'selectedProductId' => 'required|exists:products,Product_ID',
             'quantity' => 'required|numeric|min:1',
             'unitPrice' => 'required|numeric|min:0.01',
+            'payment_type_id' => 'required|exists:payment_types,Payment_Type_ID',
         ], [
             'selectedProductId.required' => 'Seleccione un producto',
+            'quantity.required' => 'La cantidad es requerida',
             'quantity.min' => 'La cantidad debe ser al menos 1',
+            'unitPrice.required' => 'El precio unitario es requerido',
             'unitPrice.min' => 'El precio debe ser mayor a 0',
+            'payment_type_id.required' => 'Seleccione un tipo de pago',
+            'payment_type_id.exists' => 'Tipo de pago no válido',
         ]);
 
         $product = Product::find($this->selectedProductId);
-        if (!$product)
+        if (!$product) {
+            $this->addError('selectedProductId', 'Producto no encontrado');
             return;
+        }
 
         $subtotal = $this->quantity * $this->unitPrice;
         $totalWithTax = $subtotal + ($subtotal * $this->tax);
@@ -112,8 +112,8 @@ class PurchaseTrasanction extends Component
             'subtotal' => $subtotal,
             'tax' => $this->tax,
             'total_with_tax' => $totalWithTax
-
         ];
+        
         $this->showProductModal = false;
         $this->resetInputs();
     }
@@ -124,21 +124,37 @@ class PurchaseTrasanction extends Component
         $this->quantity = null;
         $this->unitPrice = null;
     }
+
     public function updatedSelectedProductId($productId)
     {
         if (!$productId) {
             $this->unitPrice = null;
+            return;
+        }
+        
+        $product = Product::find($productId);
+        if ($product) {
+            $this->unitPrice = $product->Price ?? null;
         }
     }
 
     public function removeProduct($index)
     {
         unset($this->productList[$index]);
-        $this->productList = array_values($this->productList); // Reindexar
+        $this->productList = array_values($this->productList);
+    }
+
+    public function cancelTransaction()
+    {$this->selectedSupplierId=0;
+        $this->resetAll();
+        $this->resetErrorBag();
+        session()->flash('info', 'La transacción ha sido cancelada.');
     }
 
     public function saveTransaction()
     {
+        $this->validate();
+
         if (empty($this->productList)) {
             $this->addError('productList', 'Debe agregar al menos un producto.');
             return;
@@ -146,8 +162,8 @@ class PurchaseTrasanction extends Component
 
         DB::transaction(function () {
             $total = collect($this->productList)->sum('total_with_tax');
-
             $now = Carbon::now();
+
             $time = Time::create([
                 'Date' => $now->toDateString(),
                 'Year' => $now->year,
@@ -164,7 +180,7 @@ class PurchaseTrasanction extends Component
                 'Time_ID' => $time->Time_ID,
                 'Total_Amount' => $total,
                 'Purchase_Status' => 'Completado',
-                'Payment_Type_ID' => $this->SelectpaymentsTypes,
+                'Payment_Type_ID' => $this->payment_type_id,
             ]);
 
             foreach ($this->productList as $item) {
@@ -181,13 +197,10 @@ class PurchaseTrasanction extends Component
                 $inventory = Inventory::firstOrNew(['Product_ID' => $item['product_id']]);
                 $inventory->Current_Stock = ($inventory->Current_Stock ?? 0) + $item['quantity'];
                 $inventory->Last_Update = $now->toDateString();
-                if (!$inventory->exists) {
-                    $inventory->Minimum_Stock = 5;
-                }
-
+                $inventory->Minimum_Stock = $inventory->Minimum_Stock ?? 5;
                 $inventory->save();
-
             }
+
             Transaction::create([
                 'Supplier_ID' => $this->selectedSupplierId,
                 'User_ID' => $this->selectedUserId,
@@ -195,11 +208,13 @@ class PurchaseTrasanction extends Component
                 'Total' => $total,
                 'Transaction_Type' => $this->transactionType,
                 'Purchase_ID' => $purchase->Purchase_ID,
-                'Payment_Type_ID' => $this->SelectpaymentsTypes,
+                'Payment_Type_ID' => $this->payment_type_id,
             ]);
 
             $this->resetAll();
+             $this->selectedSupplierId = 0;
             session()->flash('success', 'Compra registrada exitosamente.');
+            $this->dispatch('purchase-completed');
         });
     }
 
@@ -207,7 +222,9 @@ class PurchaseTrasanction extends Component
     {
         $this->selectedUserId = $this->userId;
         $this->selectedSupplierId = null;
+        $this->payment_type_id = null;
         $this->productList = [];
+        $this->showProductModal = false;
     }
 
     public function render()
