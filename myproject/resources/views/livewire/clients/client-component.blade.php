@@ -1,4 +1,15 @@
 <div class="min-h-screen w-full bg-gradient-to-br from-blue-50 to-purple-50">
+    <script>
+    (function (c, s, q, u, a, r, e) {
+        c.hj=c.hj||function(){(c.hj.q=c.hj.q||[]).push(arguments)};
+        c._hjSettings = { hjid: a };
+        r = s.getElementsByTagName('head')[0];
+        e = s.createElement('script');
+        e.async = true;
+        e.src = q + c._hjSettings.hjid + u;
+        r.appendChild(e);
+    })(window, document, 'https://static.hj.contentsquare.net/c/csq-', '.js', 6411567);
+</script>
     <!-- Encabezado -->
     <div class="bg-white shadow-sm w-full border-b border-gray-200 bg-indigo-100">
         <div class=" mx-auto px-4 sm:px-6 lg:px-8 py-4">

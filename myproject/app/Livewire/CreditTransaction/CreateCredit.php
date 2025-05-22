@@ -429,7 +429,7 @@ public function updatedQuantities($value, $key)
 
             $credit = Credit::create([
                 'Client_ID' => $this->client_id,
-                'Payment_Type_ID' => $this->payment_type_id,
+             
                 'Start_Date' => $this->start_date,
                 'Due_Date' => $this->due_date,
                 'Total_Amount' => $totalConInteres,
@@ -467,7 +467,7 @@ public function updatedQuantities($value, $key)
                 'Total' => $this->total_amount,
                 'Transaction_Type' => 'Crédito',
                 'Purchase_ID' => null,
-                'Payment_Type_ID' => $this->payment_type_id,
+                'Payment_Type_ID' => 1,
             ]);
 
             DB::commit();
