@@ -48,25 +48,27 @@
                                         clip-rule="evenodd"></path>
                                 </svg>
                             </div>
-                            <input wire:model.live.debounce.300ms="keyWord" type="text"
-                                placeholder="Buscar proveedor..."
-                                class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                            <input 
+                                 id="search"
+                                wire:model.live.debounce.300ms="keyWord"
+                                type="text" 
+                                placeholder="Buscar proveedor..." 
+                                class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                            >
                         </div>
-                        <button wire:click="clearFilter"
-                            class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors flex items-center justify-center text-sm font-medium">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
-                                </path>
+                        <button 
+                            wire:click="clearFilter"
+                            onclick="document.getElementById('search').value = ''"
+                            class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors flex items-center justify-center text-sm font-medium"
+                        >
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                             </svg>
                             Limpiar
                         </button>
                     </div>
                 </div>
             </div>
-
-            <!-- Mensajes de estado -->
             @if (session()->has('message'))
                 <div class="bg-green-50 border-l-4 border-green-500 p-4 mx-6 mt-4 rounded">
                     <div class="flex items-center">
@@ -100,8 +102,6 @@
                     </div>
                 </div>
             @endif
-
-            <!-- Tabla de proveedores -->
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">

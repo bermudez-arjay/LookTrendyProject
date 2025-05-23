@@ -21,6 +21,7 @@ class Payment extends Model
         'Credit_ID',
         'Payment_Date',
         'Payment_Amount',
+        'Payment_Type_ID'
     ];
 
 
@@ -38,4 +39,9 @@ class Payment extends Model
     {
         return $this->belongsTo(Credit::class, 'Credit_ID', 'Credit_ID');
     }
+      public function paymentType()
+    {
+        return $this->belongsTo('App\Models\PaymentType', 'Payment_Type_ID', 'Payment_Type_ID');
+    }
+
 }

@@ -9,9 +9,9 @@
 
                 <h1 class="text-2xl font-semibold text-center mb-6 text-pink-600">Restablecer contraseña</h1>
 
-                @if (session()->has('message'))
+                @if (session()->has('success'))
                     <div class="bg-green-100 text-green-800 p-3 rounded mb-4 text-center">
-                        {{ session('message') }}
+                        {{ session('success') }}
                     </div>
                 @endif
 
@@ -25,6 +25,7 @@
                     <input type="hidden" wire:model="token">
                     <div class="relative">
                         <input type="email" wire:model="User_Email" disabled class="w-full bg-gray-100 border rounded p-2 cursor-not-allowed">
+                        @error('User_Email') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
                     </div>
 
                     <div class="relative">
@@ -40,6 +41,7 @@
                         <label for="password_confirmation" class="absolute left-0 -top-3.5 text-gray-600 text-sm peer-placeholder-shown:top-2 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:-top-3.5 peer-focus:text-sm peer-focus:text-gray-600">
                             Confirmar contraseña
                         </label>
+                        @error('password_confirmation') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
                     </div>
                     <div class="flex justify-center">
                         <button type="submit" class="bg-pink-600 text-white px-4 py-2 rounded hover:bg-gray-800 transition">

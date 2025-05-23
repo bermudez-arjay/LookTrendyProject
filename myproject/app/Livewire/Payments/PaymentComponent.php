@@ -16,7 +16,7 @@ use Mpdf\Config\FontVariables;
 class PaymentComponent extends Component
 {
     use WithPagination;
-
+    public $payment_type_id;
     public $paymentId;
     public $credit_id;
     public $payment_date;
@@ -33,22 +33,50 @@ class PaymentComponent extends Component
 
     protected $listeners = ['paymentUpdated' => 'updateLastPayment'];
 
+public function confirmDelete($paymentId)
+{
+    $this->paymentToDelete = $paymentId;
+    $this->showDeleteConfirmation = true;
+}
+
+public function deleteConfirmed()
+{
+    Payment::find($this->paymentToDelete)->delete();
+    $this->showDeleteConfirmation = false;
+    $this->paymentToDelete = null;
+    session()->flash('message', 'Abono eliminado correctamente');
+    $this->updateLastPayment();
+    $this->dispatch('paymentUpdated'); 
+}
+
+public function cancelDelete()
+{
+    $this->showDeleteConfirmation = false;
+    $this->paymentToDelete = null;
+}
 
     public function updateLastPayment()
     {
+          $this->lastPayment = Payment::with(['credit', 'credit.client'])
+    ->orderBy('Payment_Date', 'desc')
+    ->orderBy('Payment_ID', 'desc')
+    ->first();
 
-        $this->lastPayment = Payment::with('credit')
-            ->latest('Payment_ID')
-            ->first();
+    $this->lastPaymentHumanDate = $this->lastPayment
+        ? Carbon::parse($this->lastPayment->Payment_Date)->diffForHumans()
+        : 'Sin registros';
 
-        $this->lastPaymentHumanDate = optional($this->lastPayment)->Payment_Date?->diffForHumans() ?? 'Sin registros';
+    $this->totalPaymentAmount = Payment::sum('Payment_Amount');
+    $this->paymentMonth = Payment::whereMonth('Payment_Date', now()->month)
+        ->sum('Payment_Amount');
     }
 
 
     protected $rules = [
         'credit_id' => 'required|exists:credits,Credit_ID',
         'payment_date' => 'required|date',
-        'payment_amount' => 'required|numeric|min:0.01'
+        'payment_amount' => 'required|numeric|min:0.01',
+        'payment_type_id' => 'required|exists:payment_types,Payment_Type_ID'
     ];
     protected $messages = [
         'credit_id.required' => 'Debe seleccionar un crédito.',
@@ -57,6 +85,7 @@ class PaymentComponent extends Component
         'payment_amount.required' => 'El monto del pago es obligatorio.',
         'payment_amount.numeric' => 'El monto debe ser un número.',
         'payment_amount.min' => 'El monto mínimo debe ser :min.'
+        
     ];
     public function receipt($paymentId)
     {
@@ -77,10 +106,9 @@ public function generatePdf($paymentId)
     $remainingBalance = $payment->credit->Total_Amount - $totalPayments;
     $payment->remaining_balance = $remainingBalance;
 
-    // Obtener el nombre del método de pago (asumiendo que hay una relación `paymentType` en el modelo Credit)
     $paymentMethodName = $payment->credit->paymentType->Payment_Type_Name ?? 'No especificado';
 
-    // Configuración de mPDF (igual que antes)
+    
     $defaultConfig = (new ConfigVariables())->getDefaults();
     $fontDirs = $defaultConfig['fontDir'];
     $defaultFontConfig = (new FontVariables())->getDefaults();
@@ -101,10 +129,10 @@ public function generatePdf($paymentId)
         'tempDir' => storage_path('app/mpdf/tmp'),
     ]);
 
-    // Pasar el nombre del método de pago a la vista
+   
     $html = view('livewire.payments.receipt', [
         'payment' => $payment,
-        'paymentMethodName' => $paymentMethodName, // Pasamos directamente el nombre
+        'paymentMethodName' => $paymentMethodName, 
     ])->render();
 
     $mpdf->WriteHTML($html);
@@ -237,6 +265,7 @@ public function generatePdf($paymentId)
         $this->credit_id = '';
         $this->payment_amount = '';
         $this->payment_date = Carbon::now()->format('Y-m-d');
+        $this->payment_type_id = '';
     }
 
 
@@ -277,6 +306,7 @@ public function generatePdf($paymentId)
             'Credit_ID' => $this->credit_id,
             'Payment_Date' => $this->payment_date,
             'Payment_Amount' => $this->payment_amount,
+            'Payment_Type_ID' => $this->payment_type_id, 
         ];
 
         if ($this->paymentId) {
@@ -297,15 +327,7 @@ public function generatePdf($paymentId)
     }
 
 
-    public function confirmDelete($id)
-    {
-        $this->dispatch('swal:confirm', [
-            'type' => 'warning',
-            'title' => '¿Estás seguro?',
-            'text' => 'No podrás revertir esta acción',
-            'id' => $id
-        ]);
-    }
+   
 
     public function delete($id)
     {
