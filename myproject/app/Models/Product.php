@@ -29,7 +29,7 @@ class Product extends Model
     /**
      * @var array
      */
-    protected $fillable = ['Product_Name', 'Description', 'Category', 'Unit_Price', 'Removed'];
+    protected $fillable = ['Category_ID','Product_Name', 'Description', 'Category', 'Unit_Price', 'Removed'];
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
@@ -60,6 +60,10 @@ class Product extends Model
     public function transactions()
     {
         return $this->hasMany('App\Models\Transaction', 'Product_ID', 'Product_ID');
+    }
+        public function category()
+    {
+        return $this->belongsTo(Category::class);
     }
     
 }
