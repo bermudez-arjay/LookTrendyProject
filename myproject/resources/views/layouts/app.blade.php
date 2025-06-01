@@ -272,6 +272,12 @@
                             <i class="fas fa-boxes text-rose-500 mr-2"></i>
                             <span>Productos</span>
                         </a>
+                           <a href="{{ route('categorias') }}" 
+                           class="flex items-center p-2 rounded-lg hover:bg-rose-50 text-sm transition-all"
+                           wire:navigate>
+                            <i class="fas fa-boxes text-rose-500 mr-2"></i>
+                            <span>Categorias</span>
+                        </a>
                     </div>
                 </div>
 

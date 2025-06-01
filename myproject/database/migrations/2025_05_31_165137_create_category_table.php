@@ -15,6 +15,7 @@ return new class extends Migration
             $table->increments('Category_ID');
             $table->string('Category_Name');
             $table->text('Category_Description')->nullable();
+            $table->boolean('Removed')->nullable()->default(false);
         });
     }
 

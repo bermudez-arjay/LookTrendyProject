@@ -1,40 +1,41 @@
-<div class="min-h-screen w-full bg-gradient-to-br from-blue-50 to-purple-50">
+<div>
+   <div class="min-h-screen w-full bg-gradient-to-br from-blue-50 to-purple-50">
     <!-- Encabezado -->
-    <div class="bg-white shadow-sm border-b border-gray-200 bg-indigo-100">
-        <div class="mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <div class="bg-white shadow-sm w-full border-b border-gray-200 bg-indigo-100">
+        <div class=" mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Gestión de Productos</h1>
+                    <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Gestión de Categorías</h1>
                     <nav class="flex items-center text-sm text-gray-600 mt-1">
                         <a href="#" class="text-gray-500 hover:text-gray-700 transition-colors">Dashboard</a>
                         <svg class="mx-2 h-4 w-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
                         </svg>
-                        <span class="text-indigo-600 font-medium">Productos</span>
+                        <span class="text-indigo-600 font-medium">Categorías</span>
                     </nav>
                 </div>
                 <button 
-                    wire:click="$dispatch('openCreateProductModal')"
+                    wire:click="$dispatch('openCreateCategoryModal')"
                     class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center justify-center transition-colors"
                 >
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                     </svg>
-                    Nuevo Producto
+                    Nueva Categoría
                 </button>
             </div>
         </div>
     </div>
 
     <!-- Contenido principal -->
-    <div class="w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div class="w-full px-4 sm:px-6 lg:px-8 py-6">
         <div class="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200">
             <!-- Encabezado de la tabla -->
             <div class="px-6 py-4 border-b border-gray-200 bg-white-100">
                 <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <div>
-                        <h2 class="text-lg font-semibold text-gray-800">Lista de Productos</h2>
-                        <p class="text-sm text-gray-500 mt-1">En la siguiente tabla puede observar la lista de productos</p>
+                        <h2 class="text-lg font-semibold text-gray-800">Lista de Categorías</h2>
+                        <p class="text-sm text-gray-500 mt-1">En la siguiente tabla puede observar la lista de categorías</p>
                     </div>
                     
                     <!-- Barra de búsqueda -->
@@ -46,16 +47,16 @@
                                 </svg>
                             </div>
                             <input 
-                                id="searchProduct"
+                                id="searchCategory"
                                 wire:model.live.debounce.300ms="keyWord"
                                 type="text" 
-                                placeholder="Buscar por nombre..." 
+                                placeholder="Buscar categoría..." 
                                 class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                             >
                         </div>
                         <button 
                             wire:click="clearFilter"
-                            onclick="document.getElementById('searchProduct').value = ''"
+                            onclick="document.getElementById('searchCategory').value = ''"
                             class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors flex items-center justify-center text-sm font-medium"
                         >
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -98,22 +99,18 @@
                 </div>
             @endif
 
-            <!-- Tabla de productos -->
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                ID
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Nombre
                             </th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Descripción
-                            </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Categoría
-                            </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Precio Unitario
                             </th>
                             <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Acciones
@@ -121,26 +118,23 @@
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
-                        @forelse ($products as $product)
+                        @forelse ($categories as $category)
                         <tr class="hover:bg-gray-50 transition-colors">
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                {{ $product->Product_Name }}
-                            </td>
-                            <td class="px-6 py-4 text-sm text-gray-500 max-w-xs">
-                                <span class="line-clamp-2">{{ $product->Description }}</span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                                    {{ $product->category->Category_Name ?? 'Sin categoría' }}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                                    {{ $category->Category_ID }}
                                 </span>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-medium">
-                                ${{ number_format($product->Unit_Price, 2) }}
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">
+                                {{ $category->Category_Name }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-xs truncate">
+                                {{ $category->Category_Description }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <div class="flex justify-end space-x-2">
                                     <button 
-                                        wire:click="$dispatch('editProductById', { Product_ID: '{{ $product->Product_ID }}' })"
+                                        wire:click="$dispatch('editCategoryById', { Category_ID: '{{ $category->Category_ID }}' })"
                                         class="text-indigo-600 hover:text-indigo-900 transition-colors p-1 rounded-md hover:bg-indigo-50"
                                         title="Editar"
                                     >
@@ -150,7 +144,7 @@
                                     </button>
                                     <button 
                                         class="text-red-600 hover:text-red-900 transition-colors p-1 rounded-md hover:bg-red-50"
-                                        wire:click="$dispatch('showDeleteModal', {Product_ID: '{{ $product->Product_ID }}'})"
+                                        wire:click="$dispatch('showDeleteModal', {Category_ID: '{{ $category->Category_ID }}'})"
                                         title="Eliminar"
                                     >
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -163,7 +157,7 @@
                         @empty
                         <tr>
                             <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">
-                                No se encontraron productos
+                                No se encontraron categorías
                             </td>
                         </tr>
                         @endforelse
@@ -173,17 +167,18 @@
 
             <!-- Paginación -->
             <div class="px-6 py-4 border-t border-gray-200 bg-gray-50">
-                {{ $products->links() }}
+                {{ $categories->links() }}
             </div>
         </div>
     </div>
-    <livewire:products.product-create />
-    <livewire:products.product-edit />
-    <livewire:products.product-delete />
+
+    <livewire:category.category-create />
+    <livewire:category.category-edit />
+    <livewire:category.category-delete />
 </div>
 
 <script>
-    window.addEventListener('product-notify', event => {
+    window.addEventListener('category-notify', event => {
         const Toast = Swal.mixin({
             toast: true,
             position: 'top-end',
@@ -203,3 +198,4 @@
         });
     });
 </script>
+</div>

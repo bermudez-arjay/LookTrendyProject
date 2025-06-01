@@ -61,9 +61,9 @@ class Product extends Model
     {
         return $this->hasMany('App\Models\Transaction', 'Product_ID', 'Product_ID');
     }
-        public function category()
-    {
-        return $this->belongsTo(Category::class);
-    }
+public function category()
+{
+    return $this->belongsTo(Category::class, 'Category_ID', 'Category_ID');
+}
     
 }

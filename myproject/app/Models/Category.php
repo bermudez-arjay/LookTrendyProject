@@ -14,10 +14,11 @@ class Category extends Model
      *
      * @var string
      */
+      protected $table = 'category';
       protected $primaryKey = 'Category_ID';
     public $timestamps = false;
 
-    protected $fillable = ['Category_Name', 'Category_Description'];
+    protected $fillable = ['Category_Name', 'Category_Description','Removed'];
     
     public function products()
     {
