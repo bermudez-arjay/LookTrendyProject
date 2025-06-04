@@ -181,7 +181,11 @@
                             </div>
                             <div x-show="open && expanded" x-collapse 
                                 class="ml-10 pl-2 space-y-1 mt-1 animate-fadeIn">
-                               
+                               <a href="#" class="flex items-center p-2 rounded-lg hover:bg-green-50 text-sm transition-all"
+                           wire:navigate>
+                            <i class="fas fa-chart-pie text-green-500 mr-2"></i>
+                            <span>Dashboard</span>
+                        </a>
                                 <a href="{{ route('ventas') }}" 
                                 class="flex items-center p-2 rounded-lg hover:bg-blue-50 text-sm transition-all"
                                 wire:navigate>

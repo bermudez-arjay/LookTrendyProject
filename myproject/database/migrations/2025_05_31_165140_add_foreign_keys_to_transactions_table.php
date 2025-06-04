@@ -18,6 +18,7 @@ return new class extends Migration
             $table->foreign(['Credit_ID'], 'transactions_ibfk_5')->references(['Credit_ID'])->on('credits')->onUpdate('no action')->onDelete('no action');
             $table->foreign(['Purchase_ID'], 'transactions_ibfk_6')->references(['Purchase_ID'])->on('purchases')->onUpdate('no action')->onDelete('no action');
             $table->foreign(['Payment_Type_ID'], 'transactions_ibfk_7')->references(['Payment_Type_ID'])->on('payment_types')->onUpdate('no action')->onDelete('no action');
+            $table->foreign(['Sale_ID'], 'transactions_ibfk_7')->references(['Sale_ID'])->on('sales')->onUpdate('no action')->onDelete('no action');
         });
     }
 
@@ -33,6 +34,7 @@ return new class extends Migration
             $table->dropForeign('transactions_ibfk_5');
             $table->dropForeign('transactions_ibfk_6');
             $table->dropForeign('transactions_ibfk_7');
+             $table->dropForeign('transactions_ibfk_8');
         });
     }
 };
