@@ -154,7 +154,7 @@
                     class="w-full mr-2 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
                     Cancelar
                 </button>
-                <button type="submit" onclick="
+                <button type="reset-selects" onclick="
                             document.getElementById('client_id').value ='';
                             document.getElementById('term').innerHTML ='';
                             document.getElementById('payment_type_id').innerHTML ='';
@@ -291,6 +291,12 @@
     @push('scripts')
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script>
+                  window.addEventListener('reset-selects', event => {
+            // Resetear los selects a su valor por defecto
+            document.getElementById('client_id').value = '0';
+            document.getElementById('payment_type_id').value = '0';
+            document.getElementById('term').value = '0';
+        });
             window.addEventListener('credit-notify', event => {
                 const Toast = Swal.mixin({
                     toast: true,

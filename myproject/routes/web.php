@@ -9,6 +9,7 @@ use App\Livewire\Supplier\SupplierComponent;
 use App\Livewire\Payments\PaymentComponent;
 use App\Livewire\User\UserComponent;
 use App\Livewire\InventoryDashboard\InventoryDashboard;
+use App\Livewire\Category\CategoryComponent;
 use App\Livewire\Products\ProductComponent;
 use App\Livewire\CreditTransaction\CreateCredit;
 use Illuminate\Support\Facades\Route;
@@ -53,7 +54,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/clientes', ClientComponent::class)->name('clientes');
     Route::get('/proveedores', SupplierComponent::class)->name('proveedores');
 
-    // Productos,Inventario 
+    // Productos,Inventario,categorias
+    Route::get('/categorias', CategoryComponent::class)->name('categorias');
     Route::get('/productos', ProductComponent::class)->name('productos');
     Route::get('/inventario', InventoryDashboard::class)->name('inventario');
 

@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('Category', 100)->nullable();
             $table->decimal('Unit_Price', 10)->nullable();
             $table->boolean('Removed')->nullable();
+            $table->unsignedInteger('Category_ID')->nullable()->index('fk_products_category');
         });
     }
 
