@@ -13,6 +13,7 @@ use App\Livewire\Products\ProductComponent;
 use App\Livewire\CreditTransaction\CreateCredit;
 use Illuminate\Support\Facades\Route;
 use App\Livewire\PurchaseTransaction\PurchaseTrasanction;
+use App\Livewire\Sales\CreateSale;
 use App\Livewire\DatabaseBackup\DatabaseBackup;
 
 use Illuminate\Support\Facades\Session;
@@ -63,6 +64,10 @@ Route::middleware(['auth'])->group(function () {
     //Pagos
     Route::get('/payments/{paymentid}/receipt', [PaymentComponent::class, 'receipt'])->name('payments.receipt');
     Route::get('/abonos', PaymentComponent::class)->name('abonos');
+
+      //Ventas
+    Route::get('/ventas', CreateSale::class)->name('ventas');
+    Route::get('/ventas/{sale}', [CreateSale::class, 'show'])->name('sales.show');
 });
 
 
