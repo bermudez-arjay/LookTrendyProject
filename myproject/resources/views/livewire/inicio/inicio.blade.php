@@ -13,16 +13,12 @@
 
     <!-- Contenido Principal -->
     <div class="max-w-7xl mx-auto px-4 py-8">
-        <!-- Sección de Resumen de Créditos -->
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-8">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="font-bold text-gray-800">Resumen de Créditos Hoy</h3>
-                <span class="text-2xl font-bold text-blue-600">
-                    ${{ number_format($this->totalCreditosHoy ?? 0, 2) }}
-                </span>
-            </div>
-            <livewire:charts.credit-chart />
-        </div>
+    <h2 class="text-xl font-semibold text-purple-900 text-center mb-8">Resumen de Créditos</h2>
+
+    <div class="mt-4">
+    <livewire:charts.credit-chart />
+    </div>
+</div>
 
         <!-- Módulos del Sistema -->
         <h2 class="text-xl font-semibold text-purple-900 text-center mb-8">Módulos del Sistema</h2>
