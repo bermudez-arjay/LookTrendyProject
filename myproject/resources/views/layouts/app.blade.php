@@ -168,7 +168,28 @@
                     @endif
                 @endauth
                 
-                
+                 <div x-data="{ open: false }">
+                            <div @click="open = !open; expanded = true; activeMenu = 'Ventas'" 
+                                class="relative flex items-center p-3 rounded-xl hover:bg-white hover:shadow-md transition-all cursor-pointer group menu-item nav-link overflow-hidden"
+                                :class="{'active-menu-item': activeMenu === 'ventas'}">
+                                <div class="w-8 h-8 flex items-center justify-center bg-blue-100 rounded-lg group-hover:bg-blue-200 transition-all">
+                                    <i class="fas fa-shopping-cart text-blue-600 group-hover:text-blue-700"></i>
+                                </div>
+                                <span x-show="expanded" class="ml-3 text-sm font-medium text-purple-800 flex-1 animate-fadeIn">Ventas</span>
+                                <i x-show="expanded" class="fas fa-chevron-down text-xs transition-transform duration-200 text-purple-500"
+                                :class="{'rotate-180': open}"></i>
+                            </div>
+                            <div x-show="open && expanded" x-collapse 
+                                class="ml-10 pl-2 space-y-1 mt-1 animate-fadeIn">
+                               
+                                <a href="{{ route('ventas') }}" 
+                                class="flex items-center p-2 rounded-lg hover:bg-blue-50 text-sm transition-all"
+                                wire:navigate>
+                                    <i class="fas fa-plus-circle text-blue-500 mr-2"></i>
+                                    <span>Nueva Venta</span>
+                                </a>
+                            </div>
+                        </div>
                 <!-- Crédito -->
                 <div x-data="{ open: false }">
                     <div @click="open = !open; expanded = true; activeMenu = 'credito'" 
@@ -373,5 +394,58 @@
             }, 300);
         });
     </script>
+    @if(session('toast'))
+<div class="toast-notification" data-type="{{ session('toast.type') }}">
+    {{ session('toast.message') }}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const toastData = @json(session('toast'));
+    if(toastData) {
+        showToast(toastData.type, toastData.message);
+    }
+});
+
+function showToast(type, message) {
+   
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.classList.add('show'), 10);
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+</script>
+
+<style>
+.toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 20px;
+    border-radius: 4px;
+    color: white;
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.toast.success { background: #28a745; }
+.toast.error { background: #dc3545; }
+.toast.warning { background: #fd7e14; }
+.toast.info { background: #17a2b8; }
+</style>
+@endif
+
 </body>
 </html>

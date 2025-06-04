@@ -3,79 +3,91 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Carbon\Carbon;
 
-/**
- * @property integer $Credit_ID
- * @property integer $Client_ID
- * @property string $Start_Date
- * @property string $Due_Date
- * @property float $Total_Amount
- * @property float $Interest_Rate
- * @property string $Credit_Status
- * @property integer $Payment_Type_ID
- * @property Client $client
- * @property PaymentType $paymentType
- * @property CreditDetail[] $creditDetails
- * @property Transaction[] $transactions
- * @property Payment[] $payments
- */
 class Credit extends Model
 {
-    /**
-     * The primary key for the model.
-     * 
-     * @var string
-     */
     protected $primaryKey = 'Credit_ID';
     public $timestamps = false;
 
-    /**
-     * @var array
-     */
-    protected $fillable = ['Client_ID', 'Start_Date', 'Due_Date', 'Total_Amount', 'Interest_Rate', 'Credit_Status', 'Payment_Type_ID'];
+    protected $fillable = [
+        'Client_ID',
+        'Start_Date',
+        'Due_Date',
+        'Total_Amount',
+        'Interest_Rate',
+        'Credit_Status',
+        'Payment_Type_ID'
+    ];
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function client()
+   
+    protected $casts = [
+        'Start_Date' => 'datetime',
+        'Due_Date' => 'datetime',
+        'Total_Amount' => 'float',
+        'Interest_Rate' => 'float',
+    ];
+
+ 
+
+    public function client(): BelongsTo
     {
-        return $this->belongsTo('App\Models\Client', 'Client_ID', 'Client_ID');
+        return $this->belongsTo(Client::class, 'Client_ID', 'Client_ID');
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function paymentType()
+    public function paymentType(): BelongsTo
     {
-        return $this->belongsTo('App\Models\PaymentType', 'Payment_Type_ID', 'Payment_Type_ID');
+        return $this->belongsTo(PaymentType::class, 'Payment_Type_ID', 'Payment_Type_ID');
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function creditDetails()
+    public function creditDetails(): HasMany
     {
-        return $this->hasMany('App\Models\CreditDetail', 'Credit_ID', 'Credit_ID');
+        return $this->hasMany(CreditDetail::class, 'Credit_ID', 'Credit_ID');
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function transactions()
+    public function transactions(): HasMany
     {
-        return $this->hasMany('App\Models\Transaction', 'Credit_ID', 'Credit_ID');
+        return $this->hasMany(Transaction::class, 'Credit_ID', 'Credit_ID');
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function payments()
+    public function payments(): HasMany
     {
-        return $this->hasMany('App\Models\Payment', 'Credit_ID', 'Credit_ID');
+        return $this->hasMany(Payment::class, 'Credit_ID', 'Credit_ID');
     }
-    
-public function getRemainingBalanceAttribute()
-{
-    return $this->Total_Amount - $this->payments->sum('Payment_Amount');
-}
+
+
+    public function getRemainingBalanceAttribute(): float
+    {
+        return $this->Total_Amount - $this->payments->sum('Payment_Amount');
+    }
+
+    public function getIsPaidAttribute(): bool
+    {
+        return $this->remaining_balance <= 0;
+    }
+
+    public function getIsExpiredAttribute(): bool
+    {
+        return !$this->is_paid && $this->Due_Date && now()->gt($this->Due_Date);
+    }
+
+    public function getComputedStatusAttribute(): string
+    {
+        if ($this->is_paid) {
+            return 'Cancelado';
+        }
+
+        if ($this->is_expired) {
+            return 'Vencido';
+        }
+
+        return 'Pendiente';
+    }
+
+    public function getFormattedDueDateAttribute(): string
+    {
+        return $this->Due_Date ? $this->Due_Date->format('d/m/Y') : 'No definida';
+    }
 }
