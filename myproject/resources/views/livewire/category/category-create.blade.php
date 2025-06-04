@@ -3,6 +3,7 @@
     @if($open)
     <div class="fixed inset-0 z-50 overflow-y-auto">
         <!-- Contenedor del modal -->
+         <div class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm transition-opacity duration-300" aria-hidden="true"></div>
         <div class="flex items-center justify-center min-h-screen p-4">
             <!-- Contenido del modal -->
             <div class="relative bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden transition-all duration-300 transform">
@@ -37,7 +38,7 @@
                             class="block w-full rounded-lg shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 px-4 py-2 text-sm @error('Category_Name') border-red-500 @enderror"
                         />
                         @error('Category_Name')
-                            <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
+                            <p class="mt-1 text-xs text-red-500">{{$message }}</p>
                         @enderror
                     </div>
 
@@ -51,7 +52,7 @@
                             class="block w-full rounded-lg shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 px-4 py-2 text-sm @error('Category_Description') border-red-500 @enderror"
                         ></textarea>
                         @error('Category_Description')
-                            <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
+                            <p class="mt-1 text-xs text-red-500">{{$message }}</p>
                         @enderror
                     </div>
 
