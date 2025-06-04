@@ -4,21 +4,14 @@ namespace App\Livewire\Products;
 
 use Livewire\Component;
 use App\Models\Product;
+use App\Models\Category;
 
 class ProductCreate extends Component
 {
     public $open = false;
-    public $Product_Name, $Description, $Unit_Price, $Category;
+    public $Product_Name, $Description, $Unit_Price, $Category_ID;
     
-    public $categories = [
-        'Calzado', 
-        'Bolsos', 
-        'Higiene', 
-        'Ropa de Dama',
-        'Ropa de Caballero', 
-        'Ropa Infantil', 
-        'Artículos para el Hogar'
-    ]; 
+    public $categories = []; 
 
     protected $rules = [
         'Product_Name' => [
@@ -41,11 +34,9 @@ class ProductCreate extends Component
             'max:999999.99',
             'regex:/^\d+(\.\d{1,2})?$/' 
         ],
-        'Category' => [
+        'Category_ID' => [
             'required',
-            'string',
-            'max:50',
-            'in:Calzado,Bolsos,Higiene,Ropa de Dama,Ropa de Caballero,Ropa Infantil,Artículos para el Hogar'
+            'exists:category,Category_ID'
         ]
     ];
 
@@ -65,12 +56,24 @@ class ProductCreate extends Component
             'Unit_Price.min' => 'El precio no puede ser negativo.',
             'Unit_Price.max' => 'El precio no puede exceder 999,999.99.',
             'Unit_Price.regex' => 'El precio debe tener máximo 2 decimales.',
-            'Category.required' => 'La categoría es obligatoria.',
-            'Category.in' => 'Seleccione una categoría válida.'
+            'Category_ID.required' => 'La categoría es obligatoria.',
+            'Category_ID.exists' => 'Seleccione una categoría válida.'
         ];
     }
 
     protected $listeners = ['openCreateProductModal' => 'openModal'];
+
+    public function mount()
+    {
+        $this->loadCategories();
+    }
+
+    protected function loadCategories()
+    {
+        $this->categories = Category::where('Removed', 0)
+            ->orderBy('Category_Name', 'asc')
+            ->get(['Category_ID', 'Category_Name']);
+    }
 
     public function openModal()
     {
@@ -91,7 +94,7 @@ class ProductCreate extends Component
             'Product_Name',
             'Description',
             'Unit_Price',
-            'Category'
+            'Category_ID'
         ]);
     }
 
@@ -108,7 +111,7 @@ class ProductCreate extends Component
                 'Product_Name' => trim($validatedData['Product_Name']),
                 'Description' => $validatedData['Description'] ? trim($validatedData['Description']) : null,
                 'Unit_Price' => round($validatedData['Unit_Price'], 2),
-                'Category' => $validatedData['Category'],
+                'Category_ID' => $validatedData['Category_ID'],
                 'Removed' => 0 
             ]);
 
