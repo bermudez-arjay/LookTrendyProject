@@ -19,6 +19,8 @@ return new class extends Migration
             $table->decimal('Total_Amount', 10)->nullable();
             $table->decimal('Interest_Rate', 5)->nullable();
             $table->string('Credit_Status', 50)->nullable();
+            $table->decimal('Late_Fee', 10)->nullable();
+             $table->decimal('Discount', 10)->nullable();
         });
     }
 

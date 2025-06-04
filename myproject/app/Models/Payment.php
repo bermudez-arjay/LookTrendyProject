@@ -6,14 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Payment extends Model
-{
-    
+{ 
     protected $table = 'payments';
-
-
     protected $primaryKey = 'Payment_ID';
-
-    
     public $timestamps = false;
 
  
@@ -22,14 +17,14 @@ class Payment extends Model
         'Payment_Date',
         'Payment_Amount',
         'Payment_Type_ID'
-    ];
+        ];
 
 
     protected $casts = [
         'Payment_Date' => 'datetime',
         'Payment_Amount' => 'decimal:2',
     ];
-
+ 
        public static function getTotalPayments()
     {
         return self::sum('Payment_Amount');

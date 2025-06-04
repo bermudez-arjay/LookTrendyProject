@@ -21,6 +21,7 @@
         "enlightn/enlightn": "^2.10",
         "fakerphp/faker": "^1.9.1",
         "kitloong/laravel-migrations-generator": "^7.0",
+        "krlove/eloquent-model-generator": "^2.0",
         "laravel-lang/common": "^6.7",
         "laravel/pint": "^1.0",
         "laravel/sail": "^1.18",
