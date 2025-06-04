@@ -2,9 +2,9 @@
     <h2 class="text-2xl font-bold mb-6 text-gray-800 border-b pb-3">Crear Nuevo Crédito</h2>
 
     <form wire:submit.prevent="save" class="space-y-6">
-        <!-- Sección Cliente y Plazo -->
+      
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <!-- USUARIO -->
+          
             <div class="space-y-2">
                 <label class="block text-sm font-medium text-gray-700">Usuario</label>
                 <input type="text" value="{{ Auth::user()->User_FirstName }}"
@@ -25,12 +25,9 @@
                 </select>
                 @error('client_id') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
             </div>
-
-            <!-- Plazo -->
-
         </div>
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <!-- Sección Tipo de Pago -->
+         
             <div class="space-y-2">
                 <label class="block text-sm font-medium text-gray-700">Tipo de Pago <span
                         class="text-red-500">*</span></label>
@@ -57,9 +54,9 @@
             </div>
         </div>
 
-        <!-- Sección Fechas -->
+      
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <!-- Fecha de Inicio -->
+           
             <div class="space-y-2">
                 <label class="block text-sm font-medium text-gray-700">Fecha de Inicio <span
                         class="text-red-500">*</span></label>
@@ -68,14 +65,13 @@
                 @error('start_date') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
             </div>
 
-            <!-- Fecha de Vencimiento -->
             <div class="space-y-2">
                 <label class="block text-sm font-medium text-gray-700">Fecha de Vencimiento</label>
                 <input type="date" id="due_date" value="{{ $due_date }}" readonly
                     class="mt-1 block w-full rounded-lg bg-gray-50 border-gray-300 shadow-sm py-2 px-3 border">
             </div>
         </div>
-        <!-- Sección Productos -->
+     
         <div class="space-y-4">
             <div class="flex justify-between items-center">
                 <h3 class="text-lg font-medium text-gray-800">Productos</h3>
