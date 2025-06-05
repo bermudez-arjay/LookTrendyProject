@@ -58,6 +58,7 @@ Route::middleware(['auth'])->group(function () {
     });
 
     Route::get('/clientes', ClientComponent::class)->name('clientes');    
+     Route::get('/categorias', CategoryComponent::class)->name('categorias');  
 
     //Créditos
     Route::get('/creditos', CreateCredit::class)->name('creditos');
