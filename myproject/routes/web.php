@@ -53,6 +53,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/proveedores', SupplierComponent::class)->name('proveedores');
         // Productos,Inventario 
         Route::get('/productos', ProductComponent::class)->name('productos');
+        Route::get('/categorias', CategoryComponent::class)->name('categorias');
         Route::get('/inventario', InventoryDashboard::class)->name('inventario');
         // Respaldo de base de datos
         Route::get('/backup', DatabaseBackup::class)->name('backup');
