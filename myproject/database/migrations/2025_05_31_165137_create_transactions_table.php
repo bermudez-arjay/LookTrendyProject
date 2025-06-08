@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('Transaction_Type', 50)->nullable();
             $table->integer('Purchase_ID')->nullable()->index('purchase_id');
             $table->integer('Payment_Type_ID')->nullable()->index('transactions_ibfk_7_idx');
-             $table->integer('Sale_ID')->nullable()->index('sale_id');
+$table->unsignedInteger('Sale_ID')->nullable()->index('sale_id');
         });
     }
 
