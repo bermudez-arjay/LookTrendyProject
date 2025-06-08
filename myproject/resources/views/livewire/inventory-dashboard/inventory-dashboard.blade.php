@@ -132,8 +132,6 @@
         <div class="p-4 border-b flex justify-between items-center">
             <h2 class="text-lg font-semibold">Inventario de Productos</h2>
         </div>
-        
-        <!-- Tarjeta de Bajo Stock -->
         <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 transition-transform hover:scale-[1.01] cursor-pointer"
             wire:click="openLowStockModal">
             <div class="flex items-center justify-between">

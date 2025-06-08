@@ -54,15 +54,13 @@ Route::middleware(['auth'])->group(function () {
         // Productos,Inventario 
         Route::get('/productos', ProductComponent::class)->name('productos');
         Route::get('/inventario', InventoryDashboard::class)->name('inventario');
-        Route::get('/categorias', CategoryComponent::class)->name('categorias');  
-
         // Respaldo de base de datos
         Route::get('/backup', DatabaseBackup::class)->name('backup');
 
     });
 
     Route::get('/clientes', ClientComponent::class)->name('clientes');    
-   
+     Route::get('/categorias', CategoryComponent::class)->name('categorias');  
 
     //Créditos
     Route::get('/creditos', CreateCredit::class)->name('creditos');
