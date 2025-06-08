@@ -1,11 +1,12 @@
 <div>
     @if($open)
     <div class="fixed inset-0 z-50 overflow-y-auto">
-        <!-- Contenedor del modal -->
+           <div class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm transition-opacity duration-300" aria-hidden="true"></div>
+
         <div class="flex items-center justify-center min-h-screen p-4">
-            <!-- Contenido del modal -->
+            
             <div class="relative bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden transition-all duration-300 transform">
-                <!-- Header -->
+               
                 <div class="px-6 pt-6 pb-4 border-b border-gray-100">
                     <div class="flex items-center justify-between">
                         <div>

@@ -9,15 +9,6 @@
                 <p class="text-gray-500 text-sm">{{ now()->translatedFormat('l, d \d\e F \d\e Y') }}</p>
             </div>
         </div>
-    </div>
-
-    <!-- Contenido Principal -->
-    <div class="max-w-7xl mx-auto px-4 py-8">
-    <h2 class="text-xl font-semibold text-purple-900 text-center mb-8">Resumen de Créditos</h2>
-
-    <div class="mt-4">
-    <livewire:charts.credit-chart />
-    </div>
 </div>
 
         <!-- Módulos del Sistema -->

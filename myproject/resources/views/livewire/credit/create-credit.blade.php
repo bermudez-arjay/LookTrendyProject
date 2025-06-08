@@ -26,20 +26,9 @@
                 @error('client_id') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
             </div>
         </div>
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-         
-            <div class="space-y-2">
-                <label class="block text-sm font-medium text-gray-700">Tipo de Pago <span
-                        class="text-red-500">*</span></label>
-                <select wire:model.live="payment_type_id" id="payment_type_id"
-                    class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 border">
-                    <option value="">Seleccione tipo de pago</option>
-                    @foreach($paymentTypes as $type)
-                        <option value="{{ $type->Payment_Type_ID }}">{{ $type->Payment_Type_Name }}</option>
-                    @endforeach
-                </select>
-                @error('payment_type_id') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
-            </div>
+      
+      
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div class="space-y-2">
                 <label class="block text-sm font-medium text-gray-700">Plazo (Meses) <span
                         class="text-red-500">*</span></label>
@@ -52,11 +41,6 @@
                 </select>
                 @error('term') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
             </div>
-        </div>
-
-      
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-           
             <div class="space-y-2">
                 <label class="block text-sm font-medium text-gray-700">Fecha de Inicio <span
                         class="text-red-500">*</span></label>
