@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Route;
 use App\Livewire\PurchaseTransaction\PurchaseTrasanction;
 use App\Livewire\Sales\CreateSale;
 use App\Livewire\DatabaseBackup\DatabaseBackup;
+use App\Livewire\Charts\CreditChart;
 
 use Illuminate\Support\Facades\Session;
 /*
@@ -44,20 +45,20 @@ Route::get('/backup', DatabaseBackup::class)->name('backup');
 Route::middleware(['auth'])->group(function () {
 
     //Inicio
-    Route::get('/inicio', Inicio::class)->name('inicio');
+    Route::get('/inicio', \App\Livewire\Inicio\Inicio::class)->name('inicio')->middleware('auth');
 
     //compras
-    Route::get('/compras', PurchaseTrasanction::class)->name('transaction');
+    Route::middleware(['check.role:Administrador'])->group(function () {
+        Route::get('/compras', PurchaseTrasanction::class)->name('transaction');
+        Route::get('/usuarios', UserComponent::class)->name('usuarios');
+        Route::get('/proveedores', SupplierComponent::class)->name('proveedores');
+        // Productos,Inventario 
+        Route::get('/productos', ProductComponent::class)->name('productos');
+        Route::get('/inventario', InventoryDashboard::class)->name('inventario');
+    });
 
-    //Usuarios,Clientes y Proveedores
-    Route::get('/usuarios', UserComponent::class)->name('usuarios');
-    Route::get('/clientes', ClientComponent::class)->name('clientes');
-    Route::get('/proveedores', SupplierComponent::class)->name('proveedores');
-
-    // Productos,Inventario,categorias
-    Route::get('/categorias', CategoryComponent::class)->name('categorias');
-    Route::get('/productos', ProductComponent::class)->name('productos');
-    Route::get('/inventario', InventoryDashboard::class)->name('inventario');
+    Route::get('/clientes', ClientComponent::class)->name('clientes');    
+     Route::get('/categorias', CategoryComponent::class)->name('categorias');  
 
     //Créditos
     Route::get('/creditos', CreateCredit::class)->name('creditos');
@@ -79,12 +80,3 @@ Route::get('/test-pdf', function() {
 });
 
 
-// Modifica la ruta de prueba para ver los últimos 7 días
-Route::get('/test-credit-amount', function() {
-    return [
-        'hoy' => \App\Models\Credit::whereDate('Start_Date', today())->sum('Total_Amount'),
-        'ultimos_7_dias' => \App\Models\Credit::whereDate('Start_Date', '>=', now()->subDays(7))
-            ->sum('Total_Amount'),
-        'total_general' => \App\Models\Credit::sum('Total_Amount')
-    ];
-});
