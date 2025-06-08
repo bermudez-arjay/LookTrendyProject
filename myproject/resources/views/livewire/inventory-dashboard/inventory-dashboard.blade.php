@@ -99,7 +99,7 @@
         <div class="p-4 border-b">
             <h2 class="text-lg font-semibold">Inventario de Productos</h2>
         </div>
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 transition-transform hover:scale-[1.02] cursor-pointer"
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 transition-transform hover:scale-[1.01] cursor-pointer"
             wire:click="openLowStockModal">
             <div class="flex items-center justify-between">
                 <div>
