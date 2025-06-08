@@ -1,4 +1,5 @@
 <div>
+    <!-- Sección de Filtros y Botones de Exportación -->
     <div class="mb-6 bg-white p-4 rounded-lg shadow-sm border border-gray-100">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -12,18 +13,48 @@
                     </div>
                 </div>
             </div>
-            <div>
-                <label for="date" class="block text-sm font-medium text-gray-700 mb-1">Filtrar por fecha</label>
-                <input type="date" wire:model.lazy="selectedDate"
-                    class="focus:ring-blue-500 focus:border-blue-500 block w-full pl-4 pr-10 py-2 sm:text-sm border-gray-300 rounded-md border">
+            <div class="flex items-end space-x-2">
+                <div class="flex-1">
+                    <label for="date" class="block text-sm font-medium text-gray-700 mb-1">Filtrar por fecha</label>
+                    <input type="date" wire:model.lazy="selectedDate"
+                        class="focus:ring-blue-500 focus:border-blue-500 block w-full pl-4 pr-10 py-2 sm:text-sm border-gray-300 rounded-md border">
+                </div>
+                <div class="flex space-x-2 mb-1">
+                    <button wire:click="exportAllExcel" 
+                        wire:loading.attr="disabled"
+                        class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded text-sm flex items-center transition-colors">
+                        <i class="fas fa-file-excel mr-2"></i>
+                        <span wire:loading.remove wire:target="exportAllExcel">Excel</span>
+                        <span wire:loading wire:target="exportAllExcel">
+                            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        </span>
+                    </button>
+                    <button wire:click="exportAllPdf" 
+                        wire:loading.attr="disabled"
+                        class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded text-sm flex items-center transition-colors">
+                        <i class="fas fa-file-pdf mr-2"></i>
+                        <span wire:loading.remove wire:target="exportAllPdf">PDF</span>
+                        <span wire:loading wire:target="exportAllPdf">
+                            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        </span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+
+    <!-- Tarjetas de Resumen -->
+ <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 transition-transform hover:scale-[1.02]">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-gray-500 text-sm">Compras (Hoy)</p>
+                    <p class="text-gray-500 text-sm">Entradas (Hoy)</p>
                     <p class="text-2xl font-bold text-blue-600">{{ number_format($incomingToday) }}</p>
                 </div>
                 <div class="bg-blue-100 p-3 rounded-full">
@@ -40,7 +71,7 @@
         <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 transition-transform hover:scale-[1.02]">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-gray-500 text-sm">Ventas (Hoy)</p>
+                    <p class="text-gray-500 text-sm">Salidas (Hoy)</p>
                     <p class="text-2xl font-bold text-red-600">{{ number_format($outgoingToday) }}</p>
                 </div>
                 <div class="bg-red-100 p-3 rounded-full">
@@ -95,10 +126,14 @@
             </div>
         </div> --}}
     </div>
+
+    <!-- Tabla de Inventario -->
     <div class="bg-white rounded shadow overflow-hidden mb-6">
-        <div class="p-4 border-b">
+        <div class="p-4 border-b flex justify-between items-center">
             <h2 class="text-lg font-semibold">Inventario de Productos</h2>
         </div>
+        
+        <!-- Tarjeta de Bajo Stock -->
         <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 transition-transform hover:scale-[1.01] cursor-pointer"
             wire:click="openLowStockModal">
             <div class="flex items-center justify-between">
@@ -109,18 +144,18 @@
                     </p>
                 </div>
                 <div class="{{ $lowStockCount > 0 ? 'bg-yellow-100' : 'bg-gray-100' }} p-3 rounded-full">
-                    <i
-                        class="fas fa-exclamation-triangle {{ $lowStockCount > 0 ? 'text-yellow-600' : 'text-gray-600' }} text-xl"></i>
+                    <i class="fas fa-exclamation-triangle {{ $lowStockCount > 0 ? 'text-yellow-600' : 'text-gray-600' }} text-xl"></i>
                 </div>
             </div>
             <div class="mt-4 pt-4 border-t border-gray-100">
                 <p class="text-xs text-gray-500 flex items-center">
-                    <span
-                        class="inline-block w-2 h-2 rounded-full {{ $lowStockCount > 0 ? 'bg-yellow-500' : 'bg-gray-500' }} mr-2"></span>
+                    <span class="inline-block w-2 h-2 rounded-full {{ $lowStockCount > 0 ? 'bg-yellow-500' : 'bg-gray-500' }} mr-2"></span>
                     Productos
                 </p>
             </div>
         </div>
+
+        <!-- Tabla de Productos Completa -->
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
@@ -168,6 +203,8 @@
             {{ $inventoryItems->links() }}
         </div>
     </div>
+
+    <!-- Modal de Bajo Stock -->
     @if($showLowStockModal)
         <div class="fixed inset-0 overflow-y-auto z-50">
             <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
@@ -177,28 +214,51 @@
 
                 <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
 
-                <div
-                    class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+                <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
                     <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                        <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">
-                            Productos con Bajo Stock ({{ $lowStockCount }})
-                        </h3>
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900">
+                                Productos con Bajo Stock ({{ $lowStockCount }})
+                            </h3>
+                            <div class="flex space-x-2">
+                                <button wire:click="exportLowStockExcel" 
+                                    wire:loading.attr="disabled"
+                                    class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded text-sm flex items-center transition-colors">
+                                    <i class="fas fa-file-excel mr-2"></i>
+                                    <span wire:loading.remove wire:target="exportLowStockExcel">Excel</span>
+                                    <span wire:loading wire:target="exportLowStockExcel">
+                                        <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                    </span>
+                                </button>
+                                <button wire:click="exportLowStockPdf" 
+                                    wire:loading.attr="disabled"
+                                    class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded text-sm flex items-center transition-colors">
+                                    <i class="fas fa-file-pdf mr-2"></i>
+                                    <span wire:loading.remove wire:target="exportLowStockPdf">PDF</span>
+                                    <span wire:loading wire:target="exportLowStockPdf">
+                                        <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
 
                         <div class="overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50">
                                     <tr>
-                                        <th
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Producto</th>
-                                        <th
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Stock Actual</th>
-                                        <th
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Stock Mínimo</th>
-                                        <th
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Diferencia</th>
                                     </tr>
                                 </thead>
@@ -239,4 +299,18 @@
             </div>
         </div>
     @endif
+
+    <!-- Loading Indicator solo para exportaciones -->
+    <div wire:loading.flex wire:target="exportAllExcel,exportAllPdf,exportLowStockExcel,exportLowStockPdf" 
+         class="fixed inset-0 bg-black bg-opacity-30 z-50 items-center justify-center">
+        <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm">
+            <div class="flex items-center">
+                <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500 mr-4"></div>
+                <div>
+                    <h3 class="text-lg font-medium text-gray-900">Generando reporte</h3>
+                    <p class="text-sm text-gray-500">Por favor espere...</p>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

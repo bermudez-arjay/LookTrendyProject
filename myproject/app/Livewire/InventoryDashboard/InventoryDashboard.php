@@ -12,11 +12,14 @@ use App\Models\Purchase;
 use App\Models\PurchaseDetail;
 use App\Models\CreditDetail;
 use Carbon\Carbon;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Maatwebsite\Excel\Facades\Excel;
+ use App\Exports\InventoryExport;
+ use App\Exports\LowStockExport;
 
 class InventoryDashboard extends Component
 {
     use WithPagination;
-    
     public $incomingToday = 0;
     public $outgoingToday = 0;
     public $totalIncoming = 0;
@@ -125,6 +128,69 @@ public function checkLowStock()
     public function closeModal()
     {
         $this->showLowStockModal = false;
+    }
+    
+    public function exportAllExcel()
+    {
+        $this->dispatch('exporting');
+        
+        return Excel::download(
+            new InventoryExport(), 
+            'inventario_completo_' . now()->format('Y-m-d') . '.xlsx'
+        );
+    }
+
+    // Método para exportar todo a PDF
+public function exportAllPdf()
+{
+    $this->dispatch('exporting');
+    
+    $inventory = Inventory::with(['product' => function($query) {
+            $query->where('Removed', 0);
+        }])
+        ->whereHas('product', function($query) {
+            $query->where('Removed', 0);
+        })
+        ->orderBy('Current_Stock', 'asc')
+        ->get();
+
+    $pdf = Pdf::loadView('livewire.reports.report-inventory.report-inventory', [
+        'inventory' => $inventory,
+        'title' => 'Inventario Completo',
+        'date' => now()->format('Y-m-d')
+    ]);
+
+    return response()->streamDownload(
+        fn () => print($pdf->output()),
+        'inventario_completo_' . now()->format('Y-m-d') . '.pdf'
+    );
+}
+    // Método para exportar bajo stock a Excel
+    public function exportLowStockExcel()
+    {
+        $this->dispatch('exporting');
+        
+        return Excel::download(
+            new LowStockExport($this->lowStockProducts), 
+            'productos_bajo_stock_' . now()->format('Y-m-d') . '.xlsx'
+        );
+    }
+
+    // Método para exportar bajo stock a PDF
+    public function exportLowStockPdf()
+    {
+        $this->dispatch('exporting');
+        
+        $pdf = Pdf::loadView('livewire.reports.report-inventory.low-stock', [
+            'products' => $this->lowStockProducts,
+            'title' => 'Productos con Bajo Stock',
+            'date' => now()->format('Y-m-d')
+        ]);
+
+        return response()->streamDownload(
+            fn () => print($pdf->output()),
+            'productos_bajo_stock_' . now()->format('Y-m-d') . '.pdf'
+        );
     }
 
     public function render()
