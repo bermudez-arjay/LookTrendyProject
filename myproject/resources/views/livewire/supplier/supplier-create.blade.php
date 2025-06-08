@@ -1,14 +1,13 @@
 <div>
     @if($open)
     <div class="fixed inset-0 z-50 overflow-y-auto">
-        <!-- Fondo difuminado -->
+     
         <div class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm transition-opacity duration-300" aria-hidden="true"></div>
 
-        <!-- Contenedor del modal -->
         <div class="flex items-center justify-center min-h-screen p-4">
-            <!-- Contenido del modal -->
+          
             <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden transition-all duration-300 transform">
-                <!-- Header -->
+             
                 <div class="px-6 pt-6 pb-4 border-b border-gray-100">
                     <div class="flex items-center justify-between">
                         <div>
@@ -25,8 +24,6 @@
                         </button>
                     </div>
                 </div>
-
-                <!-- Mensajes -->
                 @if (session('success'))
                 <div class="bg-emerald-50 px-6 py-3">
                     <div class="flex items-center text-emerald-600 text-sm">
@@ -38,10 +35,10 @@
                 </div>
                 @endif
 
-                <!-- Formulario -->
+               
                 <div class="px-6 py-3 space-y-4">
                     <div class="grid grid-cols-2 md:grid-cols-2 gap-3">
-                        <!-- Identificación -->
+                       
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Identificación</label>
                             <div class="relative">
@@ -56,8 +53,6 @@
                                 @enderror
                             </div>
                         </div>
-
-                        <!-- Nombre del Proveedor -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Nombre del Proveedor</label>
                             <div class="relative">
@@ -72,8 +67,6 @@
                                 @enderror
                             </div>
                         </div>
-
-                        <!-- Email -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
                             <div class="relative">
@@ -89,7 +82,6 @@
                             </div>
                         </div>
 
-                        <!-- RUC -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">RUC</label>
                             <div class="relative">

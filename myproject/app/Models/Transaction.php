@@ -14,12 +14,13 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $Transaction_Type
  * @property integer $Purchase_ID
  * @property integer $Payment_Type_ID
-
+ * @property integer $Sale_ID
  * @property Supplier $supplier
  * @property User $user
  * @property Time $time
  * @property Credit $credit
  * @property Purchase $purchase
+ * @property Sale $sale
  */
 class Transaction extends Model
 {
@@ -34,7 +35,7 @@ class Transaction extends Model
     /**
      * @var array
      */
-    protected $fillable = [ 'Supplier_ID', 'User_ID', 'Time_ID', 'Credit_ID',  'Total', 'Transaction_Type', 'Purchase_ID', 'Payment_Type_ID'];
+    protected $fillable = [ 'Supplier_ID', 'User_ID', 'Time_ID', 'Credit_ID',  'Total', 'Transaction_Type', 'Purchase_ID', 'Payment_Type_ID', 'Sale_ID'];
 
   
     /**
@@ -75,5 +76,12 @@ class Transaction extends Model
     public function purchase()
     {
         return $this->belongsTo('App\Models\Purchase', 'Purchase_ID', 'Purchase_ID');
+    }
+     /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+     public function sale()
+    {
+        return $this->belongsTo('App\Models\Sale', 'Sale_ID', 'Sale_ID');
     }
 }

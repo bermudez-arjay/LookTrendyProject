@@ -17,20 +17,20 @@
             </div>
             <!-- Cliente -->
             <div class="space-y-2">
-                <label class="block text-sm font-medium text-gray-700">Cliente <span class="text-red-500">*</span></label>
-                <select wire:model="selectedClientId"
-                    class="mt-1 block w-full rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 border @error('selectedClientId') border-red-500 @enderror">
-                    <option value="0">Seleccionar cliente</option>
-                    @foreach ($clients as $client)
-                        <option value="{{ $client->Client_ID }}">{{ $client->Client_FirstName }} {{ $client->Client_LastName }}</option>
-                    @endforeach
-                </select>
-                @error('selectedClientId') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
-            </div>
+    <label class="block text-sm font-medium text-gray-700">Cliente <span class="text-red-500">*</span></label>
+    <select wire:model="selectedClientId"
+        class="mt-1 block w-full rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 border @error('selectedClientId') border-red-500 @enderror">
+        <option value="">Seleccionar cliente</option> 
+        @foreach ($clients as $client)
+            <option value="{{ $client->Client_ID }}">{{ $client->Client_FirstName }} {{ $client->Client_LastName }}</option>
+        @endforeach
+    </select>
+    @error('selectedClientId') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+</div>
             <!-- Fecha -->
             <div class="space-y-2">
                 <label class="block text-sm font-medium text-gray-700">Fecha <span class="text-red-500">*</span></label>
-                <input type="date" wire:model="saleDate"
+                <input type="date" wire:model="saleDate" readonly
                     class="mt-1 block w-full rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 border @error('saleDate') border-red-500 @enderror">
                 @error('saleDate') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
             </div>
@@ -108,21 +108,21 @@
                     class="mt-1 block w-full rounded-lg bg-white border-gray-300 shadow-sm py-2 px-3 border font-bold text-gray-900">
             </div>
 
-            <div class="space-y-2">
-                <label class="block text-sm font-medium text-gray-700">Método de Pago <span class="text-red-500">*</span></label>
-                <select wire:model="payment_type_id" wire:change="updatePaymentFields"
-                    class="mt-1 block w-full rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 border @error('payment_type_id') border-red-500 @enderror">
-                    <option value="">Seleccionar método</option>
-                    @foreach($paymentTypes as $type)
-                        <option value="{{ $type->Payment_Type_ID }}">{{ $type->Payment_Type_Name }}</option>
-                    @endforeach
-                </select>
-                @error('payment_type_id') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
-            </div>
+           <div class="space-y-2">
+    <label class="block text-sm font-medium text-gray-700">Método de Pago <span class="text-red-500">*</span></label>
+    <select wire:model="payment_type_id" wire:change="updatePaymentFields"
+        class="mt-1 block w-full rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 border @error('payment_type_id') border-red-500 @enderror">
+        <option value="">Seleccionar método</option>
+        @foreach($paymentTypes as $type)
+            <option value="{{ $type->Payment_Type_ID }}">{{ $type->Payment_Type_Name }}</option>
+        @endforeach
+    </select>
+    @error('payment_type_id') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+</div>
 
-      @if($show_amount_fields)
-   
+   @if($show_amount_fields)
     @if($payment_type_id == 2)
+     
         <div class="md:col-span-2 space-y-2">
             <label class="block text-sm font-medium text-gray-700">
                 Monto en Dólares <span class="text-red-500">*</span>
@@ -131,10 +131,10 @@
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <span class="text-gray-500">$</span>
                 </div>
-                 <input wire:model.live="received_amount" 
-           type="number" step="0.01" min="0.01"
-           class="block w-full pl-7 pr-12 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 @error('received_amount') border-red-500 @enderror"
-           placeholder="0.00">
+                <input wire:model.live="dollar_amount" 
+                       type="number" step="0.01" min="0.01"
+                       class="block w-full pl-7 pr-12 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 @error('dollar_amount') border-red-500 @enderror"
+                       placeholder="0.00">
                 <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                     <span class="text-gray-500">USD</span>
                 </div>
@@ -146,43 +146,33 @@
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <span class="text-gray-500">C$</span>
                 </div>
-                <input type="text" value="C${{ number_format($this->convertedAmount, 2) }}" readonly
-                    class="block w-full pl-7 pr-12 py-2 border border-gray-300 rounded-lg bg-gray-50">
+                <input type="text" 
+                       value="C${{ number_format($this->convertedAmount, 2) }}" 
+                       readonly
+                       class="block w-full pl-7 pr-12 py-2 border border-gray-300 rounded-lg bg-gray-50">
             </div>
+        </div>
+    @else
+    
+        <div class="md:col-span-2 space-y-2">
+            <label class="block text-sm font-medium text-gray-700">
+                Monto Recibido (Córdobas) <span class="text-red-500">*</span>
+            </label>
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <span class="text-gray-500">C$</span>
+                </div>
+                <input wire:model.live="cordoba_amount" 
+                       type="number" step="0.01" min="0.01"
+                       class="block w-full pl-7 pr-12 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 @error('cordoba_amount') border-red-500 @enderror"
+                       placeholder="0.00">
+                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <span class="text-gray-500">NIO</span>
+                </div>
+            </div>
+            @error('cordoba_amount') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
         </div>
     @endif
-    <div class="md:col-span-2 space-y-2">
-        <label class="block text-sm font-medium text-gray-700">
-            @if($payment_type_id == 1)
-                Monto Recibido (Córdobas) <span class="text-red-500">*</span>
-            @else
-                Monto Recibido (Dólares) <span class="text-red-500">*</span>
-            @endif
-        </label>
-        <div class="relative">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <span class="text-gray-500">
-                    {{ $payment_type_id == 2 ? '$' : 'C$' }}
-                </span>
-            </div>
-          <input wire:model.live="cordoba_amount" 
-           wire:change="$set('received_amount', $event.target.value)"
-           type="number" step="0.01" min="0.01"
-           class="block w-full pl-7 pr-12 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 @error('cordoba_amount') border-red-500 @enderror"
-           placeholder="0.00">
-            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                <span class="text-gray-500">
-                    {{ $payment_type_id == 2 ? 'USD' : 'NIO' }}
-                </span>
-            </div>
-        </div>
-        @if($payment_type_id == 1)
-            @error('cordoba_amount') <span class="text-red-500 text-xs">{{$message }}</span> @enderror
-        @else
-            @error('received_amount') <span class="text-red-500 text-xs">{{$message }}</span> @enderror
-        @endif
-    </div>
-
     @if($change_amount > 0)
         <div class="md:col-span-2 space-y-2">
             <label class="block text-sm font-medium text-gray-700">
@@ -192,9 +182,10 @@
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <span class="text-gray-500">C$</span>
                 </div>
-                <input type="text" readonly 
-                    value="C${{ number_format($change_amount, 2) }}"
-                    class="block w-full pl-7 pr-12 py-2 border border-gray-300 rounded-lg bg-gray-50">
+                <input type="text" 
+                       readonly 
+                       value="C${{ number_format($change_amount, 2) }}"
+                       class="block w-full pl-7 pr-12 py-2 border border-gray-300 rounded-lg bg-gray-50">
             </div>
         </div>
     @endif
