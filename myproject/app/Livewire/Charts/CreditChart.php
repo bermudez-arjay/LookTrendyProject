@@ -45,10 +45,7 @@ class CreditChart extends Component
             $endDate->format('Y-m-d')
         ])->exists();
 
-        if (!$recentCreditsExist) {
-            $this->prepareFallbackData();
-            return;
-        }
+       
         
         $this->totalCreditosHoy = Credit::whereDate('Start_Date', $endDate->format('Y-m-d'))
             ->sum('Total_Amount');
