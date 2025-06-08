@@ -30,32 +30,22 @@ class CreateSale extends Component
     public $received_amount = 0; 
     public $change_amount = 0; 
 
-   protected function rules()
+  protected function rules()
 {
-    return [
+    $rules = [
         'selectedClientId' => 'required|numeric|min:1',
         'saleDate' => 'required|date',
         'productList' => 'required|array|min:1',
-        'payment_type_id' => 'required|in:1,2', 
-        'dollar_amount' => [
-            'nullable', 
-            'required_if:payment_type_id,2',
-            'numeric',
-            'min:0.01'
-        ],
-        'cordoba_amount' => [
-            'nullable', 
-            'required_if:payment_type_id,1',
-            'numeric',
-            'min:0.01'
-        ],
-        'received_amount' => [
-            'nullable',
-            'required_if:payment_type_id,1,2',
-            'numeric',
-            'min:0.01'
-        ]
+        'payment_type_id' => 'required|in:1,2',
     ];
+
+    if ($this->payment_type_id == 2) {
+        $rules['dollar_amount'] = 'required|numeric|min:0.01';
+    } else {
+        $rules['cordoba_amount'] = 'required|numeric|min:0.01';
+    }
+
+    return $rules;
 }
 protected $messages = [
     'selectedClientId.required' => 'Debe seleccionar un cliente',
@@ -65,20 +55,19 @@ protected $messages = [
     'productList.required' => 'Debe agregar al menos un producto',
     'productList.min' => 'Debe agregar al menos un producto',
     'payment_type_id.required' => 'Seleccione un tipo de pago',
-    'dollar_amount.required_if' => 'El monto en dólares es requerido para pagos en USD',
+    'dollar_amount.required' => 'El monto en dólares es requerido',
+    'dollar_amount.numeric' => 'El monto en dólares debe ser numérico',
     'dollar_amount.min' => 'El monto en dólares debe ser mayor a 0',
-    'cordoba_amount.required_if' => 'El monto en córdobas es requerido para pagos en C$',
+    'cordoba_amount.required' => 'El monto en córdobas es requerido',
+    'cordoba_amount.numeric' => 'El monto en córdobas debe ser numérico',
     'cordoba_amount.min' => 'El monto en córdobas debe ser mayor a 0',
-    'received_amount.required' => 'Ingrese el monto recibido',
-    'received_amount.min' => 'El monto recibido debe ser mayor a 0',
-];
-    public function getConvertedAmountProperty()
-    {
-        if ($this->payment_type_id == 2 && isset($this->dollar_amount)) {
-            return number_format(floatval($this->dollar_amount) * $this->exchangeRate, 2);
-        }
-        return 0;
+];   public function getConvertedAmountProperty()
+{
+    if ($this->payment_type_id == 2 && $this->dollar_amount > 0) {
+        return floatval($this->dollar_amount) * $this->exchangeRate;
     }
+    return 0;
+}
 
     public function getTotalAmountProperty()
     {
@@ -112,16 +101,14 @@ public function updatedCordobaAmount($value)
 
     public function calculateChange()
 {
-  
-    $cordobaAmount = floatval($this->cordoba_amount) ?? 0;
-    $receivedAmount = floatval($this->received_amount) ?? 0;
-    $totalAmount = floatval($this->total_amount) ?? 0;
-    $convertedAmount = floatval($this->convertedAmount) ?? 0;
-
+    $total = floatval($this->total_amount) ?? 0;
+    
     if ($this->payment_type_id == 1) {
-        $this->change_amount = max(0, $cordobaAmount - $totalAmount);
+        $received = floatval($this->cordoba_amount) ?? 0;
+        $this->change_amount = max(0, $received - $total);
     } else {
-        $this->change_amount = max(0, $receivedAmount - $convertedAmount);
+        $received = floatval($this->dollar_amount) ?? 0;
+        $this->change_amount = max(0, ($received * $this->exchangeRate) - $total);
     }
 }
       public function validateAmount()
@@ -171,7 +158,7 @@ public function updatedCordobaAmount($value)
         $this->dollar_amount = null;
         $this->cordoba_amount = null;
     }
-
+  
     public function updatedTotalAmount()
     {
         $this->calculateChange();
@@ -290,20 +277,47 @@ public function updatedCordobaAmount($value)
         $this->reset();
         $this->saleDate = now()->format('Y-m-d');
     }
+    public function resetForm()
+{
+    $this->reset([
+        'selectedClientId',
+        'payment_type_id',
+        'productList',
+        'dollar_amount',
+        'cordoba_amount',
+        'received_amount',
+        'change_amount'
+    ]);
+    
+  
+    $this->resetValidation();
+    
+    $this->selectedClientId = '';
+    $this->payment_type_id = ''; 
+    
+   
+    $this->saleDate = now()->format('Y-m-d');
+    $this->show_amount_fields = false;
+}
 public function saveSale()
 {
+    \Log::debug('Datos antes de validar:', [
+        'productList' => $this->productList,
+        'dollar_amount' => $this->dollar_amount,
+        'payment_type_id' => $this->payment_type_id
+    ]);
+
     try {
         $this->validate();
-        
+
         $date = Carbon::parse($this->saleDate); 
-     
         $subtotal = collect($this->productList)->sum('subtotal');
         $vatAmount = $subtotal * 0.15;
         $totalAmount = $subtotal + $vatAmount;
-       
+
         DB::beginTransaction();
         
-        $time = Time::create([
+          $time = Time::create([
             'Date' => $date->format('Y-m-d'),
             'Year' => $date->year,
             'Quarter' => ceil($date->month / 3),
@@ -312,14 +326,14 @@ public function saveSale()
             'Hour' => $date->format('H:i:s'),
             'Day_of_Week' => $date->dayOfWeekIso,
         ]);
-
-        $sale = Sale::create([
+        $saleData = [
             'Client_ID' => $this->selectedClientId,
             'Sale_Date' => $this->saleDate,
             'Sale_VAT' => $vatAmount,
             'Total_Amount' => $totalAmount,
-        ]);
-        
+        ];
+     
+        $sale = Sale::create($saleData);
         foreach ($this->productList as $item) {
             SaleDetail::create([
                 'Sale_ID' => $sale->Sale_ID,
@@ -333,8 +347,14 @@ public function saveSale()
                 $inventory->decrement('Current_Stock', $item['quantity']);
             }
         }
- 
-        Transaction::create([
+       
+        $receivedAmount = ($this->payment_type_id == 2) 
+            ? $this->dollar_amount * $this->exchangeRate
+            : $this->cordoba_amount;
+
+      
+        $transactionData = [
+            'Sale_ID' => $sale->Sale_ID,  
             'Supplier_ID' => null,
             'User_ID' => auth()->user()->User_ID,
             'Time_ID' => $time->Time_ID,
@@ -343,21 +363,40 @@ public function saveSale()
             'Transaction_Type' => 'Venta',
             'Purchase_ID' => null,
             'Payment_Type_ID' => $this->payment_type_id,
-            'Sale_ID' => $sale->Sale_ID,    
-        ]);
+            'Received_Amount' => $receivedAmount,
+            'Exchange_Rate' => $this->exchangeRate,
+            'Dollar_Amount' => ($this->payment_type_id == 2) ? $this->dollar_amount : null,
+        ];
+        
+        Transaction::create($transactionData);
         
         DB::commit();
-       
-        $this->resetExcept(['saleDate']);
+        
+        \Log::info('Venta completada exitosamente', [
+            'sale_id' => $sale->Sale_ID,
+            'total' => $totalAmount,
+            'received' => $receivedAmount,
+            'dollar_amount' => $this->dollar_amount ?? null
+        ]);
+        
+       $this->resetForm();
         $this->saleDate = now()->format('Y-m-d');
         
         session()->flash('success', 'Venta registrada exitosamente');
             
     } catch (\Illuminate\Validation\ValidationException $e) {
         DB::rollBack();
+        \Log::error('Error de validación', [
+            'error' => $e->getMessage(),
+            'errors' => $e->validator->errors()->all()
+        ]);
         session()->flash('error', 'Error de validación: '.implode(' ', $e->validator->errors()->all()));
     } catch (\Exception $e) {
         DB::rollBack();
+        \Log::error('Error general', [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
         session()->flash('error', 'Error al registrar la venta: '.$e->getMessage());
     }
 }

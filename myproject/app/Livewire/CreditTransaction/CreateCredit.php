@@ -49,7 +49,6 @@ class CreateCredit extends Component
     {
         return [
             'client_id' => 'required|exists:clients,Client_ID',
-            'payment_type_id' => 'required|exists:payment_types,Payment_Type_ID',
             'start_date' => 'required|date',
             'due_date' => 'required|date|after_or_equal:start_date',
             'total_amount' => 'required|numeric|min:0',
@@ -63,10 +62,7 @@ class CreateCredit extends Component
     return [
         'client_id.required' => 'Debe seleccionar un cliente',
         'client_id.exists' => 'El cliente seleccionado no es válido',
-        
-        'payment_type_id.required' => 'Debe seleccionar un tipo de pago',
-        'payment_type_id.exists' => 'El tipo de pago seleccionado no es válido',
-        
+   
         'start_date.required' => 'La fecha de inicio es obligatoria',
         'start_date.date' => 'La fecha de inicio debe ser una fecha válida',
         
