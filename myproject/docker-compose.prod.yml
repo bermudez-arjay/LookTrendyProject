@@ -3,8 +3,8 @@ services:
     build: .
     environment:
       - APP_ENV=demo
-      - APP_URL=https://tu-app.a.run.app  # Actualiza con tu URL de Cloud Run
-      - VITE_APP_URL=https://tu-app.a.run.app
+      - APP_URL=https://looktrendy-demo-xyz.a.run.app  # Actualiza con tu URL de Cloud Run
+      - VITE_APP_URL=https://looktrendy-demo-xyz.a.run.app
       - DB_HOST=127.0.0.1  # Localhost no funciona bien en Cloud Run, usa 127.0.0.1
       - DB_PORT=3306
       - DB_DATABASE=looktrendy
