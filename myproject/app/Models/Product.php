@@ -65,5 +65,13 @@ public function category()
 {
     return $this->belongsTo(Category::class, 'Category_ID', 'Category_ID');
 }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function saleDetails()
+    {
+        return $this->hasMany(SaleDetail::class, 'Product_ID');
+    }
     
 }

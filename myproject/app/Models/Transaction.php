@@ -84,4 +84,8 @@ class Transaction extends Model
     {
         return $this->belongsTo('App\Models\Sale', 'Sale_ID', 'Sale_ID');
     }
+    public function paymentType()
+{
+    return $this->belongsTo(PaymentType::class, 'Payment_Type_ID');
+}
 }
