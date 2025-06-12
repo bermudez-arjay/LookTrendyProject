@@ -38,37 +38,63 @@ class InventoryDashboard extends Component
         $this->loadSummaryData();
         $this->checkLowStock();
     }
-
-    public function loadSummaryData()
-    {
-        $date = Carbon::parse($this->selectedDate);
-        
-$this->incomingToday = Time::whereDate('Date', $date)
-    ->whereHas('purchases.transactions')
-    ->with(['purchases.purchaseDetails' => function($query) {
-        $query->select('Purchase_ID', 'Quantity');
-    }])
-    ->get()
-    ->sum(function($time) {
-        return $time->purchases->sum(function($purchase) {
-            return $purchase->purchaseDetails->sum('Quantity');
+public function loadSummaryData()
+{
+    $date = Carbon::parse($this->selectedDate);
+    $month = $date->month;
+    $year = $date->year;
+    
+    $this->incomingToday = Time::whereDate('Date', $date)
+        ->whereHas('purchases.transactions')
+        ->with(['purchases.purchaseDetails' => function($query) {
+            $query->select('Purchase_ID', 'Quantity');
+        }])
+        ->get()
+        ->sum(function($time) {
+            return $time->purchases->sum(function($purchase) {
+                return $purchase->purchaseDetails->sum('Quantity');
+            });
         });
-    });
-       $this->outgoingToday = Credit::whereDate('Start_Date', $date)
-    ->whereHas('transactions.time', function($query) use ($date) {
-        $query->whereDate('Date', $date);
-    })
-    ->with(['creditDetails' => function($query) {
-        $query->select('Credit_ID', 'Quantity');
-    }])
-    ->get()
-    ->sum(function($credit) {
-        return $credit->creditDetails->sum('Quantity');
-    });
-        
-        $this->totalIncoming = PurchaseDetail::sum('Quantity');
-        $this->totalOutgoing = CreditDetail::sum('Quantity');
-    }
+
+    $this->outgoingToday = Credit::whereDate('Start_Date', $date)
+        ->whereHas('transactions.time', function($query) use ($date) {
+            $query->whereDate('Date', $date);
+        })
+        ->with(['creditDetails' => function($query) {
+            $query->select('Credit_ID', 'Quantity');
+        }])
+        ->get()
+        ->sum(function($credit) {
+            return $credit->creditDetails->sum('Quantity');
+        });
+
+    $this->totalIncoming = Time::whereMonth('Date', $month)
+        ->whereYear('Date', $year)
+        ->whereHas('purchases.transactions')
+        ->with(['purchases.purchaseDetails' => function($query) {
+            $query->select('Purchase_ID', 'Quantity');
+        }])
+        ->get()
+        ->sum(function($time) {
+            return $time->purchases->sum(function($purchase) {
+                return $purchase->purchaseDetails->sum('Quantity');
+            });
+        });
+
+    $this->totalOutgoing = Credit::whereMonth('Start_Date', $month)
+        ->whereYear('Start_Date', $year)
+        ->whereHas('transactions.time', function($query) use ($month, $year) {
+            $query->whereMonth('Date', $month)
+                  ->whereYear('Date', $year);
+        })
+        ->with(['creditDetails' => function($query) {
+            $query->select('Credit_ID', 'Quantity');
+        }])
+        ->get()
+        ->sum(function($credit) {
+            return $credit->creditDetails->sum('Quantity');
+        });
+}
 
 public function checkLowStock()
 {
@@ -97,22 +123,32 @@ public function checkLowStock()
     return $productsInfo;
 }
     
-    public function filteredProducts()
-    {
-        $keyWord = '%' . $this->keyWord . '%';
+public function filteredProducts()
+{
+    $query = Inventory::with(['product' => function($query) {
+            $query->where('Removed', 0);
+        }])
+        ->whereHas('product', function($query) {
+            $query->where('Removed', 0);
+        });
 
-        return Inventory::with('product')
-            ->whereHas('product', function($query) use ($keyWord) {
-                $query->where('Product_ID', 'LIKE', $keyWord)
-                    ->orWhere('Product_Name', 'LIKE', $keyWord)
-                    ->orWhere('Description', 'LIKE', $keyWord)
-                    ->orWhere('Category', 'LIKE', $keyWord);
+    if (!empty(trim($this->keyWord))) {
+        $keyWord = '%'.trim($this->keyWord).'%';
+        
+        $query->where(function($q) use ($keyWord) {
+            $q->whereHas('product', function($q) use ($keyWord) {
+                $q->where('Product_ID', 'LIKE', $keyWord)
+                  ->orWhere('Product_Name', 'LIKE', $keyWord)
+                  ->orWhere('Description', 'LIKE', $keyWord)
+                  ->orWhere('Category', 'LIKE', $keyWord);
             })
             ->orWhere('Current_Stock', 'LIKE', $keyWord)
-            ->orWhere('Minimum_Stock', 'LIKE', $keyWord)
-            ->orderBy('Current_Stock', 'asc')
-            ->paginate(10);
+            ->orWhere('Minimum_Stock', 'LIKE', $keyWord);
+        });
     }
+
+    return $query->orderBy('Current_Stock', 'asc')->paginate(10);
+}
     
   public function updatedSelectedDate($value)
 {
@@ -193,21 +229,10 @@ public function exportAllPdf()
         );
     }
 
-    public function render()
+public function render()
 {
-    $inventoryItems = empty($this->keyWord) 
-        ? Inventory::with(['product' => function($query) {
-              $query->where('Removed', 0);
-          }])
-          ->whereHas('product', function($query) {
-              $query->where('Removed', 0);
-          })
-          ->orderBy('Current_Stock', 'asc')
-          ->paginate(10)
-        : $this->filteredProducts();
-        
     return view('livewire.inventory-dashboard.inventory-dashboard', [
-        'inventoryItems' => $inventoryItems
+        'inventoryItems' => $this->filteredProducts()
     ])->layout('layouts.app');
 }
 }
