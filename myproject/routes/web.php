@@ -16,6 +16,9 @@ use Illuminate\Support\Facades\Route;
 use App\Livewire\PurchaseTransaction\PurchaseTrasanction;
 use App\Livewire\Sales\CreateSale;
 use App\Livewire\DatabaseBackup\DatabaseBackup;
+use App\Livewire\Reports\CreditReport\CreditReport;
+use App\Livewire\Reports\PaymentReport\PaymentReport;
+use App\Livewire\Charts\CreditChart;
 
 use Illuminate\Support\Facades\Session;
 /*
@@ -75,9 +78,17 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/payments/{paymentid}/receipt', [PaymentComponent::class, 'receipt'])->name('payments.receipt');
     Route::get('/abonos', PaymentComponent::class)->name('abonos');
 
+
       //Ventas
     Route::get('/ventas', CreateSale::class)->name('ventas');
     Route::get('/ventas/{sale}', [CreateSale::class, 'show'])->name('sales.show');
+   Route::view('/dashboard/ventas', 'livewire.sale.sale-dashboard')->name('dashboard.ventas');
+    Route::get('/ventas/{sale}/factura', [CreateSale::class, 'exportPDF'])->name('ventas.factura');
+
+
+    //Reportes
+    Route::get('/reporte-creditos', CreditReport::class)->name('reporte.creditos');
+    Route::get('/reporte-abonos', PaymentReport::class)->name('reporte.abonos');
 });
 
 

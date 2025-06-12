@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-    <script src="{{ mix('/js/app.js') }}"></script>
+    @vite('resources/js/app.js')
     <style>
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
@@ -167,22 +167,22 @@
                 @endauth
                 
                <div x-data="{ open: false }">
-    <div @click="open = !open; expanded = true; activeMenu = 'ventas'" 
-                         class="relative flex items-center p-3 rounded-xl hover:bg-white hover:shadow-md transition-all cursor-pointer group menu-item nav-link overflow-hidden"
-                         :class="{'active-menu-item': activeMenu === 'ventas'}">
-                        <div class="w-8 h-8 flex items-center justify-center bg-pink-100 rounded-lg group-hover:bg-pink-200 transition-all">
-                             <i class="fas fa-shopping-basket text-pink-500 text-sm"></i>
-                        </div>
-                        <span x-show="expanded" class="ml-3 text-sm font-medium text-purple-800 flex-1 animate-fadeIn">Ventas</span>
-                        <i x-show="expanded" class="fas fa-chevron-down text-xs transition-transform duration-200 text-purple-500"
-                           :class="{'rotate-180': open}"></i>
-                    </div>
+    <div @click="open = !open; expanded = true; activeMenu ='ventas'" 
+         class="relative flex items-center p-3 rounded-xl hover:bg-white hover:shadow-md transition-all cursor-pointer group menu-item nav-link overflow-hidden"
+         :class="{'active-menu-item': activeMenu === 'ventas'}">
+        <div class="w-8 h-8 flex items-center justify-center bg-pink-100 rounded-lg group-hover:bg-pink-200 transition-all">
+            <i class="fas fa-shopping-basket text-pink-500 text-sm"></i>
+        </div>
+        <span x-show="expanded" class="ml-3 text-sm font-medium text-purple-800 flex-1 animate-fadeIn">Ventas</span>
+        <i x-show="expanded" class="fas fa-chevron-down text-xs transition-transform duration-200 text-purple-500"
+           :class="{'rotate-180': open}"></i>
+    </div>
 
     <div x-show="open && expanded" x-collapse 
-         class="ml-10 pl-2 space-y-1 mt-1 animate-fadeIn border-l-2 border-pink-200">
-        <a href="#" class="flex items-center p-2 rounded-lg hover:bg-pink-100 text-sm transition-all"
+         class="ml-10 pl-2 space-y-1 mt-1 animate-fadeIn">
+         <a href="{{ route('dashboard.ventas') }}"class="flex items-center p-2 rounded-lg hover:bg-pink-100 text-sm transition-all"
            wire:navigate>
-            <div class="w-6 h-6 flex items-center justify-center bg-pink-100 rounded-full mr-2">
+            <div class="w-6 h-6 flex items-center justify-center  rounded-full mr-2">
                 <i class="fas fa-chart-pie text-pink-600 text-xs"></i>
             </div>
             <span class="text-pink-800">Dashboard</span>
@@ -190,13 +190,14 @@
         <a href="{{ route('ventas') }}" 
            class="flex items-center p-2 rounded-lg hover:bg-pink-100 text-sm transition-all"
            wire:navigate>
-            <div class="w-6 h-6 flex items-center justify-center bg-pink-100 rounded-full mr-2">
+            <div class="w-6 h-6 flex items-center justify-center  rounded-full mr-2">
                 <i class="fas fa-tags text-pink-600 text-xs"></i>
             </div>
             <span class="text-pink-800">Nueva Venta</span>
         </a>
     </div>
 </div>
+
                 <!-- Crédito -->
                 <div x-data="{ open: false }">
                     <div @click="open = !open; expanded = true; activeMenu = 'credito'" 
@@ -309,6 +310,31 @@
                         </a>
                     </div>
                 </div>
+              <div x-data="{ open: false }">
+    <div @click="open = !open; expanded = true; activeMenu = 'reportes'" 
+         class="relative flex items-center p-3 rounded-xl hover:bg-white hover:shadow-md transition-all cursor-pointer group menu-item nav-link overflow-hidden"
+         :class="{'active-menu-item': activeMenu === 'reportes'}">
+        <div class="w-8 h-8 flex items-center justify-center bg-cyan-100 rounded-lg group-hover:bg-cyan-200 transition-all">
+            <i class="fas fa-chart-bar text-cyan-600 group-hover:text-cyan-700"></i>
+        </div>
+        <span x-show="expanded" class="ml-3 text-sm font-medium text-purple-800 flex-1 animate-fadeIn">Reportes</span>
+        <i x-show="expanded" class="fas fa-chevron-down text-xs transition-transform duration-200 text-purple-500"
+           :class="{'rotate-180': open}"></i>
+    </div>
+    <div x-show="open && expanded" x-collapse 
+         class="ml-10 pl-2 space-y-1 mt-1 animate-fadeIn">
+        <a href="{{ route('reporte.creditos') }}" class="flex items-center p-2 rounded-lg hover:bg-cyan-50 text-sm transition-all"
+           wire:navigate>
+            <i class="fas fa-file-invoice-dollar text-cyan-500 mr-2"></i>
+            <span>Reporte de Crédito</span>
+        </a>
+        <a href="{{ route('reporte.abonos') }}" class="flex items-center p-2 rounded-lg hover:bg-cyan-50 text-sm transition-all"
+           wire:navigate>
+            <i class="fas fa-file-invoice text-cyan-500 mr-2"></i>
+            <span>Reporte de Abonos</span>
+        </a>
+    </div>
+</div>
 
                 @auth
                     @if(Auth::user()->User_Role === 'Administrador')

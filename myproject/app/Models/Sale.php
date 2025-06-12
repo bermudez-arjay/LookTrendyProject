@@ -50,4 +50,12 @@ class Sale extends Model
     {
         return $this->belongsTo('App\Models\Client', 'Client_ID', 'Client_ID');
     }
+     /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function transactions()
+{
+    return $this->hasMany(Transaction::class, 'Sale_ID');
+}
+
 }
