@@ -97,7 +97,7 @@
             @endauth
 
             <!-- Módulo de Ayuda -->
-            <a href="#" class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 transition-all hover:scale-[1.02] hover:shadow-md hover:border-indigo-200">
+            <a href="{{ route('manual-usuario') }}" class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 transition-all hover:scale-[1.02] hover:shadow-md hover:border-indigo-200">
                 <div class="flex items-center">
                     <div class="bg-purple-100 p-3 rounded-full mr-4">
                         <i class="fas fa-question text-purple-600 text-xl"></i>
