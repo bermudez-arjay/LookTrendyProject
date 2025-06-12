@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-    <script src="{{ mix('/js/app.js') }}"></script>
+    @vite('resources/js/app.js')
     <style>
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
@@ -290,7 +290,8 @@
                     </div>
                     <div x-show="open && expanded" x-collapse 
                          class="ml-10 pl-2 space-y-1 mt-1 animate-fadeIn">
-                        <a href="#" class="flex items-center p-2 rounded-lg hover:bg-rose-50 text-sm transition-all"
+                        <a href="{{route('inventario')}}" class="flex items-center p-2 rounded-lg hover:bg-rose-50 text-sm transition-all"
+                        <a href="inventario" class="flex items-center p-2 rounded-lg hover:bg-rose-50 text-sm transition-all"
                            wire:navigate>
                             <i class="fas fa-clipboard-list text-rose-500 mr-2"></i>
                             <span>Inventario</span>

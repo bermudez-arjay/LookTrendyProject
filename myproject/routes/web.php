@@ -42,12 +42,12 @@ Route::get("/", function () {
 Route::get('/login', Login::class)->name('login');//no tocar
 Route::get('/resetear-Contraseña/{token}', ResetPassword::class)->name('password.reset');
 Route::get('/recuperar', ForgotPassword::class)->name('recuperar');
-Route::get('/backup', DatabaseBackup::class)->name('backup');
+
 // Grupo de rutas protegidas por autenticación 
 Route::middleware(['auth'])->group(function () {
 
     //Inicio
-    Route::get('/inicio', \App\Livewire\Inicio\Inicio::class)->name('inicio')->middleware('auth');
+    Route::get('/inicio', Inicio::class)->name('inicio')->middleware('auth');
 
     //compras
     Route::middleware(['check.role:Administrador'])->group(function () {
@@ -56,11 +56,15 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/proveedores', SupplierComponent::class)->name('proveedores');
         // Productos,Inventario 
         Route::get('/productos', ProductComponent::class)->name('productos');
+        Route::get('/categorias', CategoryComponent::class)->name('categorias');
         Route::get('/inventario', InventoryDashboard::class)->name('inventario');
+        // Respaldo de base de datos
+        Route::get('/backup', DatabaseBackup::class)->name('backup');
+
     });
 
     Route::get('/clientes', ClientComponent::class)->name('clientes');    
-     Route::get('/categorias', CategoryComponent::class)->name('categorias');  
+   
 
     //Créditos
     Route::get('/creditos', CreateCredit::class)->name('creditos');
