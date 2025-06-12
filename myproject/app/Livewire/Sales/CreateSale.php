@@ -169,16 +169,21 @@ public function updatedCordobaAmount($value)
      $this->saleDate = now()->format('Y-m-d');
 }
 
-    public function render()
-    {
-        
-        $paymentTypes = PaymentType::all();
-        return view('livewire.sale.sales-component', [
-            'clients' => Client::orderBy('Client_FirstName')->get(),
-            'products' => Product::with('inventories')->orderBy('Product_Name')->get(),
-            'paymentTypes' => $paymentTypes
-        ])->layout('layouts.app');
-    }
+public function render()
+{
+    $paymentTypes = PaymentType::all();
+    
+    return view('livewire.sale.sales-component', [
+        'clients' => Client::orderBy('Client_FirstName')->get(),
+        'products' => Product::with(['inventories' => function($query) {
+                        $query->where('Current_Stock', '>', 0);
+                    }])
+                    ->where('removed', 0)
+                    ->orderBy('Product_Name')
+                    ->get(),
+        'paymentTypes' => $paymentTypes
+    ])->layout('layouts.app');
+}
 
     public function updatedQuantities($value, $key)
     {
