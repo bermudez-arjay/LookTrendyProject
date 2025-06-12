@@ -1,0 +1,25 @@
+services:
+  app:
+    build: .
+    environment:
+      - APP_ENV=demo
+      - APP_URL=https://looktrendy-demo-xyz.a.run.app  # Actualiza con tu URL de Cloud Run
+      - VITE_APP_URL=https://looktrendy-demo-xyz.a.run.app
+      - DB_HOST=127.0.0.1  # Localhost no funciona bien en Cloud Run, usa 127.0.0.1
+      - DB_PORT=3306
+      - DB_DATABASE=looktrendy
+      - DB_USERNAME=root
+      - DB_PASSWORD=secret
+    ports:
+      - "8080:8080"  # Cloud Run usa el puerto 8080 por defecto
+    command: >
+      sh -c "
+      # Inicia MySQL en segundo plano
+      service mysql start &&
+      # Espera a que MySQL esté listo
+      while ! mysqladmin ping -h127.0.0.1 --silent; do sleep 1; done &&
+      # Ejecuta migraciones y inicia Laravel
+      php artisan migrate --force &&
+      php artisan serve --host=0.0.0.0 --port=8080
+      "
+      

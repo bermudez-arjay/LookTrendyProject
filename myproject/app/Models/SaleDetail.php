@@ -41,4 +41,12 @@ class SaleDetail extends Model
     {
         return $this->belongsTo('App\Models\Sale', 'Sale_ID', 'Sale_ID');
     }
+    /**
+ * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+ */
+public function product()
+{
+    return $this->belongsTo('App\Models\Product', 'Product_ID', 'Product_ID');
+}
+
 }
