@@ -29,7 +29,7 @@ class CreditReport extends Component
                 'start_date' => $this->start_date,
                 'due_date' => $this->due_date,
                 'client' => $this->client_id ? Client::find($this->client_id)->Client_FirstName : 'Todos',
-                'status' => $this->status ? ucfirst($this->status) : 'Todos',
+                'credit_status' => $this->credit_status ? ucfirst($this->credit_status) : 'Todos',
                
             ]
         ])->setPaper('a4', 'landscape');
