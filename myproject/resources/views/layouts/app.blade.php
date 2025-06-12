@@ -240,9 +240,9 @@
                                     class="relative flex items-center p-3 rounded-xl hover:bg-white hover:shadow-md transition-all cursor-pointer group menu-item nav-link overflow-hidden"
                                     :class="{'active-menu-item': activeMenu === 'usuarios'}">
                                     <div class="w-8 h-8 flex items-center justify-center bg-amber-100 rounded-lg group-hover:bg-amber-200 transition-all">
-                                        <i class="fas fa-users text-amber-600 group-hover:text-amber-700"></i>
+                                        <i class="fas fa-address-book text-amber-600 group-hover:text-amber-700"></i>
                                     </div>
-                                    <span x-show="expanded" class="ml-3 text-sm font-medium text-purple-800 flex-1 animate-fadeIn">Usuarios</span>
+                                    <span x-show="expanded" class="ml-3 text-sm font-medium text-purple-800 flex-1 animate-fadeIn">Registros</span>
                                     <i x-show="expanded" class="fas fa-chevron-down text-xs transition-transform duration-200 text-purple-500"
                                     :class="{'rotate-180': open}"></i>
                                 </div>
@@ -305,7 +305,7 @@
                            <a href="{{ route('categorias') }}" 
                            class="flex items-center p-2 rounded-lg hover:bg-rose-50 text-sm transition-all"
                            wire:navigate>
-                            <i class="fas fa-boxes text-rose-500 mr-2"></i>
+                            <i class="fas fa-tags text-rose-500 mr-2"></i>
                             <span>Categorias</span>
                         </a>
                     </div>
@@ -337,40 +337,51 @@
 </div>
 
                 @auth
-                        @if(Auth::user()->User_Role === 'Administrador')
-    <!-- Configuración con submenú -->
-    <div x-data="{ open: activeMenu === 'configuracion' }">
-        <!-- Botón principal -->
-        <a href="#" 
-           x-on:click="open = !open; activeMenu = 'configuracion'"
-           class="relative flex items-center p-3 rounded-xl hover:bg-white hover:shadow-md transition-all group menu-item nav-link overflow-hidden"
-           :class="activeMenu === 'configuracion' ? 'active-menu-item' : ''"
-           wire:navigate>
-            <div class="w-8 h-8 flex items-center justify-center bg-indigo-100 rounded-lg group-hover:bg-indigo-200 transition-all">
-                <i class="fas fa-cog text-indigo-600 group-hover:text-indigo-700"></i>
-            </div>
-            <span x-show="expanded" class="ml-3 text-sm font-medium text-purple-800 animate-fadeIn">Configuración</span>
-            <i x-show="expanded" class="fas fa-chevron-down ml-auto text-xs text-purple-800 transition-transform duration-200" 
-               :class="{'transform rotate-180': open}"></i>
-        </a>
+                    @if(Auth::user()->User_Role === 'Administrador')
+                            <!-- Configuración con submenú -->
+                            <div x-data="{ open: activeMenu === 'configuracion' }">
+                                <!-- Botón principal -->
+                                <a href="#" 
+                                x-on:click="open = !open; activeMenu = 'configuracion'"
+                                class="relative flex items-center p-3 rounded-xl hover:bg-white hover:shadow-md transition-all group menu-item nav-link overflow-hidden"
+                                :class="activeMenu === 'configuracion' ? 'active-menu-item' : ''"
+                                wire:navigate>
+                                    <div class="w-8 h-8 flex items-center justify-center bg-indigo-100 rounded-lg group-hover:bg-indigo-200 transition-all">
+                                        <i class="fas fa-cog text-indigo-600 group-hover:text-indigo-700"></i>
+                                    </div>
+                                    <span x-show="expanded" class="ml-3 text-sm font-medium text-purple-800 animate-fadeIn">Configuración</span>
+                                    <i x-show="expanded" class="fas fa-chevron-down ml-auto text-xs text-purple-800 transition-transform duration-200" 
+                                    :class="{'transform rotate-180': open}"></i>
+                                </a>
         
-        <!-- Submenú -->
-       <div x-show="open && expanded" x-collapse class="pl-4 mt-1 space-y-1">
-    <a href="{{ route('backup') }}" 
-       x-on:click="activeMenu = 'backup'"
-       class="flex items-center p-2 text-sm font-medium text-purple-700 rounded-lg hover:bg-indigo-50 transition-all"
-       :class="activeMenu === 'backup' ? 'bg-indigo-100' : ''"
-       wire:navigate>
-        <i class="fas fa-cloud-upload-alt text-xs mr-3 ml-1"></i>
-        <span>Respaldar Archivos</span>
-    </a>
-</div>
+                                <!-- Submenú -->
+                                <div x-show="open && expanded" x-collapse class="pl-4 mt-1 space-y-1">
+                                    <a href="{{ route('backup') }}" 
+                                    x-on:click="activeMenu = 'backup'"
+                                    class="flex items-center p-2 text-sm font-medium text-purple-700 rounded-lg hover:bg-indigo-50 transition-all"
+                                    :class="activeMenu === 'backup' ? 'bg-indigo-100' : ''"
+                                    wire:navigate>
+                                        <i class="fas fa-cloud-upload-alt text-xs mr-3 ml-1"></i>
+                                        <span>Respaldar Archivos</span>
+                                    </a>
+                                </div>
 
-    </div>
-@endif
+                             </div>
+                        @endif
                 @endauth
                 
-                
+                <a href="{{ route('manual-usuario') }}" 
+                   x-on:click="activeMenu = 'manual'"
+                   class="relative flex items-center p-3 rounded-xl hover:bg-white hover:shadow-md transition-all group menu-item nav-link overflow-hidden"
+                   :class="activeMenu === 'manual' ? 'active-menu-item' : ''"
+                   wire:navigate>
+                    <div class="relative flex items-center">
+                        <div class="w-8 h-8 flex items-center justify-center bg-purple-100 rounded-lg group-hover:bg-purple-200 transition-all">
+                            <i class="fas fa-book-open text-purple-600 group-hover:text-purple-700"></i>
+                        </div>
+                        <span x-show="expanded" class="ml-3 text-sm font-medium text-purple-800 animate-fadeIn">Manual de Usuario</span>
+                    </div>
+                </a>
             </nav>
             
             <!-- User Profile (Bottom) -->
@@ -396,7 +407,8 @@
     <div class="flex-1 flex flex-col overflow-hidden">
    
         <main class="flex-1 overflow-y-auto p-6 page-transition">
-            {{ $slot }}
+            {{ $slot ?? '' }} <!-- Para componentes -->
+            @yield('content')
         </main>
     </div>
 
