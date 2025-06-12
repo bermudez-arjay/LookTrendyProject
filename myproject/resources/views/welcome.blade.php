@@ -138,7 +138,7 @@
   <!-- Manual de usuario -->
   <section class="py-16 px-6 bg-white">
     <div class="flex justify-center items-center my-8 max-w-4xl mx-auto bg-gradient-to-r from-pink-50 to-purple-50 rounded-xl p-8">
-      <a href="#" download class="flex items-center space-x-6 hover:bg-white p-6 rounded-lg transition-all duration-300">
+      <a href="{{ route('manual-usuario') }}" download class="flex items-center space-x-6 hover:bg-white p-6 rounded-lg transition-all duration-300">
         <div class="text-5xl floating text-pink-500">
           <i class="fas fa-book-open"></i>
         </div>
