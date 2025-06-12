@@ -442,94 +442,127 @@
                                     </div>
                                 </div>
 
-                                @if($show_amount_fields)
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                        <!-- Campo para dólares -->
-                                        @if($payment_type_id == 2)
-                                            <div>
-                                                <label for="dollar_amount" class="block text-sm font-medium text-gray-700 mb-1">
-                                                    Monto en Dólares *
-                                                </label>
-                                                <div class="relative">
-                                                    <div
-                                                        class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                        <span class="text-gray-500">$</span>
-                                                    </div>
-                                                    <input wire:model.live="dollar_amount" type="number" step="0.01" min="0.01"
-                                                        id="dollar_amount"
-                                                        class="block w-full pl-7 pr-12 py-2 border border-gray-300 rounded-lg"
-                                                        placeholder="0.00">
-                                                    <div
-                                                        class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                                        <span class="text-gray-500">USD</span>
-                                                    </div>
-                                                </div>
-                                                @error('dollar_amount')
-                                                    <p class="mt-1 text-sm text-red-600">{{$message }}</p>
-                                                @enderror
-                                            </div>
-                                        @endif
-
-                                        <!-- Campo para córdobas -->
-                                        <div>
-                                            <label for="cordoba_amount" class="block text-sm font-medium text-gray-700 mb-1">
-                                                @if($payment_type_id == 2)
-                                                    Equivalente en Córdobas
-                                                @else
-                                                    Monto en Córdobas *
-                                                @endif
-                                            </label>
-                                            <div class="relative">
-                                                <div
-                                                    class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                    <span class="text-gray-500">C$</span>
-                                                </div>
-                                                <input wire:model.live="cordoba_amount" type="number" step="0.01" min="0"
-                                                    id="cordoba_amount" autocomplete="off"
-                                                    class="block w-full pl-7 pr-12 py-2 border border-gray-300 rounded-lg @if($payment_type_id == 2) bg-gray-50 @endif"
-                                                    placeholder="0.00" @if($payment_type_id == 2) readonly @endif>
-                                            </div>
-                                            @error('cordoba_amount')
-                                                <p class="mt-1 text-sm text-red-600">{{$message }}</p>
-                                            @enderror
-                                        </div>
-                                    </div>
-                                @endif
-
-                                <!-- Mensaje de error de saldo -->
-                                @if($balance_error)
-                                    <div class="mb-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm">
-                                        <i class="fas fa-exclamation-circle mr-2"></i> {{ $balance_error }}
-                                    </div>
-                                @endif
-
-                                <!-- Mostrar nuevo saldo -->
-                                @if($credit_id && ($dollar_amount || $cordoba_amount))
-                                                <div class="mb-4 p-3 bg-blue-50 text-blue-600 rounded-lg text-sm">
-                                                    <i class="fas fa-info-circle mr-2"></i>
-                                                    Nuevo saldo después del pago: C${{ 
-                                                                                    number_format(max(0, $selectedCreditInfo->remaining_balance -
-                                    ($payment_type_id == 2 ? (floatval($dollar_amount) * $exchangeRate) : floatval($cordoba_amount))), 2) 
-                                                                                }}
-                                                </div>
-                                @endif
-                            </div>
-                        </div>
+                      @if($show_amount_fields)
+    <div class="space-y-4 mb-4">
+        <!-- Sección de Saldo y Monto a Pagar -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Saldo Pendiente -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Saldo Pendiente</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <span class="text-gray-500">C$</span>
                     </div>
-                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                        <button type="button" wire:click="store"
-                            class="inline-flex justify-center w-full sm:w-auto px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                            Guardar
-                        </button>
-                        <button type="button" wire:click="closeModal"
-                            class="mt-3 inline-flex justify-center w-full sm:w-auto px-4 py-2 bg-white text-gray-700 text-sm font-medium border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3">
-                            Cancelar
-                        </button>
-                    </div>
+                    <input type="text"
+                           value="{{ number_format($this->baseBalance, 2) }}"
+                           readonly
+                           class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg bg-gray-50">
                 </div>
             </div>
+
+            <!-- Monto Total a Pagar -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Monto a Pagar</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <span class="text-gray-500">C$</span>
+                    </div>
+                    <input type="text"
+                           value="{{ number_format($this->totalPaymentAmount, 2) }}"
+                           readonly
+                           class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg bg-blue-50 font-medium">
+                </div>
+                @if($apply_late_fee)
+                    <p class="text-xs text-red-500 mt-1">Incluye mora del 2%: C${{ number_format($this->baseBalance * 0.02, 2) }}</p>
+                @elseif($apply_early_discount)
+                    <p class="text-xs text-green-500 mt-1">Incluye descuento del 5%: C${{ number_format($this->baseBalance * 0.05, 2) }}</p>
+                @endif
+            </div>
+        </div>
+
+        <!-- Monto Recibido -->
+       <div>
+    <label class="block text-sm font-medium text-gray-700">
+        Monto Recibido *
+        @if($payment_type_id == 2)
+            <span class="text-xs text-gray-500">(en dólares)</span>
+        @else
+            <span class="text-xs text-gray-500">(en córdobas)</span>
+        @endif
+    </label>
+    <div class="relative">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <span class="text-gray-500">
+                @if($payment_type_id == 2) $ @else C$ @endif
+            </span>
+        </div>
+        <input wire:model.live="{{ $payment_type_id == 2 ? 'dollar_amount' : 'cordoba_amount' }}" 
+               type="number" 
+               step="0.01" 
+               min="0.01"
+               class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+               placeholder="0.00"
+               required>
+    </div>
+    @error($payment_type_id == 2 ? 'dollar_amount' : 'cordoba_amount')
+        <span class="text-red-500 text-xs">{{$message }}</span>
+    @enderror
+</div>
+
+        <!-- Conversión de moneda si es pago en dólares -->
+        @if($payment_type_id == 2)
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Equivalente en Córdobas</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <span class="text-gray-500">C$</span>
+                    </div>
+                    <input type="text" 
+                           value="{{ number_format($this->cordoba_amount, 2) }}" 
+                           readonly
+                           class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg bg-gray-50">
+                </div>
+            </div>
+        @endif
+
+        <!-- Mostrar cambio si hay -->
+        @if($show_change_field)
+            <div class="p-3 bg-green-50 border border-green-200 rounded-lg">
+                <label class="block text-sm font-medium text-green-700">Cambio a Entregar</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <span class="text-gray-500">C$</span>
+                    </div>
+                    <input type="text"
+                           value="C${{ number_format($change_amount, 2) }}"
+                           readonly
+                           class="block w-full pl-10 pr-3 py-2 border border-green-300 rounded-lg bg-green-50 font-bold">
+                </div>
+            </div>
+        @endif
+
+        <!-- Nuevo saldo -->
+        <div class="p-3 bg-blue-50 text-blue-600 rounded-lg text-sm">
+            <i class="fas fa-info-circle mr-2"></i>
+            Nuevo saldo después del pago: C${{ 
+                number_format(max(0, $this->baseBalance - 
+                ($payment_type_id == 2 ? floatval($dollar_amount) * $exchangeRate : floatval($cordoba_amount))), 2) 
+            }}
         </div>
     </div>
+@endif
+
+<!-- Botones de acción -->
+<div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+    <button type="button" wire:click="store"
+        class="inline-flex justify-center w-full sm:w-auto px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+        Guardar
+    </button>
+    <button type="button" wire:click="closeModal"
+        class="mt-3 inline-flex justify-center w-full sm:w-auto px-4 py-2 bg-white text-gray-700 text-sm font-medium border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3">
+        Cancelar
+    </button>
+</div>
 @endif
 
 <script>
