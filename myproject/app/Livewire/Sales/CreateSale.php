@@ -44,12 +44,33 @@ class CreateSale extends Component
         'payment_type_id' => 'required|in:1,2',
     ];
 
+    $totalAmount = $this->getTotalAmountProperty();
+
     if ($this->payment_type_id == 1) {
-        $rules['cordoba_amount'] = 'required|numeric|min:0.01';
+        $rules['cordoba_amount'] = [
+            'required',
+            'numeric',
+            'min:0.01',
+            function ($attribute, $value, $fail) use ($totalAmount) {
+                if ($value < $totalAmount) {
+                    $fail("El monto recibido (C$".number_format($value, 2).") no puede ser menor al total de la venta (C$".number_format($totalAmount, 2).")");
+                }
+            }
+        ];
     }
 
     if ($this->payment_type_id == 2) {
-        $rules['dollar_amount'] = 'required|numeric|min:0.01';
+        $rules['dollar_amount'] = [
+            'required',
+            'numeric',
+            'min:0.01',
+            function ($attribute, $value, $fail) use ($totalAmount) {
+                $convertedAmount = $value * $this->exchangeRate;
+                if ($convertedAmount < $totalAmount) {
+                    $fail("El monto recibido ($".number_format($value, 2)." = C$".number_format($convertedAmount, 2).") no puede ser menor al total de la venta (C$".number_format($totalAmount, 2).")");
+                }
+            }
+        ];
     }
 
     return $rules;
@@ -117,15 +138,23 @@ public function updatedCordobaAmount($value)
     $total = floatval($this->total_amount) ?? 0;
     
     if ($this->payment_type_id == 1) {
-       
         $received = floatval($this->cordoba_amount) ?? 0;
         $this->change_amount = max(0, $received - $total);
+        if ($received > 0 && $received < $total) {
+            $this->addError('cordoba_amount', "El monto recibido no cubre el total de la venta (C$".number_format($total, 2).")");
+        } else {
+            $this->resetErrorBag('cordoba_amount');
+        }
     } else {
-      
         $received = floatval($this->dollar_amount) ?? 0;
-        $this->change_amount = max(0, ($received * $this->exchangeRate) - $total);
-       
-        $this->cordoba_amount = $received * $this->exchangeRate;
+        $converted = $received * $this->exchangeRate;
+        $this->change_amount = max(0, $converted - $total);
+        $this->cordoba_amount = $converted;
+        if ($received > 0 && $converted < $total) {
+            $this->addError('dollar_amount', "El monto recibido no cubre el total de la venta (C$".number_format($total, 2).")");
+        } else {
+            $this->resetErrorBag('dollar_amount');
+        }
     }
 }
       public function validateAmount()
@@ -212,28 +241,34 @@ public function updatedQuantities($value, $key)
     }
 }
 
+  
    public function addProduct($productId = null)
 {
+    
     $this->validate([
-        "quantities.$productId" => 'required|numeric|min:1'
+        "quantities.$productId" => 'required|numeric|min:1|max:999'
+    ], [
+        "quantities.$productId.required" => 'La cantidad es requerida',
+        "quantities.$productId.numeric" => 'La cantidad debe ser un número',
+        "quantities.$productId.min" => 'La cantidad mínima es 1',
+        "quantities.$productId.max" => 'La cantidad máxima es 999'
     ]);
 
     $product = Product::findOrFail($productId);
     $inventory = Inventory::where('Product_ID', $productId)->first();
     $availableStock = $inventory ? $inventory->Current_Stock : 0;
-    $quantity = $this->quantities[$productId];
+    $quantity = $this->quantities[$productId] ?? 0;
 
-    // Validación para stock mínimo de 5 unidades
     if ($availableStock < 5) {
-        $this->addError('quantities.'.$productId, "No se puede agregar este producto. Stock actual ($availableStock) es menor a 5 unidades.");
+        $this->addError('quantities.'.$productId, "No se puede agregar. Stock actual ($availableStock) es menor a 5 unidades.");
         return;
     }
 
     if ($quantity > $availableStock) {
-        $this->addError('quantities.'.$productId, "Stock insuficiente. Disponible: $availableStock");
+        $this->addError('quantities.'.$productId, "No hay suficiente stock. Disponible: $availableStock");
         return;
     }
-   
+
     $product = Product::find($productId);
     $inventory = Inventory::where('Product_ID', $productId)->first();
     $availableStock = $inventory ? $inventory->Current_Stock : 0;
@@ -331,9 +366,9 @@ public function saveSale()
         'productList' => $this->productList,
         'payment_type_id' => $this->payment_type_id
     ]);
-
+  $this->validate();
     try {
-        $this->validate();
+      
 
         foreach ($this->productList as $item) {
             if (!isset($item['quantity']) || $item['quantity'] <= 0) {

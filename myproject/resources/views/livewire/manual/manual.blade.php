@@ -19,10 +19,11 @@
             <li><a href="#dashboard" class="text-indigo-600 hover:underline">3. Página principal del sistema</a></li>
             <li><a href="#new-purchase" class="text-indigo-600 hover:underline">4. Sección de Compras</a></li>
             <li><a href="#new-sale" class="text-indigo-600 hover:underline">5. Sección de Venta</a></li>
-            <li><a href="#new-credit" class="text-indigo-600 hover:underline">6. Seccion de Créditos</a></li>
-            <li><a href="#registros" class="text-indigo-600 hover:underline">7. Sección de Registros</a></li>
-            <li><a href="#inventory" class="text-indigo-600 hover:underline">8. Sección de Inventario</a></li>
-            <li><a href="#configuracion" class="text-indigo-600 hover:underline">8. Configuración y BackUps</a></li>
+            <li><a href="#creditos" class="text-indigo-600 hover:underline">6. Seccion de Créditos</a></li>
+            <li><a href="#abonos" class="text-indigo-600 hover:underline">7. Seccion de Abonos</a></li>
+            <li><a href="#registros" class="text-indigo-600 hover:underline">8. Sección de Registros</a></li>
+            <li><a href="#inventory" class="text-indigo-600 hover:underline">9. Sección de Inventario</a></li>
+            <li><a href="#configuracion" class="text-indigo-600 hover:underline">10. Configuración y BackUps</a></li>
         </ul>
     </div>
 
@@ -247,7 +248,7 @@
         
         <div class="flex justify-center my-6">
             <div class="border rounded-lg p-2 bg-gray-50 max-w-4xl">
-                <img src="/images/manual/nueva-compra.png" alt="Nueva Venta" class="rounded">
+                <img src="/images/manual/venta.png" alt="Nueva Venta" class="rounded">
                 <p class="text-center text-sm text-gray-500 mt-2">Interfaz de nueva Venta</p>
             </div>
         </div>
@@ -281,6 +282,120 @@
         
     </section>
 
+    <!-- Créditos -->
+<section id="creditos" class="bg-white rounded-lg shadow-md p-6 mb-8">
+    <div class="flex items-center mb-4">
+        <div class="bg-pink-100 p-2 rounded-lg mr-3">
+            <i class="fas fa-credit-card text-pink-600"></i>
+        </div>
+        <h3 class="text-xl font-semibold text-pink-900">Sección de Créditos</h3>
+    </div>
+     <h3 class="font-medium text-lg text-pink-800 mb-2 border-t pt-4">Dashboard de Créditos</h3>
+    <p class="mb-4 text-gray-700">
+        Esta sección presenta un panel con los datos de las ventas a crédito, donde se pueden aplicar filtros para una búsqueda rápida.
+    </p>
+
+    <div class="flex justify-center my-6">
+        <div class="border rounded-lg p-2 bg-gray-50 max-w-4xl">
+            <img src="/mnt/data/cb6df330-f222-4a15-9dad-d7be369415ae.png" alt="Dashboard de Créditos" class="rounded">
+            <p class="text-center text-sm text-gray-500 mt-2">Dashboard de Créditos</p>
+        </div>
+    </div>
+    <p class="text-gray-700">
+        Al desplegar el menú <strong class="text-pink-700">Créditos</strong>, se accede al <strong class="text-pink-700">Dashboard</strong> de ventas a crédito, donde se presentan los datos registrados en forma de visualizaciones para un análisis más claro.
+    </p>
+     <h3 class="font-medium text-lg text-pink-800 mb-2 border-t pt-4">Nuevo Crédito</h3>
+    <p class="text-gray-700 mt-2">
+        La opción <strong class="text-pink-700">Nuevo Crédito</strong> permite registrar ventas con financiamiento, ingresando la información necesaria tanto del cliente como de los productos adquiridos.
+    </p><br>
+ <div class="flex justify-center my-6">
+            <div class="border rounded-lg p-2 bg-gray-50 max-w-4xl">
+                <img src="/images/manual/credito.png" alt="Nueva Venta" class="rounded">
+                <p class="text-center text-sm text-gray-500 mt-2">Interfaz de nueva Venta</p>
+            </div>
+        </div>
+    <p class="mb-4 text-gray-700">
+        Desde esta sección puedes realizar ventas a crédito. Se debe registrar al cliente, los productos, y condiciones del crédito como el plazo y forma de pago.
+    </p>
+
+    <p class="mb-4 text-gray-700">
+        En la parte superior del formulario se muestra el nombre del usuario que está registrando la venta, el cliente seleccionado y la fecha de la operación.
+    </p>
+
+    <p class="mb-4 text-gray-700">
+        Luego, en la sección <strong class="text-pink-700">Productos</strong>, puedes agregar los productos deseados haciendo clic en <strong class="text-pink-700">“Agregar producto”</strong>. Se abrirá una ventana emergente para seleccionar los productos.
+    </p>
+
+    <div class="flex justify-center my-6">
+        <div class="border rounded-lg p-2 bg-gray-50 max-w-4xl">
+            <img src="/images/manual/productoCredito.png" alt="Agregar Producto" class="rounded">
+            <p class="text-center text-sm text-gray-500 mt-2">Agregar productos al crédito</p>
+        </div>
+    </div>
+
+    <div class="bg-pink-50/50 p-4 rounded-lg border border-pink-100">
+        <h3 class="font-medium text-lg text-pink-800 mb-2">Agregar Productos</h3>
+        <ul class="list-disc pl-5 space-y-2">
+            <li>Utiliza la barra de búsqueda para localizar productos rápidamente.</li>
+            <li>En el campo <strong class="text-pink-700">Cantidad</strong>, introduce la cantidad solicitada.</li>
+            <li>Haz clic en <strong class="text-pink-700">“Agregar”</strong> para incluir el producto en la tabla.</li>
+        </ul>
+    </div><br>
+
+    <p class="mb-4 text-gray-700">
+        En la parte inferior se muestra el subtotal y total con IVA. Finalmente, se selecciona el <strong class="text-pink-700">método de pago</strong> y se guarda la venta a crédito.
+    </p>
+</section>
+
+<!-- Abonos Section -->
+<section id="abonos" class="bg-white rounded-lg shadow-md p-6 mb-8">
+  <div class="flex items-center mb-4">
+    <div class="bg-emerald-100 p-2 rounded-lg mr-3">
+      <i class="fas fa-money-bill-wave text-emerald-600"></i>
+    </div>
+    <h3 class="text-xl font-semibold text-emerald-900">Gestión de Abonos</h3>
+  </div>
+  <p class="text-gray-700">
+    Esta sección permite llevar el control de los pagos realizados por los clientes a sus créditos activos. La interfaz muestra estadísticas rápidas, una lista de abonos recientes, y permite registrar nuevos pagos.
+  </p>
+  <p class="text-gray-700 mt-6">
+    La tabla inferior muestra el historial de abonos registrados. Cada fila incluye el cliente, número de crédito, fecha del abono y monto. Además, puedes generar un comprobante PDF desde la columna de acciones.
+  </p>
+
+  <div class="flex justify-center my-6">
+    <div class="border rounded-lg p-2 bg-gray-50 max-w-4xl">
+      <img src="/images/manual/vistaAbono.png" alt="Vista de Abonos" class="rounded">
+      <p class="text-center text-sm text-gray-500 mt-2">Vista de abonos registrados</p>
+    </div>
+  </div>
+  <div class="flex items-center mb-4">
+    <div class="bg-emerald-100 p-2 rounded-lg mr-3">
+      <i class="fas fa-plus-circle text-emerald-600"></i>
+    </div>
+    <h3 class="text-xl font-semibold text-emerald-900">Registrar Nuevo Abono</h3>
+  </div>
+
+  <p class="text-gray-700">
+    Al hacer clic en <strong class="text-emerald-700">“Nuevo Abono”</strong>, se abre una ventana donde puedes registrar un nuevo pago para un cliente con crédito activo. Se debe seleccionar el crédito correspondiente e ingresar el monto, fecha y tipo de pago.
+  </p>
+
+  <ul class="list-disc pl-5 mt-4 text-gray-700 space-y-2">
+    <li>Busca el crédito por nombre del cliente o número de crédito.</li>
+    <li>Verifica el saldo pendiente antes de ingresar el monto.</li>
+    <li>Elige la fecha del abono y el tipo de pago utilizado.</li>
+    <li>Haz clic en <strong class="text-emerald-700">“Guardar”</strong> para registrar el abono.</li>
+  </ul>
+  <div class="flex justify-center my-6">
+    <div class="border rounded-lg p-2 bg-gray-50 max-w-4xl">
+      <img src="/images/manual/registrarAbono.png" alt="Formulario de Nuevo Abono" class="rounded">
+      <p class="text-center text-sm text-gray-500 mt-2">Formulario para registrar un nuevo abono</p>
+    </div>
+  </div>
+
+  <p class="text-gray-700">
+    Una vez guardado, el sistema actualizará automáticamente el monto abonado en el crédito y reducirá el saldo pendiente.
+  </p>
+</section>
 
 <!-- Registros -->
 <section id="registros" class="bg-white rounded-xl shadow-md p-6 mb-8 border border-purple-100">

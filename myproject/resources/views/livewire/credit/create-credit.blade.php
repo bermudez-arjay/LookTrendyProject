@@ -2,7 +2,19 @@
     <h2 class="text-2xl font-bold mb-6 text-gray-800 border-b pb-3">Crear Nuevo Crédito</h2>
 
     <form wire:submit.prevent="save" class="space-y-6">
-      
+      <div class="mb-4">
+    @if (session()->has('message'))
+        <div class="p-4 mb-4 text-sm text-green-700 bg-green-100 rounded-lg">
+            {{ session('message') }}
+        </div>
+    @endif
+    
+    @if (session()->has('error'))
+        <div class="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg">
+            {{ session('error') }}
+        </div>
+    @endif
+</div>
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
           
             <div class="space-y-2">
@@ -29,9 +41,8 @@
       
       
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="space-y-2">
-                <label class="block text-sm font-medium text-gray-700">Plazo (Meses) <span
-                        class="text-red-500">*</span></label>
+           <div class="space-y-2">
+                <label class="block text-sm font-medium text-gray-700">Plazo (Meses) <span class="text-red-500">*</span></label>
                 <select wire:model.live="term" id="term"
                     class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 border">
                     <option value="">Seleccione el plazo</option>
@@ -39,7 +50,9 @@
                     <option value="3">3 meses</option>
                     <option value="6">6 meses</option>
                 </select>
-                @error('term') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                @error('term') 
+                    <span class="text-red-500 text-xs">{{ $message }}</span> 
+                @enderror
             </div>
             <div class="space-y-2">
                 <label class="block text-sm font-medium text-gray-700">Fecha de Inicio <span
@@ -127,27 +140,15 @@
                     class="mt-1 block w-full rounded-lg bg-white border-gray-300 shadow-sm py-2 px-3 border font-medium text-gray-900">
             </div>
 
-            <div class="space-y-2">
-                <label class="block text-sm font-medium text-gray-700">Monto por Cuota</label>
-                <input type="text" value="${{ number_format($quotaAmount, 2) }}" readonly
-                    class="mt-1 block w-full rounded-lg bg-white border-gray-300 shadow-sm py-2 px-3 border font-medium text-gray-900">
-            </div>
-
             <div class="flex items-end">
                 <button type="button" wire:click="cancelTransaction"
                     class="w-full mr-2 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
                     Cancelar
                 </button>
-                <button type="reset-selects" onclick="
-                            document.getElementById('client_id').value ='';
-                            document.getElementById('term').innerHTML ='';
-                            document.getElementById('payment_type_id').innerHTML ='';
-
-                            "
+                <button type="submit" 
                     class="w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                     Guardar Crédito
-                </button>
-               
+                </button> 
             </div>
         </div>
     </form>
@@ -177,129 +178,106 @@
                         </div>
 
                         <!-- Barra de búsqueda -->
-                        <div class="mt-4 relative">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                </svg>
-                            </div>
-                            <input type="text" wire:model.live.debounce.300ms="searchProduct"
-                                placeholder="Buscar productos..."
-                                class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                        </div>
-                    </div>
-            @error('modal_error')
-                <div class="mt-2 text-sm text-red-600 bg-red-50 p-2 rounded-md">
-                    {{$message }}
-                </div>
-            @enderror
-                                <!-- Tabla de productos -->
-                    <div class="px-6 pb-4">
+                       <div class="mt-4 relative">
+    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+    </div>
+    <input 
+        type="text" 
+        wire:model.live.debounce.300ms="searchProduct"
+        wire:keydown.enter="$refresh"
+        placeholder="Buscar productos..."
+        class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+    >
+</div>
+
+@error('modal_error')
+    <div class="mt-2 text-sm text-red-600 bg-red-50 p-2 rounded-md">
+        {{$message }}
+    </div>
+@enderror
+                           
+                 <div class="px-6 pb-4 pt-2"> 
+                 @if($filteredProducts->count() > 0)
                         <div class="overflow-y-auto max-h-96">
                             <table class="min-w-full divide-y divide-gray-200">
+                                <!-- Cabecera de la tabla -->
                                 <thead class="bg-gray-50">
                                     <tr>
-                                        <th
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Producto</th>
-                                        <th
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Stock</th>
-                                        <th
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Precio</th>
-                                        <th
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Cantidad</th>
-                                        <th
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Acción</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Producto</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Precio</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cantidad</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acción</th>
                                     </tr>
                                 </thead>
+                                <!-- Cuerpo de la tabla -->
                                 <tbody class="bg-white divide-y divide-gray-200">
-                                    @forelse($products as $product)
-<tr class="hover:bg-gray-50">
-    <td class="px-6 py-4 whitespace-nowrap">
-        <div class="font-medium text-gray-900">{{ $product['Product_Name'] }}</div>
-        <div class="text-sm text-gray-500">{{ $product['Category'] }}</div>
-    </td>
-    <td class="px-6 py-4 whitespace-nowrap">
-        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
-            {{ ($product['inventories']['Current_Stock'] ?? 0) > 10 ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' }}">
-            {{ $product['inventories']['Current_Stock'] ?? 0 }} unidades
-        </span>
-    </td>
-    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-        C${{ number_format($product['Unit_Price'], 2) }}
-    </td>
-    <td class="px-6 py-4 whitespace-nowrap">
-    <input 
-        type="number" 
-        wire:model="quantities.{{ $product['Product_ID'] }}"
-        min="1" 
-        max="{{ $product['inventories']['Current_Stock'] ?? 0 }}"
-        class="w-20 px-2 py-1 border rounded-md sm:text-sm @error('quantity_'.$product['Product_ID']) border-red-500 @enderror"
-        {{ ($product['inventories']['Current_Stock'] ?? 0) <= 0 ? 'disabled' : '' }}
-    >
-    @error('quantity_'.$product['Product_ID'])
-        <span class="text-red-500 text-xs block mt-1">{{ $message }}</span>
-    @enderror
-</td>
-   <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-    <button 
-        wire:click="addDetail({{ $product['Product_ID'] }})"
-        class="text-indigo-600 hover:text-indigo-900 px-3 py-1 rounded @if(($product['inventories']['Current_Stock'] ?? 0) <= 0) opacity-50 cursor-not-allowed @endif"
-        @if(($product['inventories']['Current_Stock'] ?? 0) <= 0) disabled @endif
-    >
-        Agregar
-    </button>
-</td>
-</tr>
-@empty
-<tr>
-    <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">
-        No se encontraron productos
-    </td>
-</tr>
-@endforelse
+                                     @forelse($filteredProducts as $product)
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="font-medium text-gray-900">{{ $product['Product_Name'] }}</div>
+                                            <div class="text-sm text-gray-500">{{ $product['category']['Category_Name'] ?? 'Sin categoría' }}</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $product['inventories']['Current_Stock'] > 10 ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' }}">
+                                                {{ $product['inventories']['Current_Stock'] ?? 0 }} unidades
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            ${{ number_format($product['Unit_Price'], 2) }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <input 
+                                                type="number" 
+                                                wire:model="quantities.{{ $product['Product_ID'] }}"
+                                                min="1" 
+                                                max="{{ $product['inventories']['Current_Stock'] ?? 0 }}"
+                                                class="w-20 px-2 py-1 border rounded-md sm:text-sm"
+                                            >
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                            <button 
+                                                wire:click="addDetail({{ $product['Product_ID'] }})"
+                                                class="text-indigo-600 hover:text-indigo-900 px-3 py-1 rounded"
+                                            >
+                                                Agregar
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    @endforeach
                                 </tbody>
                             </table>
+                             <div class="px-6 py-4 border-t border-gray-100 bg-white">
                         </div>
-                    </div>
+                        </div>
+                    @else
+                        <div class="text-center py-8">
+                            @if(!empty($searchProduct))
+                                <p class="text-gray-500">No se encontraron productos para "{{ $searchProduct }}"</p>
+                            @else
+                                <p class="text-gray-500">Ingrese un término de búsqueda para encontrar productos</p>
+                            @endif
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
-    @endif
-
+    </div>
+@endif
     @push('scripts')
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+       
         <script>
-                  window.addEventListener('reset-selects', event => {
-            // Resetear los selects a su valor por defecto
-            document.getElementById('client_id').value = '0';
-            document.getElementById('payment_type_id').value = '0';
-            document.getElementById('term').value = '0';
+        document.addEventListener('livewire:initialized', () => {
+        Livewire.on('reset-selects', () => {
+            
+            document.querySelector('#client_id').selectedIndex = 0;
+            document.querySelector('#term').selectedIndex = 0;
         });
-            window.addEventListener('credit-notify', event => {
-                const Toast = Swal.mixin({
-                    toast: true,
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 3000,
-                    timerProgressBar: true,
-                    didOpen: (toast) => {
-                        toast.addEventListener('mouseenter', Swal.stopTimer)
-                        toast.addEventListener('mouseleave', Swal.resumeTimer)
-                    }
-                });
-
-                Toast.fire({
-                    icon: event.detail.type || 'success',
-                    title: event.detail.title || '¡Operación exitosa!',
-                    text: event.detail.message || ''
-                });
-            });
+    });
+           
         </script>
     @endpush
 </div>
