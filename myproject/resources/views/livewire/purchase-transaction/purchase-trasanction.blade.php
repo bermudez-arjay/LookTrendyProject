@@ -20,7 +20,7 @@
                 <label class="block text-sm font-medium text-gray-700">Proveedor <span class="text-red-500">*</span></label>
                 <select wire:model="selectedSupplierId"
                     class="mt-1 block w-full rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 border @error('selectedSupplierId') border-red-500 @enderror">
-                    <option value="0">Seleccionar proveedor</option>
+                    <option value="">Seleccionar proveedor</option>
                     @foreach($suppliers as $supplier)
                         <option value="{{ $supplier->Supplier_ID }}">{{ $supplier->Supplier_Name }}</option>
                     @endforeach
@@ -114,7 +114,7 @@
 
             <div class="space-y-2">
                 <label class="block text-sm font-medium text-gray-700">Método de Pago <span class="text-red-500">*</span></label>
-                <select wire:model="payment_type_id" wire:change="updatedPaymentTypeId"
+                <select wire:model="payment_type_id" wire:change="updatePaymentFields"
                     class="mt-1 block w-full rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 border @error('payment_type_id') border-red-500 @enderror">
                     <option value="">Seleccionar método</option>
                     @foreach($paymentTypes as $type)
@@ -145,13 +145,28 @@
                         </div>
                         @error('dollar_amount') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
 
+                        <label class="block text-sm font-medium text-gray-700">Tasa de Cambio</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <span class="text-gray-500">C$</span>
+                            </div>
+                            <input wire:model="exchangeRate"
+                                   type="number" step="0.01" min="0.01"
+                                   class="block w-full pl-7 pr-12 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 @error('exchange_rate') border-red-500 @enderror"
+                                   placeholder="36.50">
+                            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                <span class="text-gray-500">por $1</span>
+                            </div>
+                        </div>
+                        @error('exchangeRate') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+
                         <label class="block text-sm font-medium text-gray-700">Equivalente en Córdobas</label>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                 <span class="text-gray-500">C$</span>
                             </div>
                             <input type="text" 
-                                   value="C${{ number_format($convertedAmount, 2) }}" 
+                                   value="C${{ number_format($dollar_amount * $exchangeRate, 2) }}" 
                                    readonly
                                    class="block w-full pl-7 pr-12 py-2 border border-gray-300 rounded-lg bg-gray-50">
                         </div>
@@ -185,7 +200,7 @@
                         </label>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <span class="text-gray-500">C$</span>
+                                
                             </div>
                             <input type="text" 
                                    readonly 
@@ -195,7 +210,11 @@
                     </div>
                 @endif
             @endif
-
+    @error('productList')
+        <div class="md:col-span-4 text-red-500 text-sm bg-red-50 p-2 rounded-lg">
+            {{ $message }}
+        </div>
+    @enderror
             <div class="md:col-span-4 flex justify-end space-x-3">
                 <button type="button" wire:click="cancelPurchase"
                     class="w-32 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
@@ -244,7 +263,7 @@
                                 <thead class="bg-gray-50 sticky top-0">
                                     <tr>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Producto</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoría</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Precio Unitario</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cantidad</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acción</th>
@@ -256,9 +275,24 @@
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <div class="font-medium text-gray-900">{{ $product->Product_Name }}</div>
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {{ $product->Category }}
-                                            </td>
+                                           <td class="px-6 py-4 whitespace-nowrap text-sm">
+    @php
+        $stock = $product->inventories->Current_Stock ?? 0;
+        $colorClass = 'text-gray-500';
+        
+        if ($stock == 0) {
+            $colorClass = 'text-red-600 font-bold';
+        } elseif ($stock > 0 && $stock <= 5) {
+            $colorClass = 'text-yellow-600 font-medium';
+        } elseif ($stock > 5) {
+            $colorClass = 'text-green-600 font-medium';
+        }
+    @endphp
+    
+    <span class="{{ $colorClass }}">
+        {{ $stock }}
+    </span>
+</td>
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <div class="relative">
                                                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -317,7 +351,7 @@
                 });
             });
 
-            Livewire.on('purchase-error', (message) =>
+            Livewire.on('purchase-error', (message) => {
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
