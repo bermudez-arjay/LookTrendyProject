@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
-import tailwindcss from '@tailwindcss/vite'
+import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
     plugins: [
@@ -16,5 +16,14 @@ export default defineConfig({
             host: 'localhost',
             protocol: 'ws',
         }
+    },
+    resolve: {
+        alias: {
+            '$': 'jquery',
+            'jquery': 'jquery/dist/jquery.slim.js',
+        }
+    },
+    optimizeDeps: {
+        include: ['jquery', 'select2'],
     }
 });

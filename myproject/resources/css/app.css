@@ -1,2 +1,32 @@
 @import "tailwindcss";
-@source "../views";
+@import 'select2/dist/css/select2.min.css';
+
+.select2-container {
+  @apply w-full !important;
+}
+
+.select2-container--default .select2-selection--single {
+  @apply h-12 px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 !important;
+  line-height: 1.5 !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+  @apply text-base !important;
+  line-height: 1.5 !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+  height: 100% !important;
+}
+
+.select2-dropdown {
+  @apply border border-gray-300 rounded-lg shadow-sm !important;
+}
+
+.select2-results__option {
+  @apply py-2 px-3 !important;
+}
+
+.select2-container--default .select2-results__option--highlighted {
+  @apply bg-indigo-100 text-gray-900 !important;
+}

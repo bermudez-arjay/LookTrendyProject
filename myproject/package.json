@@ -6,6 +6,7 @@
         "build": "vite build"
     },
     "devDependencies": {
+        "@types/jquery": "^3.5.32",
         "autoprefixer": "^10.4.21",
         "axios": "^1.6.4",
         "chart.js": "^4.4.9",
@@ -16,6 +17,8 @@
     },
     "dependencies": {
         "@tailwindcss/vite": "^4.1.4",
-        "apexcharts": "^4.7.0"
+        "apexcharts": "^4.7.0",
+        "jquery": "^3.7.1",
+        "select2": "^4.1.0-rc.0"
     }
 }

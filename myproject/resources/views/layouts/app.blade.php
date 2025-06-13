@@ -288,7 +288,12 @@
                         <a href="{{route('credit.dashboard')}}" class="flex items-center p-1 md:p-2 rounded-lg hover:bg-green-50 text-xs md:text-sm transition-all"
                            wire:navigate>
                             <i class="fas fa-chart-pie text-green-500 mr-2 text-xs"></i>
-                            <span>Dashboard</span>
+                            <span>Dashboard de Créditos</span>
+                        </a>
+                        <a href="{{route('dashboard.abonos')}}" class="flex items-center p-1 md:p-2 rounded-lg hover:bg-green-50 text-xs md:text-sm transition-all"
+                           wire:navigate>
+                            <i class="fas fa-chart-pie text-green-500 mr-2 text-xs"></i>
+                            <span>Dashboard de Abonos</span>
                         </a>
                         <a href="{{ route('creditos') }}" 
                            class="flex items-center p-1 md:p-2 rounded-lg hover:bg-green-50 text-xs md:text-sm transition-all"

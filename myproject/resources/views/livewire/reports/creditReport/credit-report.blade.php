@@ -17,6 +17,83 @@
             </button>
         </div>
     </div>
+ <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <!-- Total de créditos -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 transition-transform hover:scale-[1.02]">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 text-sm">Total Créditos</p>
+                    <p class="text-2xl font-bold text-blue-600">{{ $totalCredits }}</p>
+                </div>
+                <div class="bg-blue-100 p-3 rounded-full">
+                    <i class="fas fa-file-invoice-dollar text-blue-600 text-xl"></i>
+                </div>
+            </div>
+            <div class="mt-4 pt-4 border-t border-gray-100">
+                <p class="text-xs text-gray-500">
+                    <span class="inline-block w-2 h-2 rounded-full bg-blue-500 mr-2"></span>
+                    Monto total: C$ {{ number_format($totalAmount, 2) }}
+                </p>
+            </div>
+        </div>
+
+        <!-- Promedio por crédito -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 transition-transform hover:scale-[1.02]">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 text-sm">Promedio por crédito</p>
+                    <p class="text-2xl font-bold text-purple-600">C$ {{ number_format($averageCredit, 2) }}</p>
+                </div>
+                <div class="bg-purple-100 p-3 rounded-full">
+                    <i class="fas fa-chart-line text-purple-600 text-xl"></i>
+                </div>
+            </div>
+            <div class="mt-4 pt-4 border-t border-gray-100">
+                <p class="text-xs text-gray-500">
+                    <span class="inline-block w-2 h-2 rounded-full bg-purple-500 mr-2"></span>
+                    En {{ $daysPeriod }} días
+                </p>
+            </div>
+        </div>
+
+        <!-- Créditos cancelados -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 transition-transform hover:scale-[1.02]">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 text-sm">Cancelados</p>
+                    <p class="text-2xl font-bold text-green-600">{{ $paidCredits }}</p>
+                </div>
+                <div class="bg-green-100 p-3 rounded-full">
+                    <i class="fas fa-check-circle text-green-600 text-xl"></i>
+                </div>
+            </div>
+            <div class="mt-4 pt-4 border-t border-gray-100">
+                <p class="text-xs text-gray-500">
+                    <span class="inline-block w-2 h-2 rounded-full bg-green-500 mr-2"></span>
+                    {{ $totalCredits > 0 ? round(($paidCredits/$totalCredits)*100, 1) : 0 }}% del total
+                </p>
+            </div>
+        </div>
+
+        <!-- Créditos vencidos -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 transition-transform hover:scale-[1.02]">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 text-sm">Vencidos</p>
+                    <p class="text-2xl font-bold text-red-600">{{ $expiredCredits }}</p>
+                </div>
+                <div class="bg-red-100 p-3 rounded-full">
+                    <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
+                </div>
+            </div>
+            <div class="mt-4 pt-4 border-t border-gray-100">
+                <p class="text-xs text-gray-500">
+                    <span class="inline-block w-2 h-2 rounded-full bg-red-500 mr-2"></span>
+                    {{ $totalCredits > 0 ? round(($expiredCredits/$totalCredits)*100, 1) : 0 }}% del total
+                </p>
+            </div>
+        </div>
+    </div>
 
     <!-- Filtros -->
     <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200">
@@ -58,7 +135,7 @@
                 <select wire:model.live="client_id" 
                         class="w-full pl-4 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                     <option value="">Todos los clientes</option>
-                    @foreach($clientes as $cliente)
+                    @foreach($clients as $cliente)
                         <option value="{{ $cliente->Client_ID }}">{{ $cliente->Client_FirstName }}</option>
                     @endforeach
                 </select>
@@ -96,10 +173,10 @@
         <!-- Resumen -->
         <div class="px-5 py-3 bg-gray-50 border-b border-gray-200 flex flex-wrap justify-between items-center gap-3">
             <p class="text-sm text-gray-600">
-                Mostrando <span class="font-medium">{{ $creditos->count() }}</span> créditos
+                Mostrando <span class="font-medium">{{ $credits->count() }}</span> créditos
             </p>
             <p class="text-sm text-gray-600">
-                Total pendiente: <span class="font-medium text-blue-600">C$ {{ number_format($creditos->sum('remaining_balance'), 2) }}</span>
+                Total pendiente: <span class="font-medium text-blue-600">C$ {{ number_format($credits->sum('remaining_balance'), 2) }}</span>
             </p>
         </div>
         
@@ -115,11 +192,11 @@
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Saldo</th>
-                        <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                      
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
-                    @forelse ($creditos as $credito)
+                    @forelse ($credits as $credito)
                         <tr class="hover:bg-gray-50 transition-colors">
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                 {{ $credito->Credit_ID }}
@@ -149,12 +226,7 @@
                                 {{ $credito->remaining_balance > 0 ? 'text-red-600' : 'text-green-600' }}">
                                 C$ {{ number_format($credito->remaining_balance, 2) }}
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <button wire:click="showDetails({{ $credito->Credit_ID }})" 
-                                        class="text-blue-600 hover:text-blue-900 mr-3">
-                                    Detalles
-                                </button>
-                            </td>
+                            
                         </tr>
                     @empty
                         <tr>
