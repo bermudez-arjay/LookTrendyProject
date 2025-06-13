@@ -88,21 +88,7 @@ public function updatedPaymentTypeId()
     $this->change_amount = 0;
 }
    
-    public function deleteConfirmed()
-    {
-        Payment::find($this->paymentToDelete)->delete();
-        $this->showDeleteConfirmation = false;
-        $this->paymentToDelete = null;
-        session()->flash('message', 'Abono eliminado correctamente');
-        $this->updateLastPayment();
-        $this->dispatch('paymentUpdated');
-    }
-
-    public function cancelDelete()
-    {
-        $this->showDeleteConfirmation = false;
-        $this->paymentToDelete = null;
-    }
+    
 
     public function updateLastPayment()
     {
@@ -252,17 +238,15 @@ public function updatedPaymentTypeId()
             $this->selectedCreditInfo->remaining_balance = 
                 $this->selectedCreditInfo->Total_Amount - $totalPayments;
             
-         
             $this->apply_late_fee = false;
             $this->apply_early_discount = false;
             
-         
             $this->determineCreditStatus();
+            $this->checkFullPayment(); 
         }
     } else {
         $this->selectedCreditInfo = null;
     }
-    $this->checkFullPayment(); 
 }
  protected function determineCreditStatus()
     {
@@ -308,22 +292,7 @@ public function updatedPaymentTypeId()
     return 'Pendiente';
     
 }
-public function updatedQuantities($value, $key)
-{
-    $productId = str_replace('quantities.', '', $key);
-    $availableStock = Inventory::where('Product_ID', $productId)->value('Current_Stock') ?? 0;
-    
-    if ($availableStock < 5) {
-        $this->addError('quantities.'.$productId, "No se puede agregar. Stock actual ($availableStock) es menor a 5 unidades.");
-        return;
-    }
-    
-    if ($value > $availableStock) {
-        $this->addError('quantities.'.$productId, "No hay suficiente stock. Disponible: $availableStock");
-    } else {
-        $this->resetErrorBag('quantities.'.$productId);
-    }
-}
+
 
    public function updatedCreditId($value)
 {
@@ -475,8 +444,6 @@ public function validateAmount()
     return true;
 }
 
-
-   
     public function selectCredit($creditId)
     {
         $this->credit_id = $creditId;
@@ -490,9 +457,11 @@ public function validateAmount()
 
 public function calculateChange()
 {
-    $this->change_amount = 0;
+     $this->change_amount = 0;
     $this->show_change_field = false;
-    
+
+    if (!is_numeric($this->dollar_amount) && !is_numeric($this->cordoba_amount)) return;
+   
     if (!$this->selectedCreditInfo) return;
     $totalToPay = $this->baseBalance;
     if ($this->apply_late_fee) {
@@ -520,6 +489,7 @@ public function updatedDollarAmount($value)
 {
     if ($this->payment_type_id == 2) {
         $this->cordoba_amount = $value * $this->exchangeRate;
+        $this->checkFullPayment(); 
         $this->calculateChange();
     }
 }
@@ -527,34 +497,37 @@ public function updatedDollarAmount($value)
 public function updatedCordobaAmount($value)
 {
     if ($this->payment_type_id == 1) {
+        $this->checkFullPayment(); 
         $this->calculateChange();
     }
 }
 
 public function getTotalPaymentAmountProperty()
 {
+    $this->log('Estado del crédito', [
+    'status' => $this->creditStatus,
+    'is_full_payment' => $this->is_full_payment,
+    'apply_late_fee' => $this->apply_late_fee,
+    'apply_early_discount' => $this->apply_early_discount
+]);
     if (!$this->selectedCreditInfo) {
-        $this->log('No hay crédito seleccionado para calcular el monto a pagar');
         return 0;
     }
     
     $baseAmount = $this->selectedCreditInfo->remaining_balance;
-    $this->log('Saldo base', ['baseAmount' => $baseAmount]);
     if ($this->apply_late_fee && $this->creditStatus == 'Vencido') {
         $lateFee = $baseAmount * 0.02;
         $baseAmount += $lateFee;
-        $this->log('Mora aplicada', ['lateFee' => $lateFee, 'newAmount' => $baseAmount]);
     }
 
     if ($this->apply_early_discount && $this->creditStatus == 'Pendiente' && $this->is_full_payment) {
         $discount = $baseAmount * 0.05;
         $baseAmount -= $discount;
-        $this->log('Descuento aplicado', ['discount' => $discount, 'newAmount' => $baseAmount]);
     }
     
-    $this->log('Monto total a pagar calculado', ['totalPaymentAmount' => $baseAmount]);
     return $baseAmount;
 }
+
 
 public function getBaseBalanceProperty()
 {
@@ -572,15 +545,13 @@ public function store()
     $this->validate();
     
     try {
-        // Cálculo del monto del pago
+       
         $amount = $this->payment_type_id == 2
             ? (float)$this->dollar_amount * $this->exchangeRate
             : (float)$this->cordoba_amount;
         $lateFee = $this->apply_late_fee ? $this->baseBalance * 0.02 : 0;
         $earlyDiscount = $this->apply_early_discount ? $this->baseBalance * 0.05 : 0;
         $finalAmount = $amount - $earlyDiscount;
-
-        // Crear el pago
         Payment::create([
             'Credit_ID' => $this->credit_id,
             'Payment_Date' => $this->payment_date,

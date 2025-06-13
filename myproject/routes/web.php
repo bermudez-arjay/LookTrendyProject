@@ -50,6 +50,10 @@ Route::middleware(['auth'])->group(function () {
     //Inicio
     Route::get('/inicio', Inicio::class)->name('inicio')->middleware('auth');
 
+   Route::get('/manual-usuario', function () {
+    return view('livewire.manual.manual'); // Asegúrate que coincida con la ubicación y nombre real
+})->name('manual-usuario')->middleware('auth');
+
     //compras
     Route::middleware(['check.role:Administrador'])->group(function () {
         Route::get('/compras', PurchaseTrasanction::class)->name('transaction');
