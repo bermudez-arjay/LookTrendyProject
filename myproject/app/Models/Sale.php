@@ -34,7 +34,10 @@ class Sale extends Model
      * @var array
      */
     protected $fillable = ['Client_ID', 'Sale_Date', 'Sale_VAT', 'Total_Amount'];
-
+protected $casts = [
+    'Sale_Date' => 'datetime',
+    
+];
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */

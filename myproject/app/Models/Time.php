@@ -31,7 +31,9 @@ class Time extends Model
      * @var array
      */
     protected $fillable = ['Date', 'Year', 'Quarter', 'Month', 'Week', 'Hour', 'Day_of_Week'];
-
+protected $casts = [
+    'Date' => 'datetime', // Para Laravel 8+
+];
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */

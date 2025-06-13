@@ -213,16 +213,21 @@ public function updatedCordobaAmount($value)
      $this->saleDate = now()->format('Y-m-d');
 }
 
-    public function render()
-    {
-        
-        $paymentTypes = PaymentType::all();
-        return view('livewire.sale.sales-component', [
-            'clients' => Client::orderBy('Client_FirstName')->get(),
-            'products' => Product::with('inventories')->orderBy('Product_Name')->get(),
-            'paymentTypes' => $paymentTypes
-        ])->layout('layouts.app');
-    }
+public function render()
+{
+    $paymentTypes = PaymentType::all();
+    
+    return view('livewire.sale.sales-component', [
+        'clients' => Client::orderBy('Client_FirstName')->get(),
+        'products' => Product::with(['inventories' => function($query) {
+                        $query->where('Current_Stock', '>', 0);
+                    }])
+                    ->where('removed', 0)
+                    ->orderBy('Product_Name')
+                    ->get(),
+        'paymentTypes' => $paymentTypes
+    ])->layout('layouts.app');
+}
 public function updatedQuantities($value, $key)
 {
     $productId = str_replace('quantities.', '', $key);
@@ -376,93 +381,97 @@ public function saveSale()
             }
         }
 
-        $date = Carbon::parse($this->saleDate);
-        $subtotal = collect($this->productList)->sum('subtotal');
-        $vatAmount = $subtotal * 0.15;
-        $totalAmount = $subtotal + $vatAmount;
+            $date = Carbon::parse($this->saleDate);
+            $subtotal = collect($this->productList)->sum('subtotal');
+            $vatAmount = $subtotal * 0.15;
+            $totalAmount = $subtotal + $vatAmount;
 
-        DB::beginTransaction();
-
-        $time = Time::create([
-            'Date' => $date->format('Y-m-d'),
-            'Year' => $date->year,
-            'Quarter' => ceil($date->month / 3),
-            'Month' => $date->month,
-            'Week' => $date->weekOfYear,
-            'Hour' => $date->format('H:i:s'),
-            'Day_of_Week' => $date->dayOfWeekIso,
-        ]);
-
-        $sale = Sale::create([
-            'Client_ID' => $this->selectedClientId,
-            'Sale_Date' => $this->saleDate,
-            'Sale_VAT' => $vatAmount,
-            'Total_Amount' => $totalAmount,
-        ]);
-
-        foreach ($this->productList as $item) {
-            SaleDetail::create([
-                'Sale_ID' => $sale->Sale_ID,
-                'Product_ID' => $item['product_id'],
-                'Quantity' => $item['quantity'],
-                'Subtotal' => $item['subtotal'],
+            $time = Time::create([
+                'Date' => $date->format('Y-m-d'),
+                'Year' => $date->year,
+                'Quarter' => ceil($date->month / 3),
+                'Month' => $date->month,
+                'Week' => $date->weekOfYear,
+                'Hour' => $date->format('H:i:s'),
+                'Day_of_Week' => $date->dayOfWeekIso,
             ]);
 
-            $inventory = Inventory::where('Product_ID', $item['product_id'])->first();
-            if ($inventory) {
-                $inventory->decrement('Current_Stock', $item['quantity']);
+            $sale = Sale::create([
+                'Client_ID' => $this->selectedClientId,
+                'Sale_Date' => $this->saleDate,
+                'Sale_VAT' => $vatAmount,
+                'Total_Amount' => $totalAmount,
+            ]);
+
+            foreach ($this->productList as $item) {
+                SaleDetail::create([
+                    'Sale_ID' => $sale->Sale_ID,
+                    'Product_ID' => $item['product_id'],
+                    'Quantity' => $item['quantity'],
+                    'Subtotal' => $item['subtotal'],
+                ]);
+
+                Inventory::where('Product_ID', $item['product_id'])
+                        ->decrement('Current_Stock', $item['quantity']);
             }
+
+            $receivedAmount = $this->payment_type_id == 2
+                ? ($this->dollar_amount * $this->exchangeRate)
+                : $this->cordoba_amount;
+
+            $changeAmount = $receivedAmount - $totalAmount;
+            $this->change_amount = max(0, $changeAmount);
+
+            $transaction = Transaction::create([
+                'Sale_ID' => $sale->Sale_ID,
+                'Supplier_ID' => null,
+                'User_ID' => auth()->user()->User_ID,
+                'Time_ID' => $time->Time_ID,
+                'Credit_ID' => null,
+                'Total' => $totalAmount,
+                'Transaction_Type' => 'Venta',
+                'Purchase_ID' => null,
+                'Payment_Type_ID' => $this->payment_type_id,
+                'Received_Amount' => $receivedAmount,
+                'Exchange_Rate' => $this->exchangeRate,
+                'Dollar_Amount' => $this->payment_type_id == 2 ? $this->dollar_amount : null,
+            ]);
+
+            DB::commit();
+
+            \Log::info('Venta completada exitosamente', [
+                'sale_id' => $sale->Sale_ID,
+                'transaction_id' => $transaction->Transaction_ID,
+                'total' => $totalAmount,
+                'received' => $receivedAmount,
+                'change' => $this->change_amount
+            ]);
+
+            $this->resetForm();
+            $this->saleDate = now()->format('Y-m-d');
+            session()->flash('success', 'Venta registrada exitosamente.');
+            
+            return $this->generatePdf(
+                $sale->Sale_ID,
+                $totalAmount,
+                $receivedAmount,
+            $changeAmount
+
+            );
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Error al procesar venta: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'user' => auth()->user()->User_ID ?? null
+            ]);
+            session()->flash('error', 'Error al registrar la venta: ' . $e->getMessage());
+            return back();
         }
-
-        $receivedAmount = $this->payment_type_id == 2
-            ? ($this->dollar_amount * $this->exchangeRate)
-            : $this->cordoba_amount;
-
-        $changeAmount = $receivedAmount - $totalAmount;
-        $this->change_amount = $changeAmount < 0 ? 0 : $changeAmount;
-
-        Transaction::create([
-            'Sale_ID' => $sale->Sale_ID,
-            'Supplier_ID' => null,
-            'User_ID' => auth()->user()->User_ID,
-            'Time_ID' => $time->Time_ID,
-            'Credit_ID' => null,
-            'Total' => $totalAmount,
-            'Transaction_Type' => 'Venta',
-            'Purchase_ID' => null,
-            'Payment_Type_ID' => $this->payment_type_id,
-            'Received_Amount' => $receivedAmount,
-            'Exchange_Rate' => $this->exchangeRate,
-            'Dollar_Amount' => $this->payment_type_id == 2 ? $this->dollar_amount : null,
-        ]);
-
-        DB::commit();
-
-       
-        \Log::info('Venta completada exitosamente', [
-            'sale_id' => $sale->Sale_ID,
-            'total' => $totalAmount,
-            'received' => $receivedAmount,
-            'dollar_amount' => $this->dollar_amount ?? null,
-        ]);
-
-        $this->resetForm();
-        $this->saleDate = now()->format('Y-m-d');
-        session()->flash('success', 'Venta registrada exitosamente.' );
-      return $this->generatePdf($sale->Sale_ID);
-
-    } catch (\Exception $e) {
-        DB::rollBack();
-        \Log::error('Error al procesar venta: ' . $e->getMessage(), [
-            'productList' => $this->productList,
-        ]);
-        session()->flash('error', 'Error al registrar la venta: ' . $e->getMessage());
-        return back();
     }
-}
-public function receipt($saleId)
+    public function receipt($saleId)
 {
-    $sale = Sale::with(['client', 'saleDetails.product', 'transactions.paymentType'])
+ $sale = Sale::with(['client', 'saleDetails.product', 'transactions.paymentType'])
               ->findOrFail($saleId);
     
     $transaction = $sale->transactions->first();
@@ -474,52 +483,26 @@ public function receipt($saleId)
         'transaction' => $transaction
     ]);
 }
-public function generatePdf($saleId)
+public function generatePdf($saleId, $totalAmount, $receivedAmount, $changeAmount)
 {
     $sale = Sale::with(['client', 'saleDetails.product', 'transactions.paymentType'])
               ->findOrFail($saleId);
     
     $transaction = $sale->transactions->first();
     $paymentMethodName = $transaction->paymentType->Payment_Type_Name ?? 'No especificado';
-    
-   
-    $paymentType = $transaction->Payment_Type_ID;
-    $totalAmount = $sale->Total_Amount;
-    if ($paymentType == 2) {
-        $exchangeRate = $this->exchangeRate; 
-        $dollarAmount = $transaction->Total / $exchangeRate;
-        $receivedAmount = $dollarAmount * $exchangeRate;
-    } 
-   
-    else {
-        $receivedAmount = $transaction->Total; 
-        $dollarAmount = null;
-    }
-    
-    $changeAmount = max(0, $receivedAmount - $totalAmount);
-
-    // Configuración de mPDF (igual a tu versión funcional)
+    $changeAmount = max(0, $changeAmount);
     $defaultConfig = (new ConfigVariables())->getDefaults();
     $fontDirs = $defaultConfig['fontDir'];
-    $defaultFontConfig = (new FontVariables())->getDefaults();
-    $fontData = $defaultFontConfig['fontdata'];
-
+    
     $mpdf = new Mpdf([
         'mode' => 'utf-8',
         'format' => 'A4',
         'orientation' => 'P',
         'fontDir' => array_merge($fontDirs, [storage_path('fonts')]),
-        'fontdata' => $fontData + [
-            'dejavusans' => [
-                'R' => 'DejaVuSans.ttf',
-                'B' => 'DejaVuSans-Bold.ttf',
-            ],
-        ],
         'default_font' => 'dejavusans',
         'tempDir' => storage_path('app/mpdf/tmp'),
     ]);
 
-   
     $data = [
         'sale' => $sale,
         'invoice_number' => str_pad($sale->Sale_ID, 8, '0', STR_PAD_LEFT),
@@ -533,9 +516,7 @@ public function generatePdf($saleId)
         'user' => auth()->user(),
     ];
 
-    
     $html = view('livewire.sale.invoice', $data)->render();
-
     $mpdf->WriteHTML($html);
 
     return response()->streamDownload(

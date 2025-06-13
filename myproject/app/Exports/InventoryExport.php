@@ -42,7 +42,7 @@ class InventoryExport implements FromCollection, WithHeadings, WithStyles, WithD
         return [
             'Nombre Producto',
             'Stock',
-            'Stock Mini',
+            'Stock Minimo',
             'Diferencia',
             'Estado',
         ];
@@ -50,12 +50,11 @@ class InventoryExport implements FromCollection, WithHeadings, WithStyles, WithD
 
     public function startCell(): string
     {
-        return 'A10';
+        return 'A9';
     }
 
     public function styles(Worksheet $sheet)
     {
-        // Título
         $sheet->mergeCells('B3:D4');
         $sheet->setCellValue('B3', 'TIENDA LOOK-TRENDY');
         $sheet->getStyle('B3')->applyFromArray([
@@ -74,7 +73,7 @@ class InventoryExport implements FromCollection, WithHeadings, WithStyles, WithD
             ],
         ]);
 
-        // Subtítulo
+
         $sheet->mergeCells('A7:E7');
         $sheet->setCellValue('A7', 'REPORTE DE INVENTARIO - ' . now()->format('d/m/Y'));
         $sheet->getStyle('A7')->applyFromArray([
@@ -92,7 +91,6 @@ class InventoryExport implements FromCollection, WithHeadings, WithStyles, WithD
             ],
         ]);
 
-        // Encabezado tabla en A10:E10
         $sheet->getStyle('A9:E9')->applyFromArray([
             'font' => [
                 'bold' => true,
@@ -114,8 +112,7 @@ class InventoryExport implements FromCollection, WithHeadings, WithStyles, WithD
             ],
         ]);
 
-        // Estilo para las filas de datos (desde A11 en adelante)
-        $sheet->getStyle('A9:E' . $sheet->getHighestRow())->applyFromArray([
+        $sheet->getStyle('A8:E' . $sheet->getHighestRow())->applyFromArray([
             'borders' => [
                 'allBorders' => [
                     'borderStyle' => Border::BORDER_THIN,
@@ -128,7 +125,6 @@ class InventoryExport implements FromCollection, WithHeadings, WithStyles, WithD
             ],
         ]);
 
-        // Autoajuste de columnas
         foreach (range('A', 'E') as $col) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
@@ -139,7 +135,7 @@ class InventoryExport implements FromCollection, WithHeadings, WithStyles, WithD
         $drawing = new Drawing();
         $drawing->setName('Logo');
         $drawing->setDescription('Logo de la empresa');
-        $drawing->setPath(public_path('logotipo.png')); // Asegúrate que el logo esté en public/
+        $drawing->setPath(public_path('logotipo.png')); 
         $drawing->setHeight(90);
         $drawing->setCoordinates('A1');
         $drawing->setOffsetX(10);
