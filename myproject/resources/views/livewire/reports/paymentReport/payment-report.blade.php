@@ -17,7 +17,99 @@
             </button>
         </div>
     </div>
+<!-- Tarjetas de Resumen para Abonos corregidas -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+    <!-- Total abonado hoy -->
+    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 transition-transform hover:scale-[1.02]">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-gray-500 text-sm">Abonos (Hoy)</p>
+                <p class="text-2xl font-bold text-blue-600">C$ {{ number_format($payments->where('Payment_Date', today())->sum('Payment_Amount'), 2) }}</p>
+            </div>
+            <div class="bg-blue-100 p-3 rounded-full">
+                <i class="fas fa-money-bill-wave text-blue-600 text-xl"></i>
+            </div>
+        </div>
+        <div class="mt-4 pt-4 border-t border-gray-100">
+            <p class="text-xs text-gray-500 flex items-center">
+                <span class="inline-block w-2 h-2 rounded-full bg-blue-500 mr-2"></span>
+                {{ $payments->where('Payment_Date', today())->count() }} transacciones
+            </p>
+        </div>
+    </div>
 
+    <!-- Total abonado en el periodo -->
+    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 transition-transform hover:scale-[1.02]">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-gray-500 text-sm">Total Abonado</p>
+                <p class="text-2xl font-bold text-green-600">C$ {{ number_format($payments->sum('Payment_Amount'), 2) }}</p>
+            </div>
+            <div class="bg-green-100 p-3 rounded-full">
+                <i class="fas fa-wallet text-green-600 text-xl"></i>
+            </div>
+        </div>
+        <div class="mt-4 pt-4 border-t border-gray-100">
+            <p class="text-xs text-gray-500 flex items-center">
+                <span class="inline-block w-2 h-2 rounded-full bg-green-500 mr-2"></span>
+                {{ $payments->count() }} abonos
+            </p>
+        </div>
+    </div>
+
+    <!-- Promedio de abonos -->
+    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 transition-transform hover:scale-[1.02]">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-gray-500 text-sm">Promedio por abono</p>
+                <p class="text-2xl font-bold text-purple-600">C$ {{ number_format($payments->avg('Payment_Amount'), 2) }}</p>
+            </div>
+            <div class="bg-purple-100 p-3 rounded-full">
+                <i class="fas fa-chart-line text-purple-600 text-xl"></i>
+            </div>
+        </div>
+        <div class="mt-4 pt-4 border-t border-gray-100">
+            <p class="text-xs text-gray-500 flex items-center">
+                <span class="inline-block w-2 h-2 rounded-full bg-purple-500 mr-2"></span>
+                @if($start_date && $end_date)
+                    En {{ \Carbon\Carbon::parse($start_date)->diffInDays($end_date) + 1 }} días
+                @else
+                    Período no definido
+                @endif
+            </p>
+        </div>
+    </div>
+
+    <!-- Tipo de pago más usado -->
+    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 transition-transform hover:scale-[1.02]">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-gray-500 text-sm">Método más usado</p>
+                <p class="text-2xl font-bold text-indigo-600">
+                    @php
+                        $mostUsed = $payments->groupBy('Payment_Type_ID')->sortByDesc(function($group) {
+                            return $group->count();
+                        })->first();
+                    @endphp
+                    {{ $mostUsed->first()->paymentType->Payment_Type_Name ?? 'N/A' }}
+                </p>
+            </div>
+            <div class="bg-indigo-100 p-3 rounded-full">
+                <i class="fas fa-credit-card text-indigo-600 text-xl"></i>
+            </div>
+        </div>
+        <div class="mt-4 pt-4 border-t border-gray-100">
+            <p class="text-xs text-gray-500 flex items-center">
+                <span class="inline-block w-2 h-2 rounded-full bg-indigo-500 mr-2"></span>
+                @if($mostUsed)
+                    {{ $mostUsed->count() }} transacciones
+                @else
+                    0 transacciones
+                @endif
+            </p>
+        </div>
+    </div>
+</div>
     <!-- Filtros -->
     <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-4">

@@ -17,10 +17,6 @@
   </style>
 </head>
 <body>
-  <iframe 
-    title="Dashboard de Ventas"
-    src="https://app.powerbi.com/view?r=eyJrIjoiOGU2MzQyZGEtZGI0Yi00NmM3LWFjNTEtMTJmMGMyZGUzMjg4IiwidCI6ImU0NzY0NmZlLWRhMjctNDUxOC04NDM2LTVmOGIxNThiYTEyNyIsImMiOjR9" 
-    allowfullscreen="true">
-  </iframe>
+  <iframe title="compras" width="600" height="373.5" src="https://app.powerbi.com/view?r=eyJrIjoiMDI3NzFjMWMtZjg4MC00MjRmLTk5NjYtOWVlZmY5ZTczZDBmIiwidCI6ImU0NzY0NmZlLWRhMjctNDUxOC04NDM2LTVmOGIxNThiYTEyNyIsImMiOjR9" frameborder="0" allowFullScreen="true"></iframe>
 </body>
 </html>

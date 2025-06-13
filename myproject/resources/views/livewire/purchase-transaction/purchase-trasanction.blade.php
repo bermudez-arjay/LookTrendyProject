@@ -143,7 +143,7 @@
                                 <span class="text-gray-500">USD</span>
                             </div>
                         </div>
-                        @error('dollar_amount') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                        @error('dollar_amount') <span class="text-red-500 text-xs">{{$message }}</span> @enderror
 
                         <label class="block text-sm font-medium text-gray-700">Equivalente en Córdobas</label>
                         <div class="relative">
