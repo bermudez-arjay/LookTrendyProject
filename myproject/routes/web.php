@@ -58,9 +58,11 @@ Route::middleware(['auth'])->group(function () {
     //compras
     Route::middleware(['check.role:Administrador'])->group(function () {
         Route::get('/compras', PurchaseTrasanction::class)->name('transaction');
+        Route::view('dashboard/compras', 'livewire.purchase-transaction.purchase-dashboard')->name('dashboard.compras');
         Route::get('/usuarios', UserComponent::class)->name('usuarios');
         Route::get('/proveedores', SupplierComponent::class)->name('proveedores');
         // Productos,Inventario 
+        Route::view('/dashboard/inventario', 'livewire.inventory-dashboard.dashboard-inventory')->name('dashboard.inventario');
         Route::get('/productos', ProductComponent::class)->name('productos');
         Route::get('/categorias', CategoryComponent::class)->name('categorias');
         Route::get('/inventario', InventoryDashboard::class)->name('inventario');
@@ -74,6 +76,7 @@ Route::middleware(['auth'])->group(function () {
 
     //Créditos
     Route::get('/creditos', CreateCredit::class)->name('creditos');
+    Route::view('/dashboard/creditos', 'livewire.credit.credit-dashboard')->name('credit.dashboard');
     Route::get('/credits/{credit}', [CreateCredit::class, 'show'])->name('credits.show');
 
     //Pagos

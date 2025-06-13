@@ -10,7 +10,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Usuario -->
             <div class="space-y-2">
-                <label class="block text-sm font-medium text-gray-700">Usuario</label>
+                <label class="block text-sm font-medium text-gray-700">Registrado por</label>
                 <input type="text" value="{{ Auth::user()->User_FirstName }}"
                     class="mt-1 block w-full rounded-lg bg-gray-50 border-gray-300 shadow-sm py-2 px-3 border" readonly>
             </div>
@@ -20,7 +20,7 @@
                 <label class="block text-sm font-medium text-gray-700">Proveedor <span class="text-red-500">*</span></label>
                 <select wire:model="selectedSupplierId"
                     class="mt-1 block w-full rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 border @error('selectedSupplierId') border-red-500 @enderror">
-                    <option value="">Seleccionar proveedor</option>
+                    <option value="0">Seleccionar proveedor</option>
                     @foreach($suppliers as $supplier)
                         <option value="{{ $supplier->Supplier_ID }}">{{ $supplier->Supplier_Name }}</option>
                     @endforeach
@@ -31,7 +31,7 @@
             <!-- Fecha -->
             <div class="space-y-2">
                 <label class="block text-sm font-medium text-gray-700">Fecha <span class="text-red-500">*</span></label>
-                <input type="date" wire:model="purchaseDate" readonly
+                <input type="date" wire:model="purchaseDate"
                     class="mt-1 block w-full rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 border @error('purchaseDate') border-red-500 @enderror">
                 @error('purchaseDate') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
             </div>
@@ -69,10 +69,12 @@
                                 <tr>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $detail['product_name'] }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $detail['quantity'] }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">C${{ $detail['unit_price'] }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">C${{ $detail['subtotal'] }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">C${{ $detail['vat'] }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">C${{ $detail['total_with_tax'] }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        C${{ number_format($detail['unit_price'], 2) }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">C${{ number_format($detail['subtotal'], 2) }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">C${{ number_format($detail['vat'], 2) }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">C${{ number_format($detail['total_amount'], 2) }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                         <button type="button" wire:click="removeProduct({{ $index }})" class="text-red-600 hover:text-red-900">
                                             Eliminar
@@ -106,13 +108,13 @@
 
             <div class="space-y-2">
                 <label class="block text-sm font-medium text-gray-700">Total</label>
-                <input type="text" value="C${{ number_format(collect($productList)->sum('total_with_tax'), 2) }}" readonly
+                <input type="text" value="C${{ number_format(collect($productList)->sum('total_amount'), 2) }}" readonly
                     class="mt-1 block w-full rounded-lg bg-white border-gray-300 shadow-sm py-2 px-3 border font-bold text-gray-900">
             </div>
 
             <div class="space-y-2">
                 <label class="block text-sm font-medium text-gray-700">Método de Pago <span class="text-red-500">*</span></label>
-                <select wire:model="payment_type_id" wire:change="updatePaymentFields"
+                <select wire:model="payment_type_id" wire:change="updatedPaymentTypeId"
                     class="mt-1 block w-full rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 border @error('payment_type_id') border-red-500 @enderror">
                     <option value="">Seleccionar método</option>
                     @foreach($paymentTypes as $type)
@@ -123,8 +125,7 @@
             </div>
 
             @if($show_amount_fields)
-                @if($payment_type_id == 2)
-                    <!-- Pago en dólares -->
+                @if($payment_type_id == 2) <!-- Pago en dólares -->
                     <div class="md:col-span-2 space-y-2">
                         <label class="block text-sm font-medium text-gray-700">
                             Monto en Dólares <span class="text-red-500">*</span>
@@ -133,7 +134,8 @@
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                 <span class="text-gray-500">$</span>
                             </div>
-                            <input wire:model.live="dollar_amount" 
+                            <input wire:model="dollar_amount" 
+                                   wire:change="calculateChange"
                                    type="number" step="0.01" min="0.01"
                                    class="block w-full pl-7 pr-12 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 @error('dollar_amount') border-red-500 @enderror"
                                    placeholder="0.00">
@@ -141,7 +143,7 @@
                                 <span class="text-gray-500">USD</span>
                             </div>
                         </div>
-                        @error('dollar_amount') <span class="text-red-500 text-xs">{{ $message}}</span> @enderror
+                        @error('dollar_amount') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
 
                         <label class="block text-sm font-medium text-gray-700">Equivalente en Córdobas</label>
                         <div class="relative">
@@ -149,13 +151,12 @@
                                 <span class="text-gray-500">C$</span>
                             </div>
                             <input type="text" 
-                                   value="C${{ number_format($this->convertedAmount, 2) }}" 
+                                   value="C${{ number_format($convertedAmount, 2) }}" 
                                    readonly
                                    class="block w-full pl-7 pr-12 py-2 border border-gray-300 rounded-lg bg-gray-50">
                         </div>
                     </div>
-                @else
-                    <!-- Pago en córdobas -->
+                @else <!-- Pago en córdobas -->
                     <div class="md:col-span-2 space-y-2">
                         <label class="block text-sm font-medium text-gray-700">
                             Monto Pagado (Córdobas) <span class="text-red-500">*</span>
@@ -164,7 +165,8 @@
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                 <span class="text-gray-500">C$</span>
                             </div>
-                            <input wire:model.live="cordoba_amount" 
+                            <input wire:model="cordoba_amount" 
+                                   wire:change="calculateChange"
                                    type="number" step="0.01" min="0.01"
                                    class="block w-full pl-7 pr-12 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 @error('cordoba_amount') border-red-500 @enderror"
                                    placeholder="0.00">
@@ -216,8 +218,8 @@
                     <div class="px-6 pt-6 pb-4 border-b border-gray-100">
                         <div class="flex items-center justify-between">
                             <div>
-                                <h3 class="text-xl font-semibold text-gray-900">Agregar Productos</h3>
-                                <p class="mt-1 text-sm text-gray-500">Seleccione productos y especifique cantidades y precios</p>
+                                <h3 class="text-xl font-semibold text-gray-900">Seleccionar Producto</h3>
+                                <p class="mt-1 text-sm text-gray-500">Busque y seleccione productos para agregar</p>
                             </div>
                             <button wire:click="$set('showProductModal', false)" class="text-gray-400 hover:text-gray-500">
                                 <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -231,61 +233,50 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                 </svg>
                             </div>
-                            <input type="text" wire:model.live.debounce.300ms="searchProduct"
+                            <input type="text" wire:model.live.debounce.300ms="productSearch"
                                 placeholder="Buscar productos..."
                                 class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                         </div>
                     </div>
-                    
                     <div class="px-6 pb-4">
                         <div class="overflow-y-auto max-h-96">
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50 sticky top-0">
                                     <tr>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Producto</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock Actual</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cantidad</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoría</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Precio Unitario</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cantidad</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acción</th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
-                                    @forelse($filteredProducts as $product)
+                                    @forelse($products as $product)
                                         <tr class="hover:bg-gray-50">
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <div class="font-medium text-gray-900">{{ $product->Product_Name }}</div>
-                                                <div class="text-sm text-gray-500">{{ $product->Category }}</div>
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap">
-                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
-                                                    {{ ($product->current_stock ?? 0) > 5 ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' }}">
-                                                    {{ $product->current_stock ?? 0 }} unidades
-                                                </span>
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap">
-                                                <input type="number" 
-                                                       wire:model="quantities.{{ $product->Product_ID }}" 
-                                                       min="1" 
-                                                       step="1"
-                                                       class="w-20 px-2 py-1 border rounded-md sm:text-sm @error('quantities.'.$product->Product_ID) border-red-500 @enderror"
-                                                       placeholder="0">
-                                                @error('quantities.'.$product->Product_ID)
-                                                    <span class="text-red-500 text-xs block mt-1">{{ $message }}</span>
-                                                @enderror
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                {{ $product->Category }}
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <div class="relative">
                                                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                                         <span class="text-gray-500">C$</span>
                                                     </div>
-                                                    <input type="number" 
-                                                           wire:model="unitPrices.{{ $product->Product_ID }}" 
-                                                           min="0.01" 
-                                                           step="0.01"
-                                                           class="block w-full pl-7 pr-12 py-1 border rounded-md sm:text-sm @error('unitPrices.'.$product->Product_ID) border-red-500 @enderror"
-                                                           placeholder="0.00">
+                                                    <input wire:model="prices.{{ $product->Product_ID }}"
+                                                           type="number" step="0.01" min="0.01"
+                                                           class="block w-full pl-7 pr-12 py-1 border rounded-md sm:text-sm @error('prices.'.$product->Product_ID) border-red-500 @enderror">
+                                                    @error('prices.'.$product->Product_ID)
+                                                        <span class="text-red-500 text-xs block mt-1">{{ $message }}</span>
+                                                    @enderror
                                                 </div>
-                                                @error('unitPrices.'.$product->Product_ID)
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <input wire:model="quantities.{{ $product->Product_ID }}"
+                                                       type="number" min="1"
+                                                       class="w-20 px-2 py-1 border rounded-md sm:text-sm @error('quantities.'.$product->Product_ID) border-red-500 @enderror">
+                                                @error('quantities.'.$product->Product_ID)
                                                     <span class="text-red-500 text-xs block mt-1">{{ $message }}</span>
                                                 @enderror
                                             </td>
@@ -307,22 +298,6 @@
                             </table>
                         </div>
                     </div>
-                    
-                    <div class="px-6 py-4 border-t border-gray-100 bg-gray-50">
-                        <div class="flex justify-end space-x-3">
-                            <button wire:click="$set('showProductModal', false)"
-                                class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                Cancelar
-                            </button>
-                            <button wire:click="$set('showProductModal', false)"
-                                class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                                </svg>
-                                Finalizar Selección
-                            </button>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -330,29 +305,27 @@
 </div>
 
 @push('scripts')
-<script>
-    document.addEventListener('livewire:initialized', () => {
-        // Notificación cuando se completa la compra
-        Livewire.on('purchase-completed', () => {
-            Swal.fire({
-                icon: 'success',
-                title: 'Compra registrada',
-                text: 'La compra se ha registrado exitosamente',
-                timer: 3000,
-                showConfirmButton: false
+    <script>
+        document.addEventListener('livewire:initialized', () => {
+            Livewire.on('purchase-completed', () => {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Compra registrada',
+                    text: 'La compra se ha registrado exitosamente',
+                    timer: 3000,
+                    showConfirmButton: false
+                });
             });
-        });
 
-        // Notificación de error
-        Livewire.on('purchase-error', (message) => {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: message,
-                timer: 3000,
-                showConfirmButton: false
+            Livewire.on('purchase-error', (message) =>
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: message,
+                    timer: 3000,
+                    showConfirmButton: false
+                });
             });
         });
-    });
-</script>
+    </script>
 @endpush
