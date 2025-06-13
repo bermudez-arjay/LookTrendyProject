@@ -108,124 +108,91 @@ class PurchaseTrasanction extends Component
 
     public function updatedDollarAmount()
     {
-        $this->calculateChange();
-    }
-
-    public function updatedCordobaAmount($value)
-    {
-        if (!is_numeric($value)) {
-            $this->cordoba_amount = 0;
-        }
-        $this->calculateChange();
-    }
-
-    public function calculateChange()
-    {
-        $total = floatval($this->total_amount) ?? 0;
+        $product = Product::with('inventories')->find($productId);
         
-        if ($this->payment_type_id == 1) {
-            $received = floatval($this->cordoba_amount) ?? 0;
-            $this->change_amount = max(0, $received - $total);
-        } else {
-            $received = floatval($this->dollar_amount) ?? 0;
-            $this->change_amount = max(0, ($received * $this->exchangeRate) - $total);
+        if (!$product) {
+            $this->addError('modal_error', 'Producto no encontrado');
+            return;
         }
-    }
 
-    public function updatePaymentFields()
-    {
-        $this->resetAmountFields();
-        $this->show_amount_fields = in_array($this->payment_type_id, [1, 2]);
-    }
+        $quantity = $this->quantities[$productId] ?? null;
+        $unitPrice = $this->unitPrices[$productId] ?? null;
 
-    public function resetPaymentFields()
-    {
-        $this->payment_type_id = null;
-        $this->resetAmountFields();
-        $this->show_amount_fields = false;
-    }
+        if (empty($quantity)) {
+            $this->addError('quantity_'.$productId, 'La cantidad es requerida');
+            return;
+        }
 
-    public function resetAmountFields()
-    {
-        $this->dollar_amount = null;
-        $this->cordoba_amount = null;
-        $this->change_amount = 0;
-    }
+        if (empty($unitPrice)) {
+            $this->addError('unitPrice_'.$productId, 'El precio unitario es requerido');
+            return;
+        }
 
-    public function updateProduct($index)
-    {
-        $product = $this->productList[$index];
-        $quantity = (float)$product['raw_quantity'];
-        $unitPrice = (float)$product['raw_unit_price'];
-        
+        if ($quantity < 1) {
+            $this->addError('quantity_'.$productId, 'La cantidad debe ser al menos 1');
+            return;
+        }
+
+        if ($unitPrice < 0.01) {
+            $this->addError('unitPrice_'.$productId, 'El precio unitario debe ser mayor a 0');
+            return;
+        }
+
+      
+        $originalUnitPrice = $unitPrice;
+        if ($this->showExchangeRate && $this->exchangeRate > 0) {
+            $unitPrice = $unitPrice * $this->exchangeRate;
+        }
+
         $subtotal = $quantity * $unitPrice;
-        $vat = $subtotal * $this->tax;
-        $total = $subtotal + $vat;
-        
-        $this->productList[$index] = [
-            'product_id' => $product['product_id'],
-            'product_name' => $product['product_name'],
-            'quantity' => number_format($quantity, 0),
-            'unit_price' => number_format($unitPrice, 2),
-            'subtotal' => number_format($subtotal, 2),
-            'vat' => number_format($vat, 2),
-            'total_with_tax' => number_format($total, 2),
-            'raw_quantity' => $quantity,
-            'raw_unit_price' => $unitPrice
-        ];
-        
-        $this->calculateChange();
-    }
+        $totalWithTax = $subtotal + ($subtotal * $this->tax);
 
-    public function addProduct($productId = null)
-    {
-        $this->validate([
-            "quantities.$productId" => 'required|numeric|min:1',
-            "unitPrices.$productId" => 'required|numeric|min:0.01'
-        ]);
-
-        $product = Product::findOrFail($productId);
-        $quantity = (float)$this->quantities[$productId];
-        $unitPrice = (float)$this->unitPrices[$productId];
-
-        $existingIndex = null;
-        
-        foreach ($this->productList as $index => $detail) {
-            if ($detail['product_id'] == $productId) {
-                $existingIndex = $index;
-                break;
+        foreach ($this->productList as &$item) {
+            if ($item['product_id'] == $productId) {
+                $item['quantity'] += $quantity;
+                $item['unit_price'] = $unitPrice;
+                $item['original_unit_price'] = $originalUnitPrice;
+                $item['subtotal'] = $item['quantity'] * $unitPrice;
+                $item['total_with_tax'] = $item['subtotal'] + ($item['subtotal'] * $this->tax);
+              
+                $this->quantities[$productId] = null;
+                $this->unitPrices[$productId] = null;
+                $this->dispatch('productAdded', productId: $productId);
+                
+                $this->dispatch('notify', 
+                    type: 'success',
+                    title: 'Producto actualizado',
+                    message: 'Se ha actualizado la cantidad del producto'
+                );
+                return;
             }
         }
 
-        $subtotal = $unitPrice * $quantity;
-        $vat = $subtotal * $this->tax;
-        $total = $subtotal + $vat;
-
-        $productData = [
-            'product_id' => $product->Product_ID,
-            'product_name' => $product->Product_Name,
-            'quantity' => number_format($quantity, 0),
-            'unit_price' => number_format($unitPrice, 2),
-            'subtotal' => number_format($subtotal, 2),
-            'vat' => number_format($vat, 2),
-            'total_with_tax' => number_format($total, 2),
-            'raw_quantity' => $quantity,
-            'raw_unit_price' => $unitPrice,
-            'is_dollar' => $this->payment_type_id == 2,
-            'exchange_rate' => $this->exchangeRate
+        $this->productList[] = [
+            'product_id' => $productId,
+            'name' => $product->Product_Name,
+            'quantity' => $quantity,
+            'unit_price' => $unitPrice,
+            'original_unit_price' => $originalUnitPrice,
+            'subtotal' => $subtotal,
+            'tax' => $this->tax,
+            'total_with_tax' => $totalWithTax,
+            'current_stock' => $product->inventories->Current_Stock ?? 0,
+            'is_dollar' => $this->showExchangeRate,
+            'exchange_rate' => $this->showExchangeRate ? $this->exchangeRate : null
         ];
 
-        if ($existingIndex !== null) {
-            $this->productList[$existingIndex] = $productData;
-        } else {
-            $this->productList[] = $productData;
-        }
+ $this->dispatch('productAdded', productId: $productId);
         
-        unset($this->quantities[$productId]);
-        unset($this->unitPrices[$productId]);
-        $this->resetErrorBag();
-        $this->showProductModal = false;
-        $this->calculateChange();
+        $this->quantities[$productId] = null;
+        $this->unitPrices[$productId] = null;
+         $this->dispatch('syncInputs');
+        
+        $this->dispatch('notify', 
+            type: 'success',
+            title: 'Producto agregado',
+            message: 'El producto se ha agregado a la lista'
+        );
     }
 
     public function removeProduct($index)
@@ -264,10 +231,18 @@ class PurchaseTrasanction extends Component
     {
         $this->validate();
 
-        try {
-            DB::beginTransaction();
-            
-            $date = Carbon::parse($this->purchaseDate);
+        if (empty($this->productList)) {
+            $this->addError('productList', 'Debe agregar al menos un producto.');
+            return;
+        }
+
+        DB::transaction(function () {
+            $total = collect($this->productList)->sum('total_with_tax');
+            $now = Carbon::now();
+
+            $paymentType = PaymentType::find($this->payment_type_id);
+            $isDollarPayment = str_contains($paymentType->Payment_Type_Name, 'USD');
+
             $time = Time::create([
                 'Date' => $date->format('Y-m-d'),
                 'Year' => $date->year,

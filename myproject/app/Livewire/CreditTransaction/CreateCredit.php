@@ -13,9 +13,10 @@ use App\Models\Transaction;
 use Livewire\Component;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
-
+use Livewire\WithPagination;
 class CreateCredit extends Component
 {
+    use WithPagination;
     public $clients, $products, $paymentTypes;
     public $totalWithInterest = 0;
     public $quotaAmount = 0;
@@ -26,10 +27,10 @@ class CreateCredit extends Component
     public $showProductModal = false;
     public $credit_status = 'Pendiente';
     public $quantities = [];
-
+  public $searchProduct = '';
+    public $perPage = 10;
     public $creditDetails = [];
 
-    // Campos temporales para agregar productos
     public $product_id, $quantity, $payment_date, $payment_amount;
 
     protected $listeners = ['selectProductChanged', 'selectClientChanged', 'selectPaymentTypeChanged', 'selectTermChanged', 'product-changed' => 'updateProductInfo'];
@@ -55,9 +56,10 @@ class CreateCredit extends Component
             'interest_rate' => 'required|numeric|min:0',
             'installments' => 'required|integer|min:1',
             'creditDetails' => 'required|array|min:1',
+            'term' => 'required|in:1,3,6'
         ];
     }
-    protected function messages()
+protected function messages()
 {
     return [
         'client_id.required' => 'Debe seleccionar un cliente',
@@ -82,6 +84,9 @@ class CreateCredit extends Component
         'installments.integer' => 'El número de cuotas debe ser un número entero',
         'installments.min' => 'Debe haber al menos 1 cuota',
         
+        'term.required' => 'El plazo es obligatorio',
+        'term.in' => 'El plazo seleccionado no es válido. Debe ser 1, 3 o 6 meses',
+        
         'creditDetails.required' => 'Debe agregar al menos un producto',
         'creditDetails.array' => 'Los productos deben estar en formato válido',
         'creditDetails.min' => 'Debe agregar al menos un producto',
@@ -92,7 +97,27 @@ class CreateCredit extends Component
         'creditDetails.*.quantity.max_stock' => 'La cantidad solicitada supera el stock disponible.',
     ];
 }
-    public function mount()
+
+   public function getFilteredProductsProperty()
+    {
+        return Product::with('inventories')
+            ->where('Removed', 0)
+            ->when($this->searchProduct, function($query) {
+                $query->where('Product_Name', 'like', '%'.$this->searchProduct.'%')
+                      ->orWhere('Category', 'like', '%'.$this->searchProduct.'%');
+            })
+            ->leftJoin('inventories', 'products.Product_ID', '=', 'inventories.Product_ID')
+            ->orderByRaw('IFNULL(inventories.Current_Stock, 5) ASC')
+            ->orderBy('Product_Name', 'asc')
+            ->select('products.*', 'inventories.Current_Stock') 
+            ->paginate($this->perPage)
+            ->through(function ($product) {
+                $product->current_stock = $product->Current_Stock ?? 0;
+                return $product;
+            });
+    }
+    
+     public function mount()
     {
         $this->start_date = date('Y-m-d');
         $this->due_date = date('Y-m-d', strtotime('+30 days'));
@@ -132,6 +157,7 @@ class CreateCredit extends Component
         $this->selectedSupplierId = null; 
         $this->payment_type_id = null;
         $this->productList = [];
+         $this->searchProduct = '';
     }
 
     public function updateProductInfo($productId)
@@ -244,32 +270,9 @@ class CreateCredit extends Component
             $this->quotaAmount = 0;
         }
     }
-    
-public function updatedSearchProduct()
+    public function addDetail($productId = null)
 {
-    $this->products = Product::with('inventories')
-        ->when($this->searchProduct, function($query) {
-            $query->where('Product_Name', 'like', '%'.$this->searchProduct.'%');
-        })
-        ->get()
-        ->map(function($product) {
-            return [
-                'Product_ID' => $product->Product_ID,
-                'Product_Name' => $product->Product_Name,
-                'Category' => $product->Category,
-                'Unit_Price' => $product->Unit_Price,
-                'inventories' => [
-                    'Current_Stock' => $product->inventories->Current_Stock ?? 0,
-                    'Inventory_ID' => $product->inventories->Inventory_ID ?? null,
-                    'Product_ID' => $product->Product_ID
-                ]
-            ];
-        })->toArray();
-}
 
-public function addDetail($productId = null)
-{
-   
     if (!$productId) {
         $this->addError('modal_error', 'Debe seleccionar un producto.');
         return;
@@ -286,7 +289,6 @@ public function addDetail($productId = null)
     $product = Product::find($productId);
     $inventory = Inventory::where('Product_ID', $productId)->first();
     $availableStock = $inventory ? $inventory->Current_Stock : 0;
-
     $existingIndex = null;
     $previousQuantity = 0;
     
@@ -296,12 +298,8 @@ public function addDetail($productId = null)
             $previousQuantity = $detail['quantity'];
             break;
         }
-    }
-
- 
+    } 
     $newQuantity = $previousQuantity + $quantity;
-
-  
     if ($newQuantity > $availableStock) {
         $remainingStock = $availableStock - $previousQuantity;
         $message = $previousQuantity > 0 
@@ -312,9 +310,6 @@ public function addDetail($productId = null)
         $this->addError('quantity_'.$productId, 'Stock insuficiente');
         return;
     }
-
-  
-  
     $subtotal = $product->Unit_Price * $newQuantity;
     $vat = $subtotal * 0.15;
     $total = $subtotal + $vat;
@@ -328,9 +323,7 @@ public function addDetail($productId = null)
             'subtotal' => $subtotal,
             'vat' => $vat,
             'total_with_vat' => $total,
-        ];
-        
-        $this->showSuccessAlert("Se agregaron $quantity unidades más a {$product->Product_Name} (Total: $newQuantity)");
+        ]; 
     } else {
        
         $this->creditDetails[] = [
@@ -340,15 +333,13 @@ public function addDetail($productId = null)
             'subtotal' => $subtotal,
             'vat' => $vat,
             'total_with_vat' => $total,
-        ];
-        
-      
+        ]; 
     }
     unset($this->quantities[$productId]);
     $this->recalculateTotalAmount();
     $this->recalculateTotalWithInterest();
     $this->recalculateQuotaAmount();
-    $this->dispatch('resetSelect2');
+    $this->dispatch('reset-selects');
     $this->resetErrorBag();
     $this->showProductModal = false;
 
@@ -373,15 +364,7 @@ public function updatedQuantities($value, $key)
             $this->recalculateTotalAmount();
             $this->recalculateTotalWithInterest();
             $this->recalculateQuotaAmount();
-
-            $this->dispatch('swal-toast', [
-                'type' => 'success', 
-                'title' => 'Producto eliminado',
-                'message' => 'Producto eliminado correctamente',
-                'timer' => 3000 
-            ]);
-
-            $this->dispatch('resetSelect2');
+            $this->dispatch('reset-selects');
         }
     }
 
@@ -451,11 +434,7 @@ public function updatedQuantities($value, $key)
             DB::commit();
  
             $this->resetForm();
-            $this->dispatch('credit-notify', [
-                'type' => 'success',
-                'title' => 'Éxito',
-                'message' => 'Crédito creado exitosamente.'
-            ]);
+           session()->flash('message', 'Crédito creado exitosamente');
         } catch (\Illuminate\Validation\ValidationException $e) {
             DB::rollBack();
             $this->dispatch('credit-notify', [
@@ -468,38 +447,32 @@ public function updatedQuantities($value, $key)
 }
     }
 
-    private function resetForm()
-    {
-      
-        $this->paymentId = '';
-        $this->credit_id = '';
-        $this->payment_date = '';
-        $this->payment_amount = '';
-        $this->client_id = '';
-        $this->term = '';
-        $this->payment_type_id = '';
-        $this->total_amount = 0;
-        $this->installments = 0;
-        $this->creditDetails = [];
-        $this->interest_rate= 0;
-        $this->credit_status = 'Pendiente';  
-        $this->product_id = '';
-        $this->quantity = '';
-        $this->selectedStock = 0;
-        $this->selectedPrice = 0.0;
-        $this->showProductModal = false;
-        $this->totalWithInterest = 0;
-        $this->quotaAmount = 0;
-        $this->start_date = now()->format('Y-m-d');
-        $this->due_date = now()->addDays(30)->format('Y-m-d');
-        
-        $this->dispatch('resetSelect2');
-    }
+   private function resetForm()
+{
+    $this->reset([
+        'client_id',
+        'term',
+        'start_date',
+        'due_date',
+        'total_amount',
+        'interest_rate',
+        'installments',
+        'creditDetails',
+        'credit_status'
+    ]);
+  
+    $this->start_date = now()->format('Y-m-d');
+    $this->due_date = now()->addDays(30)->format('Y-m-d');
+    $this->credit_status = 'Pendiente';
+    $this->dispatch('reset-selects');
+   
+}
 
     public function render()
     {
-        
-        return view('livewire.credit.create-credit')
-            ->layout('layouts.app');
+       return view('livewire.credit.create-credit', [
+            'filteredProducts' => $this->filteredProducts
+        ])->layout('layouts.app');
     }
-}
+}  
+            

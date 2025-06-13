@@ -1,7 +1,7 @@
 <?php
 namespace App\Livewire\Payments;
 
-use LaravelLang\Publisher\Console\Update;
+
 use Livewire\Component;
 use App\Models\Payment;
 use App\Models\PaymentType;
@@ -11,6 +11,7 @@ use App\Models\Client;
 use Livewire\Attributes\On;
 use Livewire\WithPagination;
 use Carbon\Carbon;
+
 use Mpdf\Mpdf;
 use Mpdf\Config\ConfigVariables;
 use Mpdf\Config\FontVariables;
@@ -116,17 +117,20 @@ public function updatedPaymentTypeId()
 ];
 
 
-    protected $messages = [
-        'dollar_amount.required_if' => 'El monto en dólares es requerido cuando el tipo de pago es en dólares',
-        'cordoba_amount.required' => 'El monto en córdobas es requerido',
-        'credit_id.required' => 'Debe seleccionar un crédito.',
-        'payment_date.required' => 'La fecha de pago es obligatoria.',
-        'payment_date.date' => 'La fecha debe ser válida.',
-        'payment_amount.required' => 'El monto del pago es obligatorio.',
-        'payment_amount.numeric' => 'El monto debe ser un número.',
-        'payment_amount.min' => 'El monto mínimo debe ser :min.'
-
-    ];
+  protected $messages = [
+    'credit_id.required' => 'Debe seleccionar un crédito.',
+    'credit_id.exists' => 'El crédito seleccionado no existe.',
+    'payment_date.required' => 'La fecha de pago es obligatoria.',
+    'payment_date.date' => 'La fecha debe ser válida.',
+    'payment_type_id.required' => 'El tipo de pago es obligatorio.',
+    'payment_type_id.exists' => 'El tipo de pago seleccionado no existe.',
+    'dollar_amount.required_if' => 'El monto en dólares es requerido cuando el tipo de pago es en dólares.',
+    'dollar_amount.numeric' => 'El monto en dólares debe ser un número válido.',
+    'dollar_amount.min' => 'El monto mínimo en dólares debe ser :min.',
+    'cordoba_amount.required_if' => 'El monto en córdobas es requerido cuando el tipo de pago es en córdobas.',
+    'cordoba_amount.numeric' => 'El monto en córdobas debe ser un número válido.',
+    'cordoba_amount.min' => 'El monto mínimo en córdobas debe ser :min.'
+];
     public function receipt($paymentId)
     {
         $payment = Payment::with(['credit.client', 'credit.payments'])->findOrFail($paymentId);

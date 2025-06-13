@@ -132,14 +132,13 @@
                     <span class="text-gray-500">$</span>
                 </div>
                 <input wire:model.live="dollar_amount" 
-                       type="number" step="0.01" min="0.01"
-                       class="block w-full pl-7 pr-12 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 @error('dollar_amount') border-red-500 @enderror"
-                       placeholder="0.00">
-                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                    <span class="text-gray-500">USD</span>
-                </div>
-            </div>
-            @error('dollar_amount') <span class="text-red-500 text-xs">{{$message }}</span> @enderror
+               wire:change="calculateChange"
+               type="number" step="0.01" min="0.01"
+               class="block w-full pl-7 pr-12 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 @error('dollar_amount') border-red-500 @enderror"
+               placeholder="0.00">
+        @error('dollar_amount') 
+            <span class="text-red-500 text-xs">{{$message }}</span> 
+        @enderror
 
             <label class="block text-sm font-medium text-gray-700">Equivalente en Córdobas</label>
             <div class="relative">
@@ -266,18 +265,18 @@
                 C${{ number_format($product['Unit_Price'], 2) }}
             </td>
             <td class="px-6 py-4 whitespace-nowrap">
-            <input 
-                type="number" 
-                wire:model="quantities.{{ $product['Product_ID'] }}"
-                min="1" 
-                max="{{ $product['inventories']['Current_Stock'] ?? 0 }}"
-                class="w-20 px-2 py-1 border rounded-md sm:text-sm @error('quantity_'.$product['Product_ID']) border-red-500 @enderror"
-                {{ ($product['inventories']['Current_Stock'] ?? 0) <= 0 ? 'disabled' : '' }}
-            >
-            @error('quantity_'.$product['Product_ID'])
-                <span class="text-red-500 text-xs block mt-1">{{ $message }}</span>
-            @enderror
-        </td>
+    <input 
+        type="number" 
+        wire:model="quantities.{{ $product['Product_ID'] }}"
+        min="1" 
+        max="{{ $product['inventories']['Current_Stock'] ?? 0 }}"
+        class="w-20 px-2 py-1 border rounded-md sm:text-sm @error('quantities.'.$product['Product_ID']) border-red-500 @enderror"
+        {{ ($product['inventories']['Current_Stock'] ?? 0) <= 0 ? 'disabled' : '' }}
+    >
+    @error('quantities.'.$product['Product_ID'])
+        <span class="text-red-500 text-xs block mt-1">{{ $message }}</span>
+    @enderror
+</td>
         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
             <button 
                 wire:click="addProduct({{ $product['Product_ID'] }})"
@@ -294,7 +293,7 @@
                 No se encontraron productos
             </td>
         </tr>
-        @endforelse
+             @endforelse
                                         </tbody>
                                     </table>
                                 </div>
@@ -304,17 +303,13 @@
                 </div> 
             @endif
             @if($errors->any())
-    <div class="alert alert-danger">
-        <ul>
-            @foreach($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-    </div>
-@endif
+     <div class="alert alert-danger">
+       
+         </div>
+        @endif
 
         </div>
-
+ 
 @push('scripts')
     <script>
         document.addEventListener('livewire:initialized', () => {

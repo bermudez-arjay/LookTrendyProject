@@ -52,7 +52,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/inicio', Inicio::class)->name('inicio')->middleware('auth');
 
    Route::get('/manual-usuario', function () {
-    return view('livewire.manual.manual'); // Asegúrate que coincida con la ubicación y nombre real
+    return view('livewire.manual.manual'); 
 })->name('manual-usuario')->middleware('auth');
 
     //compras
