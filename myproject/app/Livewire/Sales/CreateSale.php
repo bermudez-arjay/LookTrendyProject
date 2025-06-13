@@ -366,9 +366,9 @@ public function saveSale()
         'productList' => $this->productList,
         'payment_type_id' => $this->payment_type_id
     ]);
-
+  $this->validate();
     try {
-        $this->validate();
+      
 
         foreach ($this->productList as $item) {
             if (!isset($item['quantity']) || $item['quantity'] <= 0) {

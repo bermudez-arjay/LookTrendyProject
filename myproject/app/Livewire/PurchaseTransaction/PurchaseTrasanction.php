@@ -101,7 +101,6 @@ class PurchaseTrasanction extends Component
         $quantity = $this->quantities[$productId] ?? null;
         $unitPrice = $this->unitPrices[$productId] ?? null;
 
-        // Validar campos requeridos
         if (empty($quantity)) {
             $this->addError('quantity_'.$productId, 'La cantidad es requerida');
             return;
@@ -122,7 +121,7 @@ class PurchaseTrasanction extends Component
             return;
         }
 
-        // Aplicar conversión si es pago en dólares
+      
         $originalUnitPrice = $unitPrice;
         if ($this->showExchangeRate && $this->exchangeRate > 0) {
             $unitPrice = $unitPrice * $this->exchangeRate;
@@ -138,8 +137,7 @@ class PurchaseTrasanction extends Component
                 $item['original_unit_price'] = $originalUnitPrice;
                 $item['subtotal'] = $item['quantity'] * $unitPrice;
                 $item['total_with_tax'] = $item['subtotal'] + ($item['subtotal'] * $this->tax);
-                
-                // Limpiar campos y disparar evento
+              
                 $this->quantities[$productId] = null;
                 $this->unitPrices[$productId] = null;
                 $this->dispatch('productAdded', productId: $productId);
@@ -168,7 +166,7 @@ class PurchaseTrasanction extends Component
         ];
 
  $this->dispatch('productAdded', productId: $productId);
-        // Limpiar campos y disparar evento
+        
         $this->quantities[$productId] = null;
         $this->unitPrices[$productId] = null;
          $this->dispatch('syncInputs');
@@ -207,7 +205,6 @@ class PurchaseTrasanction extends Component
             $total = collect($this->productList)->sum('total_with_tax');
             $now = Carbon::now();
 
-            // Verificar si es pago en dólares
             $paymentType = PaymentType::find($this->payment_type_id);
             $isDollarPayment = str_contains($paymentType->Payment_Type_Name, 'USD');
 
