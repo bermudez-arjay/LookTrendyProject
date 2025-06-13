@@ -5,7 +5,8 @@ use App\Livewire\Auth\ForgotPassword;
 use App\Livewire\Auth\ResetPassword;
 use App\Livewire\Inicio\Inicio;
 use App\Livewire\Clients\ClientComponent;
-use App\Livewire\Reports\ReporsteSale\ReportsSale;
+use App\Livewire\Reports\ReporstSale\ReportsSale;
+use App\Livewire\Reports\ReportPurchase\ReportPurchase;
 use App\Livewire\Supplier\SupplierComponent;
 use App\Livewire\Payments\PaymentComponent;
 use App\Livewire\User\UserComponent;
@@ -91,6 +92,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/reporte-creditos', CreditReport::class)->name('reporte.creditos');
     Route::get('/reporte-abonos', PaymentReport::class)->name('reporte.abonos');
     Route::get('/reporte-ventas',ReportsSale::class)->name('reporte.ventas');
+    Route::get('/reporte-compras',ReportPurchase::class)->name('reporte.compra');
 });
 
 

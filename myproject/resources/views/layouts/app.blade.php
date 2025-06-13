@@ -334,9 +334,15 @@
             <span>Reporte de Abonos</span>
         </a>
         <a href="{{ route('reporte.ventas') }}" class="flex items-center p-2 rounded-lg hover:bg-cyan-50 text-sm transition-all"
-           wire:navigate>
+           wire:navigate> 
             <i class="fas fa-file-alt text-cyan-500 mr-2"></i>
             <span>Reporte de Ventas</span>
+        </a>
+         <a href="{{ route('reporte.compra') }}" class="flex items-center p-2 rounded-lg hover:bg-cyan-50 text-sm transition-all"
+           wire:navigate> 
+            <i class="fas fa-file-alt text-cyan-500 mr-2"></i>
+            <span>Reporte de Compras</span>
+         </a>
     </div>
 </div>
 
