@@ -17,6 +17,6 @@
   </style>
 </head>
 <body>
-  <iframe title="credito" width="600" height="373.5" src="https://app.powerbi.com/view?r=eyJrIjoiZmUxZTljMjktOTcyNS00MWI5LWJmNjEtNTQwNTc2NWE0ODc1IiwidCI6ImU0NzY0NmZlLWRhMjctNDUxOC04NDM2LTVmOGIxNThiYTEyNyIsImMiOjR9" frameborder="0" allowFullScreen="true"></iframe>
+  <iframe title="abonos" width="600" height="373.5" src="https://app.powerbi.com/view?r=eyJrIjoiZTQyNDgzZjYtZTc1OS00MDNkLTg4ZmYtYmM2ZTM4N2ZjMDA3IiwidCI6ImU0NzY0NmZlLWRhMjctNDUxOC04NDM2LTVmOGIxNThiYTEyNyIsImMiOjR9" frameborder="0" allowFullScreen="true"></iframe>
 </body>
 </html>

@@ -91,7 +91,6 @@ class ClientEdit extends Component
     {
         $this->validateOnly($propertyName);
         
-        // Formatear automáticamente la cédula mientras se escribe
         if ($propertyName === 'Client_Identity') {
             $value = preg_replace('/[^0-9A-Za-z]/', '', $this->Client_Identity);
             if (strlen($value) >= 3) {
@@ -102,8 +101,7 @@ class ClientEdit extends Component
             }
             $this->Client_Identity = strtoupper(substr($value, 0, 16));
         }
-        
-        // Formatear automáticamente el teléfono
+       
         if ($propertyName === 'Client_Phone') {
             $this->Client_Phone = preg_replace('/[^0-9]/', '', $this->Client_Phone);
         }
@@ -145,7 +143,7 @@ class ClientEdit extends Component
 
     public function update()
     {
-        // Agregar reglas de validación únicas ignorando el registro actual
+      
         $this->rules['Client_Email'] = [
             'required',
             'email:rfc,dns',

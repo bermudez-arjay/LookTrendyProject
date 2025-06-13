@@ -17,15 +17,21 @@
             </div>
             <!-- Cliente -->
             <div class="space-y-2">
-    <label class="block text-sm font-medium text-gray-700">Cliente <span class="text-red-500">*</span></label>
-    <select wire:model="selectedClientId"
-        class="mt-1 block w-full rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 border @error('selectedClientId') border-red-500 @enderror">
-        <option value="">Seleccionar cliente</option> 
-        @foreach ($clients as $client)
-            <option value="{{ $client->Client_ID }}">{{ $client->Client_FirstName }} {{ $client->Client_LastName }}</option>
+    <label class="block text-sm font-medium text-gray-700">Cliente</label>
+    <select 
+        wire:model="selectedClientId"
+        class="select2 w-full"
+    >
+        <option value="">Seleccionar cliente</option>
+        @foreach($clients as $client)
+            <option value="{{ $client->Client_ID }}">
+                {{ $client->Client_FirstName }} {{ $client->Client_LastName }}
+            </option>
         @endforeach
     </select>
-    @error('selectedClientId') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+    @error('selectedClientId') 
+        <span class="text-red-500 text-xs">{{ $message }}</span> 
+    @enderror
 </div>
             <!-- Fecha -->
             <div class="space-y-2">
@@ -109,17 +115,23 @@
             </div>
 
            <div class="space-y-2">
-    <label class="block text-sm font-medium text-gray-700">Método de Pago <span class="text-red-500">*</span></label>
-    <select wire:model="payment_type_id" wire:change="updatePaymentFields"
-        class="mt-1 block w-full rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 border @error('payment_type_id') border-red-500 @enderror">
+    <label class="block text-sm font-medium text-gray-700">Método de Pago</label>
+    <select  
+        wire:model.live="payment_type_id"
+        wire:change="updatePaymentFields"
+        class="select2 w-full"
+    >
         <option value="">Seleccionar método</option>
         @foreach($paymentTypes as $type)
-            <option value="{{ $type->Payment_Type_ID }}">{{ $type->Payment_Type_Name }}</option>
+            <option value="{{ $type->Payment_Type_ID }}">
+                {{ $type->Payment_Type_Name }}
+            </option>
         @endforeach
     </select>
-    @error('payment_type_id') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+    @error('payment_type_id') 
+        <span class="text-red-500 text-xs">{{ $message }}</span> 
+    @enderror
 </div>
-
    @if($show_amount_fields)
     @if($payment_type_id == 2)
      
@@ -226,9 +238,13 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                 </svg>
                             </div>
-                            <input type="text" wire:model.live.debounce.300ms="productSearch"
-                                placeholder="Buscar productos..."
-                                class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                           <input 
+                            type="text" 
+                            wire:model.live.debounce.300ms="searchProduct"
+                            wire:keydown.enter="$refresh"
+                            placeholder="Buscar productos..."
+                            class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+    >
                         </div>
                     </div>
                     @error('modal_error')
@@ -249,7 +265,7 @@
                                     </tr>
                                 </thead>
                                     <tbody class="bg-white divide-y divide-gray-200">
-                                            @forelse($products as $product)
+                                            @forelse($filteredProducts as $product)
         <tr class="hover:bg-gray-50">
             <td class="px-6 py-4 whitespace-nowrap">
                 <div class="font-medium text-gray-900">{{ $product['Product_Name'] }}</div>
@@ -265,14 +281,14 @@
                 C${{ number_format($product['Unit_Price'], 2) }}
             </td>
             <td class="px-6 py-4 whitespace-nowrap">
-    <input 
-        type="number" 
-        wire:model="quantities.{{ $product['Product_ID'] }}"
-        min="1" 
-        max="{{ $product['inventories']['Current_Stock'] ?? 0 }}"
-        class="w-20 px-2 py-1 border rounded-md sm:text-sm @error('quantities.'.$product['Product_ID']) border-red-500 @enderror"
-        {{ ($product['inventories']['Current_Stock'] ?? 0) <= 0 ? 'disabled' : '' }}
-    >
+            <input 
+                type="number" 
+                wire:model="quantities.{{ $product['Product_ID'] }}"
+                min="1" 
+                max="{{ $product['inventories']['Current_Stock'] ?? 0 }}"
+                class="w-20 px-2 py-1 border rounded-md sm:text-sm @error('quantities.'.$product['Product_ID']) border-red-500 @enderror"
+                {{ ($product['inventories']['Current_Stock'] ?? 0) <= 0 ? 'disabled' : '' }}
+            >
     @error('quantities.'.$product['Product_ID'])
         <span class="text-red-500 text-xs block mt-1">{{ $message }}</span>
     @enderror
@@ -312,10 +328,17 @@
  
 @push('scripts')
     <script>
-        document.addEventListener('livewire:initialized', () => {
-            Livewire.on('resetSelect2', () => {
-                $('select').val(null).trigger('change');
-            });
+       document.addEventListener('livewire:load', function() {
+        $('.select2').select2();
+        Livewire.on('resetSelect2', () => {
+            $('.select2').val(null).trigger('change');
         });
+       
+        $('.select2').on('change', function() {
+            let field = $(this).attr('wire:model');
+            let value = $(this).val();
+            @this.set(field, value);
+        });
+    });
     </script>
 @endpush

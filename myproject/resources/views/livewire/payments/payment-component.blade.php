@@ -220,79 +220,85 @@
                                 {{ $paymentId ?  : 'Registrar Nuevo Abono' }}
                             </h3>
                             <div class="mt-2">
-                                <!-- Estado del crédito -->
-                                @if($credit_id && $selectedCreditInfo)
-                                    <div class="mb-4 p-3 rounded-lg {{ $statusClass }}">
-                                        <div class="flex justify-between items-center">
+                             
+                               <!-- Estado del crédito -->
+                            @if($credit_id && $selectedCreditInfo)
+                                <div class="mb-4 p-3 rounded-lg {{ $statusClass }}">
+                                    <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-2">
+                                        <div class="flex items-center">
+                                            <i class="fas {{ 
+                                                $this->creditStatus == 'Vencido' ? 'fa-exclamation-triangle' : 
+                                                ($this->creditStatus == 'Pendiente' ? 'fa-clock' : 'fa-check-circle') 
+                                            }} mr-2"></i>
                                             <div>
-                                                <i class="fas fa-info-circle mr-2"></i>
-                                                <strong>Estado del crédito:</strong>
-                                                {{ $statusMessage }}
-                                            </div>
-                                            <div>
-                                                <strong>Saldo actual:</strong>
-                                                C${{ number_format($selectedCreditInfo->remaining_balance, 2) }}
+                                                <strong>Estado:</strong> {{ $statusMessage }}
+                                                @if($this->creditStatus == 'Vencido')
+                                                    <span class="text-xs block md:inline md:ml-2">
+                                                        (Vencido el {{ $selectedCreditInfo->Due_Date }})
+                                                    </span>
+                                                @endif
                                             </div>
                                         </div>
-
-                                        @if($this->creditStatus == 'Vencido')
-                                            <div class="mt-2 text-sm">
-                                                <i class="fas fa-exclamation-triangle mr-1"></i>
-                                                Este crédito ha vencido. Se aplicará mora del 2% si selecciona la opción.
-                                            </div>
-                                        @endif
-
-                                        @if($this->creditStatus == 'Pendiente' && $is_full_payment)
-                                            <div class="mt-2 text-sm">
-                                                <i class="fas fa-check-circle mr-1"></i>
-                                                Puede aplicar un descuento del 5% por pago anticipado completo.
-                                            </div>
-                                        @endif
+                                        <div class="font-semibold">
+                                            <strong>Saldo:</strong> C${{ number_format($selectedCreditInfo->remaining_balance, 2) }}
+                                        </div>
                                     </div>
-                                @endif
 
-                                <!-- Campos de mora y descuento -->
-                                @if($credit_id && $selectedCreditInfo)
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                        <!-- Campo de mora (si está vencido) -->
-                                        @if($this->creditStatus == 'Vencido')
-                                            <div class="bg-yellow-50 p-3 rounded-lg border border-yellow-200">
-                                                <label class="flex items-center">
-                                                    <input type="checkbox" wire:model="apply_late_fee"
-                                                        class="h-4 w-4 text-yellow-600 focus:ring-yellow-500 border-gray-300 rounded">
-                                                    <span class="ml-2 text-sm font-medium text-yellow-800">
-                                                        Aplicar mora del 2%
-                                                        (C${{ number_format($selectedCreditInfo->Total_Amount * 0.02, 2) }})
-                                                    </span>
-                                                </label>
-                                                @if($apply_late_fee)
-                                                    <p class="mt-1 text-xs text-yellow-600">
-                                                        El monto total a pagar incluirá la mora.
-                                                    </p>
-                                                @endif
-                                            </div>
-                                        @endif
-
-                                        <!-- Campo de descuento (si se cancela antes de vencimiento) -->
-                                        @if($this->creditStatus == 'Pendiente' && $is_full_payment)
-                                            <div class="bg-blue-50 p-3 rounded-lg border border-blue-200">
-                                                <label class="flex items-center">
-                                                    <input type="checkbox" wire:model="apply_early_discount"
-                                                        class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                                                    <span class="ml-2 text-sm font-medium text-blue-800">
-                                                        Aplicar descuento del 5% por pago anticipado
-                                                        (C${{ number_format($selectedCreditInfo->remaining_balance * 0.05, 2) }})
-                                                    </span>
-                                                </label>
-                                                @if($apply_early_discount)
-                                                    <p class="mt-1 text-xs text-blue-600">
-                                                        El monto total a pagar se reducirá con el descuento.
-                                                    </p>
-                                                @endif
-                                            </div>
-                                        @endif
-                                    </div>
+                                    <!-- Mensajes adicionales -->
+                                    @if($this->creditStatus == 'Vencido')
+                                        <div class="mt-2 text-sm flex items-start">
+                                            <i class="fas fa-info-circle mr-1 mt-0.5"></i>
+                                            <span>Este crédito ha vencido. Se aplicará mora del 2% si selecciona la opción.</span>
+                                        </div>
+                                    @elseif($this->creditStatus == 'Pendiente' && $is_full_payment)
+                                        <div class="mt-2 text-sm flex items-start">
+                                            <i class="fas fa-info-circle mr-1 mt-0.5"></i>
+                                            <span>Puede aplicar un descuento del 5% por pago anticipado completo.</span>
+                                        </div>
+                                    @endif
+                                </div>
+                            @endif
+                               <!-- Campos de mora y descuento -->
+                         @if($show_discount_option)
+                    <div class="bg-teal-50 p-3 rounded-lg border border-teal-200 mb-4">
+                        <label class="flex items-start">
+                            <input type="checkbox" wire:model.live="apply_early_discount"
+                                class="mt-1 h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 rounded">
+                            <span class="ml-2 text-sm">
+                                <span class="font-medium text-teal-800">Aplicar descuento del 5% por pago completo</span>
+                                <span class="block text-teal-600 text-xs mt-1">
+                                    (Ahorro: C${{ number_format($this->baseBalance * 0.05, 2) }})
+                                </span>
+                                @if($apply_early_discount)
+                                <span class="block text-xs text-teal-700 mt-1">
+                                    <i class="fas fa-check-circle mr-1"></i>
+                                    Descuento aplicado. Nuevo total: C${{ number_format($this->totalPaymentAmount, 2) }}
+                                </span>
                                 @endif
+                            </span>
+                        </label>
+                    </div>
+                    @endif
+                            @if($this->creditStatus == 'Vencido')
+                            <div class="bg-amber-50 p-3 rounded-lg border border-amber-200">
+                                <label class="flex items-start">
+                                    <input type="checkbox" wire:model="apply_late_fee"
+                                        class="mt-1 h-4 w-4 text-amber-600 focus:ring-amber-500 border-gray-300 rounded">
+                                    <span class="ml-2 text-sm">
+                                        <span class="font-medium text-amber-800">Aplicar mora del 2% por pago vencido</span>
+                                        <span class="block text-amber-600 text-xs mt-1">
+                                            (Monto adicional: C${{ number_format($this->baseBalance * 0.02, 2) }})
+                                        </span>
+                                    </span>
+                                </label>
+                                @if($apply_late_fee)
+                                <p class="mt-2 text-xs text-amber-700 bg-amber-100 p-1 rounded">
+                                    <i class="fas fa-exclamation-triangle mr-1"></i>
+                                    Mora aplicada. Total a pagar: C${{ number_format($this->totalPaymentAmount, 2) }}
+                                </p>
+                                @endif
+                            </div>
+                            @endif
                                 <!-- Búsqueda de créditos -->
                                 <div class="mb-4">
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Buscar Crédito</label>
@@ -443,76 +449,68 @@
                                 </div>
 
                       @if($show_amount_fields)
-    <div class="space-y-4 mb-4">
-        <!-- Sección de Saldo y Monto a Pagar -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- Saldo Pendiente -->
-            <div>
-                <label class="block text-sm font-medium text-gray-700">Saldo Pendiente</label>
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <span class="text-gray-500">C$</span>
-                    </div>
-                    <input type="text"
-                           value="{{ number_format($this->baseBalance, 2) }}"
-                           readonly
-                           class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg bg-gray-50">
-                </div>
-            </div>
+                        <div class="space-y-4 mb-4">
+                        <!-- Resumen de montos -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                            <!-- Saldo pendiente -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Saldo Pendiente</label>
+                                <input type="text" value="C${{ number_format($this->baseBalance, 2) }}" readonly
+                                    class="mt-1 block w-full rounded-lg bg-gray-50 border-gray-300 shadow-sm py-2 px-3 border">
+                            </div>
+                            
+                            <!-- Ajustes -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Ajustes</label>
+                                <input type="text" 
+                                    value="@if($apply_late_fee)+C${{ number_format($this->baseBalance * 0.02, 2) }} (Mora)
+                                        @elseif($apply_early_discount)-C${{ number_format($this->baseBalance * 0.05, 2) }} (Desc.)
+                                        @else C$0.00 @endif" 
+                                    readonly
+                                    class="mt-1 block w-full rounded-lg bg-gray-50 border-gray-300 shadow-sm py-2 px-3 border">
+                            </div>
+                            
+                            <!-- Total a pagar -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Total a Pagar</label>
+                                <input type="text" value="C${{ number_format($this->totalPaymentAmount, 2) }}" readonly
+                                    class="mt-1 block w-full rounded-lg bg-blue-50 border-blue-200 shadow-sm py-2 px-3 border font-medium">
+                            </div>
+                        </div>
 
-            <!-- Monto Total a Pagar -->
-            <div>
-                <label class="block text-sm font-medium text-gray-700">Monto a Pagar</label>
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <span class="text-gray-500">C$</span>
-                    </div>
-                    <input type="text"
-                           value="{{ number_format($this->totalPaymentAmount, 2) }}"
-                           readonly
-                           class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg bg-blue-50 font-medium">
-                </div>
-                @if($apply_late_fee)
-                    <p class="text-xs text-red-500 mt-1">Incluye mora del 2%: C${{ number_format($this->baseBalance * 0.02, 2) }}</p>
-                @elseif($apply_early_discount)
-                    <p class="text-xs text-green-500 mt-1">Incluye descuento del 5%: C${{ number_format($this->baseBalance * 0.05, 2) }}</p>
-                @endif
-            </div>
-        </div>
+                            <!-- Monto recibido -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                    Monto Recibido *
+                                    <span class="text-xs text-gray-500 ml-1">
+                                        (@if($payment_type_id == 2)en dólares @else en córdobas @endif)
+                                    </span>
+                                </label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <span class="text-gray-500">
+                                            @if($payment_type_id == 2) $ @else C$ @endif
+                                        </span>
+                                    </div>
+                                    <input wire:model.live="{{ $payment_type_id == 2 ? 'dollar_amount' : 'cordoba_amount' }}" 
+                                        type="number" 
+                                        step="0.01" 
+                                        min="0.01"
+                                        class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 @error($payment_type_id == 2 ? 'dollar_amount' : 'cordoba_amount') border-red-500 @enderror"
+                                        placeholder="0.00"
+                                        required>
+                                </div>
+                                @error($payment_type_id == 2 ? 'dollar_amount' : 'cordoba_amount')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
 
-        <!-- Monto Recibido -->
-       <div>
-    <label class="block text-sm font-medium text-gray-700">
-        Monto Recibido *
-        @if($payment_type_id == 2)
-            <span class="text-xs text-gray-500">(en dólares)</span>
-        @else
-            <span class="text-xs text-gray-500">(en córdobas)</span>
-        @endif
-    </label>
-    <div class="relative">
-        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <span class="text-gray-500">
-                @if($payment_type_id == 2) $ @else C$ @endif
-            </span>
-        </div>
-        <input wire:model.live="{{ $payment_type_id == 2 ? 'dollar_amount' : 'cordoba_amount' }}" 
-               type="number" 
-               step="0.01" 
-               min="0.01"
-               class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
-               placeholder="0.00"
-               required>
-    </div>
-    @error($payment_type_id == 2 ? 'dollar_amount' : 'cordoba_amount')
-        <span class="text-red-500 text-xs">{{$message }}</span>
-    @enderror
-</div>
-
-        <!-- Conversión de moneda si es pago en dólares -->
+    <!-- Conversión y cambio -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Conversión a córdobas -->
         @if($payment_type_id == 2)
             <div>
-                <label class="block text-sm font-medium text-gray-700">Equivalente en Córdobas</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Equivalente en Córdobas</label>
                 <div class="relative">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <span class="text-gray-500">C$</span>
@@ -525,33 +523,35 @@
             </div>
         @endif
 
-        <!-- Mostrar cambio si hay -->
+        <!-- Cambio -->
         @if($show_change_field)
-            <div class="p-3 bg-green-50 border border-green-200 rounded-lg">
-                <label class="block text-sm font-medium text-green-700">Cambio a Entregar</label>
+            <div>
+                <label class="block text-sm font-medium text-green-700 mb-1">Cambio a Entregar</label>
                 <div class="relative">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <span class="text-gray-500">C$</span>
                     </div>
                     <input type="text"
-                           value="C${{ number_format($change_amount, 2) }}"
+                           value="{{ number_format($change_amount, 2) }}"
                            readonly
-                           class="block w-full pl-10 pr-3 py-2 border border-green-300 rounded-lg bg-green-50 font-bold">
+                           class="block w-full pl-10 pr-3 py-2 border border-green-300 rounded-lg bg-green-50 font-medium">
                 </div>
             </div>
         @endif
+    </div>
 
-        <!-- Nuevo saldo -->
-        <div class="p-3 bg-blue-50 text-blue-600 rounded-lg text-sm">
+    <!-- Nuevo saldo proyectado -->
+    <div class="p-3 bg-indigo-50 border border-indigo-100 rounded-lg">
+        <div class="flex items-center text-sm text-indigo-800">
             <i class="fas fa-info-circle mr-2"></i>
-            Nuevo saldo después del pago: C${{ 
-                number_format(max(0, $this->baseBalance - 
-                ($payment_type_id == 2 ? floatval($dollar_amount) * $exchangeRate : floatval($cordoba_amount))), 2) 
-            }}
+            <div>
+                <strong>Nuevo saldo proyectado:</strong> 
+                C${{ number_format(max(0, $this->baseBalance - ($payment_type_id == 2 ? floatval($dollar_amount) * $exchangeRate : floatval($cordoba_amount))), 2) }}
+            </div>
         </div>
     </div>
+</div>
 @endif
-
 <!-- Botones de acción -->
 <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
     <button type="button" wire:click="store"

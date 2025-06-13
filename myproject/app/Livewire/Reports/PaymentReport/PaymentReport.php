@@ -7,6 +7,8 @@ use App\Models\Payment;
 use App\Models\Credit;
 use App\Models\PaymentType;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class PaymentReport extends Component
 {
@@ -78,12 +80,33 @@ class PaymentReport extends Component
     public function render()
     {
         $payments = $this->getFilteredPayments();
+        
+        // Calcular métricas para las tarjetas
+        $paymentsToday = Payment::whereDate('Payment_Date', today())->get();
+        $daysPeriod = $this->start_date && $this->end_date 
+            ? Carbon::parse($this->start_date)->diffInDays($this->end_date) + 1 
+            : 0;
+            
+        $mostUsedPaymentType = Payment::select('Payment_Type_ID', DB::raw('count(*) as total'))
+            ->groupBy('Payment_Type_ID')
+            ->orderByDesc('total')
+            ->first()
+            ->paymentType->Payment_Type_Name ?? 'N/A';
+            
+        $mostUsedPaymentTypeCount = Payment::select('Payment_Type_ID', DB::raw('count(*) as total'))
+            ->groupBy('Payment_Type_ID')
+            ->orderByDesc('total')
+            ->value('total') ?? 0;
 
         return view('livewire.reports.paymentReport.payment-report', [
             'payments' => $payments,
             'credits' => Credit::has('payments')->with('client')->get(),
             'paymentTypes' => PaymentType::all(),
             'total' => $payments->sum('Payment_Amount'),
+            'paymentsToday' => $paymentsToday,
+            'daysPeriod' => $daysPeriod,
+            'mostUsedPaymentType' => $mostUsedPaymentType,
+            'mostUsedPaymentTypeCount' => $mostUsedPaymentTypeCount,
         ])->layout('layouts.app');
     }
 }

@@ -17,11 +17,12 @@ use Illuminate\Support\Facades\DB;
 use Mpdf\Mpdf;
 use Mpdf\Config\ConfigVariables;
 use Mpdf\Config\FontVariables;
-
+use Livewire\WithPagination;
 
 
 class CreateSale extends Component
 {
+     use WithPagination;
     public $selectedClientId = 0;
     public $saleDate;
   public $payment_type_id = null; 
@@ -34,7 +35,28 @@ class CreateSale extends Component
     public $showProductModal = false;
     public $received_amount = 0; 
     public $change_amount = 0; 
-
+     public $searchProduct = '';
+    public $perPage = 10;
+    protected $listeners = ['select2Changed'];
+ public function getFilteredProductsProperty()
+    {
+        return Product::with('inventories')
+            ->where('Removed', 0)
+            ->when($this->searchProduct, function($query) {
+                $query->where('Product_Name', 'like', '%'.$this->searchProduct.'%')
+                      ->orWhere('Category', 'like', '%'.$this->searchProduct.'%');
+            })
+            ->leftJoin('inventories', 'products.Product_ID', '=', 'inventories.Product_ID')
+            ->orderByRaw('IFNULL(inventories.Current_Stock, 5) ASC')
+            ->orderBy('Product_Name', 'asc')
+            ->select('products.*', 'inventories.Current_Stock') 
+            ->paginate($this->perPage)
+            ->through(function ($product) {
+                $product->current_stock = $product->Current_Stock ?? 0;
+                return $product;
+            });
+    }
+    
   protected function rules()
 {
     $rules = [
@@ -219,12 +241,7 @@ public function render()
     
     return view('livewire.sale.sales-component', [
         'clients' => Client::orderBy('Client_FirstName')->get(),
-        'products' => Product::with(['inventories' => function($query) {
-                        $query->where('Current_Stock', '>', 0);
-                    }])
-                    ->where('removed', 0)
-                    ->orderBy('Product_Name')
-                    ->get(),
+       'filteredProducts' => $this->filteredProducts,
         'paymentTypes' => $paymentTypes
     ])->layout('layouts.app');
 }
@@ -342,7 +359,13 @@ public function updatedQuantities($value, $key)
         $this->reset();
         $this->saleDate = now()->format('Y-m-d');
     }
-    public function resetForm()
+   #[On('select2-changed')]
+public function updatedSelect2($field, $value)
+{
+    $this->$field = $value;
+}
+
+public function resetForm()
 {
     $this->reset([
         'selectedClientId',
@@ -354,15 +377,19 @@ public function updatedQuantities($value, $key)
         'change_amount'
     ]);
     
-  
     $this->resetValidation();
-    
-    $this->selectedClientId = '';
-    $this->payment_type_id = ''; 
-    
-   
     $this->saleDate = now()->format('Y-m-d');
     $this->show_amount_fields = false;
+    $this->dispatch('reset-select2');
+}
+public function select2Changed($field, $value)
+{
+    $this->$field = $value;
+}
+protected function syncSelect2Values()
+{
+   
+    $this->dispatch('sync-select2-values');
 }
 public function saveSale()
 {
@@ -371,10 +398,11 @@ public function saveSale()
         'productList' => $this->productList,
         'payment_type_id' => $this->payment_type_id
     ]);
+
   $this->validate();
+     $this->syncSelect2Values();
     try {
       
-
         foreach ($this->productList as $item) {
             if (!isset($item['quantity']) || $item['quantity'] <= 0) {
                 throw new \Exception("Cantidad inválida para el producto ID: {$item['product_id']}");

@@ -62,7 +62,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/usuarios', UserComponent::class)->name('usuarios');
         Route::get('/proveedores', SupplierComponent::class)->name('proveedores');
         // Productos,Inventario 
-        Route::view('/dashboard/inventario', 'livewire.inventory-dashboard.dashboard-inventory')->name('dashboard.inventario');
+        Route::view('/dashboard/inventario', 'livewire.inventory-dashboard.dashboard-inventary')->name('dashboard.inventario');
         Route::get('/productos', ProductComponent::class)->name('productos');
         Route::get('/categorias', CategoryComponent::class)->name('categorias');
         Route::get('/inventario', InventoryDashboard::class)->name('inventario');
@@ -82,6 +82,7 @@ Route::middleware(['auth'])->group(function () {
     //Pagos
     Route::get('/payments/{paymentid}/receipt', [PaymentComponent::class, 'receipt'])->name('payments.receipt');
     Route::get('/abonos', PaymentComponent::class)->name('abonos');
+ Route::view('/dashboard/abonos', 'livewire.payments.payment-dashboard')->name('dashboard.abonos');
 
 
       //Ventas
